@@ -583,10 +583,15 @@
   // sits just right of the Email me button, centered on it
   function placeEgg() {
     const box = site.querySelector(".s-egg"); if (!box) return; const a = box.parentElement.querySelector("a.s-btn[href^='mailto:']"); if (!a) return;
-    box.style.left = a.offsetLeft + a.offsetWidth + 14 + "px"; box.style.top = a.offsetTop + a.offsetHeight / 2 + "px";
     // once every word is found the badge becomes a pale yellow button, matching the real buttons' size, border, corners and shadow
     const chip = box.firstChild, done = chip.classList.contains("done");
     chip.style.height = done ? a.offsetHeight + "px" : "";
+    // beside Email me when it fits; on narrow phones it sits just below Email me instead, so it never runs off the screen,
+    // and the button row makes room for it there so it doesn't land on what comes next
+    const row = box.parentElement; row.style.paddingBottom = "";
+    const room = row.clientWidth - (a.offsetLeft + a.offsetWidth + 14);
+    if (box.hidden || box.offsetWidth <= room) { box.style.left = a.offsetLeft + a.offsetWidth + 14 + "px"; box.style.top = a.offsetTop + a.offsetHeight / 2 + "px"; }
+    else { row.style.paddingBottom = box.offsetHeight + 14 + "px"; box.style.left = a.offsetLeft + "px"; box.style.top = a.offsetTop + a.offsetHeight + 14 + box.offsetHeight / 2 + "px"; }
 
     if (!box.lastChild.hidden) placeEggPop(box);
   }
