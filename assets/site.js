@@ -661,10 +661,10 @@
   applyKern(); scheduleFills(); queueGrain(); queueFocus(); syncEgg();
 })();
 
-/* Contact form: sends through Web3Forms once its access key is filled in below.
-   Until then, Send opens the visitor's email app with the message filled in. */
+/* Contact form: sends through Web3Forms (messages go to Ian's inbox).
+   Without a key, Send opens the visitor's email app with the message filled in. */
 (() => {
-  const WEB3FORMS_KEY = "";
+  const WEB3FORMS_KEY = "e9332311-3878-45e4-8a1f-4c8df9f4827d";
   const TO = "itsian123@gmail.com";
   const form = document.querySelector(".s-form"); if (!form) return;
   const note = form.querySelector(".s-form-note");
