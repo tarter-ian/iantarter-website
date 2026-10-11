@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Choosing characters with simulation · Ian Tarter</title>
+<meta name="description" content="Case study: a Python model that weighed what Star Trek fans want against licensing costs to plan the expansions of a WizKids board game.">
+<link rel="canonical" href="https://iantarter.com/work/wizkids/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Choosing characters with simulation · Ian Tarter">
+<meta property="og:description" content="Case study: a Python model that weighed what Star Trek fans want against licensing costs to plan the expansions of a WizKids board game.">
+<meta property="og:url" content="https://iantarter.com/work/wizkids/">
+<meta property="og:image" content="https://iantarter.com/assets/img/headshot.jpg">
+<meta name="theme-color" content="#ededed">
+<link rel="icon" href="../../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@300..800&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&family=Rampart+One&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="site" id="site" data-hero="split" data-photo="square" data-nav="spread" data-brand="on" data-focus="on" data-labelpos="side" data-exp="timeline" data-contact="side" data-form="on" data-poly="on" data-links="underline" data-buttons="solid" data-texture="grain" data-hover="lift" data-marks="on" data-dividers="none" data-labeldeco="none">
+<header class="s-nav">
+  <div class="s-inner">
+    <a class="s-brand font-wait" href="../../" aria-label="Ian Tarter, home">Ian T</a>
+    <nav class="s-links" aria-label="Site">
+    <a href="../../">Home</a><a href="../../#projects">Projects</a><a href="../../#contact">Contact</a><a href="https://docs.google.com/document/d/1XuY_TyHXnFRND8e-d0cqOBNURvKf7TVkxwYfW7ypXXY/edit?usp=sharing">Resume</a>
+  </nav>
+  </div>
+</header>
+
+<article class="s-case" id="main" aria-labelledby="case-title">
+  <div class="s-inner s-case-head">
+    <a class="s-back" href="../../#case-studies">All case studies</a>
+    <p class="s-case-meta">WizKids · Summers 2024 and 2025</p>
+    <h1 class="s-case-title" id="case-title">Choosing characters with simulation</h1>
+    <p class="s-case-lede">I built a model to help WizKids decide which Star Trek characters go into each expansion of <i>Star Trek: Captain's Chair</i>, weighing what fans want against what each license&nbsp;costs.</p>
+    <dl class="s-case-facts">
+      <div><dt>Role</dt><dd>Research &amp; Development Intern</dd></div>
+      <div><dt>Methods</dt><dd>Fan sentiment research, scoring, Monte Carlo simulation</dd></div>
+      <div><dt>Built with</dt><dd>Python, ChatGPT for research</dd></div>
+      <div><dt>Outcome</dt><dd>Recommended line-ups presented to my manager</dd></div>
+    </dl>
+  </div>
+
+  <figure class="s-inner s-flow" aria-labelledby="flow-cap">
+    <ol class="s-flow-steps">
+      <li><b>Score the fans' favorites</b><span>Fan opinion from across the web, turned into points for each character</span></li>
+      <li><b>Price the bundles</b><span>Characters are licensed by show, so each pick brings its show's bundle cost</span></li>
+      <li><b>Try many line-ups</b><span>Random combinations of characters across the expansions</span></li>
+      <li><b>Keep the best</b><span>The line-up with the most fan value for the licensing it costs</span></li>
+    </ol>
+    <figcaption id="flow-cap">How the model worked. The original data was lost when the files were wiped, so this shows the method, not the numbers.</figcaption>
+  </figure>
+
+  <section class="s-section">
+    <div class="s-inner">
+      <h2 class="s-label">The problem</h2>
+      <div class="s-body">
+        <p><i>Star Trek: Captain's Chair</i> is a WizKids board game where each player commands a crew from the shows. Every expansion needs its own cast of characters, and WizKids pays for each one through a license.</p>
+        <p>Licenses are sold in bundles by show. Adding one fan favorite can mean paying for that show's whole bundle, so a character's real cost depends on who else is already in the box.</p>
+        <p class="s-case-q">Which characters should go into which expansion to give fans the most for what the licenses cost?</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="s-section">
+    <div class="s-inner">
+      <h2 class="s-label">My approach</h2>
+      <div class="s-body">
+        <p><b>First, a measure of what fans want.</b> I used ChatGPT to gather fan opinion about each character from across the web, then turned it into a point score per character.</p>
+        <p><b>Then, the cost side.</b> I grouped the characters into their licensing bundles by show, so the model paid for a bundle once, however many of its characters it used.</p>
+        <p><b>Then, the search.</b> I wrote a Python model that builds random line-ups across the expansions, scores each one by fan points against licensing cost, and keeps the best. A plain ranking of characters would have worked too, but random search was just as easy to build.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="s-section">
+    <div class="s-inner">
+      <h2 class="s-label">Outcome</h2>
+      <div class="s-body">
+        <p>I presented the model and its recommended line-ups to my manager. I don't know how much they shaped the final boxes. The game has sold well since.</p>
+        <p>WizKids also had me score outside game pitches. I built a weighted rubric from the brand and from historical trends in the games market, used it to rank hundreds of pitches, and modeled how different kinds of players would respond to each game.</p>
+        <p><b>Next time, I'd test more than one model.</b> I'd also find a sturdier way to measure how well a character or a game fits a product than fan opinion gathered by a chatbot.</p>
+        <p><a class="s-more" href="../../#case-studies">Back to all case studies</a></p>
+      </div>
+    </div>
+  </section>
+</article>
+
+<footer class="s-footer"><div class="s-inner"><span>© 2026 Ian Tarter</span><span>Carnegie Mellon MHCI, class of 2027</span></div></footer>
+</div>
+<script src="../../assets/site.js" defer></script>
+</body>
+</html>

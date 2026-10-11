@@ -37,7 +37,7 @@
     for (let y = 0; y < H; y += T) for (let x = 0; x < W; x += T) ctx.putImageData(tile, x, y);
     // keep cards, photo, form and buttons clean: cut the grain out where they sit
     const sb = site.getBoundingClientRect(); ctx.save(); ctx.globalCompositeOperation = "destination-out"; ctx.fillStyle = "#000";
-    site.querySelectorAll(".s-nav, .s-card, .s-photo, .s-form, .s-btn, .s-form input, .s-form textarea, .s-shots img, .site[data-exp='cards'] .s-job").forEach(el => {
+    site.querySelectorAll(".s-nav, .s-card, .s-photo, .s-form, .s-btn, .s-form input, .s-form textarea, .s-shots img, .s-flow-steps li, .site[data-exp='cards'] .s-job").forEach(el => {
       const r = el.getBoundingClientRect(); if (!r.width) return; const rad = Math.min(parseFloat(getComputedStyle(el).borderTopLeftRadius) || 0, r.width / 2, r.height / 2);
       // buttons and case cards lift up-left on hover, so their cut-out also covers where they move to
       const lift = el.matches(".s-btn, .s-cases .s-card") ? 4 : 0;

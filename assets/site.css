@@ -440,3 +440,15 @@ img { max-width: 100%; height: auto; }
 .site .s-card{border-radius:0px}
 .site .s-form{box-shadow:none}
 .site .s-photo{border-radius:0px;box-shadow:none}
+
+/* ---------- Case study process diagram (WizKids) ---------- */
+.s-flow { margin: 0 auto; display: grid; gap: 12px; padding-block: calc(24px * var(--density)) calc(12px * var(--density)); }
+.s-flow-steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 28px; counter-reset: step; }
+.s-flow-steps li { position: relative; counter-increment: step; display: grid; gap: 6px; align-content: start; background: var(--s-surface); border: var(--border) solid var(--s-line-strong); box-shadow: var(--shadow); padding: calc(var(--sp-card) * var(--density)); }
+.s-flow-steps li::before { content: counter(step); font-family: var(--f-heading); font-weight: var(--t-heading-w); font-size: calc(var(--t-item) * 1.4); line-height: 1; color: var(--s-accent); }
+.s-flow-steps li:not(:last-child)::after { content: "→"; position: absolute; right: -24px; top: 50%; transform: translateY(-50%); font-weight: 700; font-size: 20px; color: var(--s-text); }
+.s-flow-steps b { font-family: var(--f-heading); font-weight: var(--t-heading-w); letter-spacing: var(--t-heading-track); font-size: var(--t-item); line-height: 1.2; }
+.s-flow-steps span { color: var(--s-muted); font-size: .92em; line-height: 1.45; }
+.s-flow figcaption { font-family: var(--f-ui); font-size: calc(var(--t-ui) * .92); color: var(--s-muted); max-width: 60ch; }
+@container (max-width: 980px) { .s-flow-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); } .s-flow-steps li:nth-child(2)::after { content: none; } }
+@container (max-width: 700px) { .s-flow-steps { grid-template-columns: minmax(0, 1fr); gap: 26px; } .s-flow-steps li:not(:last-child)::after { content: "↓"; right: auto; left: 50%; top: auto; bottom: -24px; transform: translateX(-50%); } .s-flow-steps li:nth-child(2)::after { content: "↓"; } }
