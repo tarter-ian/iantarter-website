@@ -440,12 +440,12 @@
   }
   // Hidden words: spin the name's letters in order to spell one, and its emoji joins a collection by "Email me"
   const EGGS = [[["eat", "ate", "eatin"], "🍽️"], [["ear"], "👂"], [["air"], "💨"], [["ant"], "🐜"], [["art"], "🎨"], [["net"], "🥅"], [["earn", "earnt"], "💰"],
-    [["internet"], "🌐"], [["rain"], "🌧️"], [["arena"], "🏟️"], [["entertain"], "🎭"], [["tent"], "⛺"], [["anteater"], "👅"], [["retreat"], "🏕️"], [["tan"], "🏖️"],
+    [["internet"], "🌐"], [["rain"], "🌧️"], [["arena"], "🏟️"], [["initiate"], "🚀"], [["tent"], "⛺"], [["anteater"], "👅"], [["retreat"], "🏕️"], [["tan"], "🏖️"],
     [["tin"], "🥫"], [["rear"], "🔙"], [["tear"], "😢"], [["tart"], "🥧"], [["treat"], "🍬"], [["terra"], "🌍"], [["tartar"], "🐟"], [["tater"], "🥔"],
     [["nitrate"], "🧪"], [["trainer"], "👟"], [["terrain"], "⛰️"], [["narrate"], "🎙️"], [["irate"], "😠"], [["titan"], "🪐"], [["tiara"], "👑"],
     [["ran"], "🏃"], [["tire"], "🛞"], [["rare"], "💎"], [["tartan"], "🧣"], [["retina"], "👁️"], [["intern"], "💼"], [["ten"], "🔟"], [["tea"], "🍵"], [["ai"], "🤖"], [["train"], "🚂"], [["int"], "🧠"], [["rat"], "🐀"],
     [["ian"], "👋"], [["tarter"], "🪪"], [["atari"], "🕹️"], [["tetra"], "🐠"], [["tenet"], "⚖️"], [["terrier"], "🐕"], [["tartine"], "🥖"], [["aria"], "🎶"],
-    [["tie"], "👔"], [["attire"], "🎩"], [["tar"], "🛢️"], [["rent"], "🏠"], [["attain"], "🏆"], [["iterate"], "🔄"], [["trait"], "🧬"], [["era"], "⏳"],
+    [["tie"], "👔"], [["attire"], "🎩"], [["tar"], "🛢️"], [["rent"], "🏠"], [["attain"], "🏆"], [["reiterate"], "🔁"], [["trait"], "🧬"], [["era"], "⏳"],
     [["inert"], "🪨"], [["entertainer"], "🎤"], [["neat"], "✨"], [["intent"], "🎯"], [["retainer"], "🦷"], [["retire"], "🧓"]];
   // generous on purpose: any word that ends on the letter just spun counts, even inside a longer swipe (sweeping "Tarter" finds tar, tart and art)
   let eggSeq = "", eggLastI = -1, eggFound = [], eggShown = null; // eggShown: the emoji the badge shows this visit (null: 🎉 or the latest find)
