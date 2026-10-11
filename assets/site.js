@@ -580,7 +580,7 @@
       // (only the latest waiting one is kept); only a new find animates the badge, a re-spelled word pulses in the grid alone
       const anim = !!(popped && popped.length), show = () => { chip._badgeAt = performance.now(); chip._badgeT = null;
         e.textContent = em; chip.title = title; if (anim) { e.classList.remove("pop", "pulse", "cheer"); void e.offsetWidth; e.classList.add("pop"); } };
-      const wait = (chip._badgeAt || -1e9) + (reduceMotion() ? 0 : 650) - performance.now();
+      const wait = (chip._badgeAt || -1e9) + (reduceMotion() ? 0 : 900) - performance.now();
       clearTimeout(chip._badgeT); if (e.textContent === em && !anim) chip.title = title; else if (wait > 0) chip._badgeT = setTimeout(show, wait); else show(); }
     // the 64th find shows its own emoji first; a beat later the badge eases to pale yellow and the 🎉 swings in
     const finishing = popped && popped.length && n >= total && last != null && !reduceMotion();
