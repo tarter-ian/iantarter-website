@@ -452,3 +452,7 @@ img { max-width: 100%; height: auto; }
 .s-flow figcaption { font-family: var(--f-ui); font-size: calc(var(--t-ui) * .92); color: var(--s-muted); max-width: 60ch; }
 @container (max-width: 980px) { .s-flow-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); } .s-flow-steps li:nth-child(2)::after { content: none; } }
 @container (max-width: 700px) { .s-flow-steps { grid-template-columns: minmax(0, 1fr); gap: 26px; } .s-flow-steps li:not(:last-child)::after { content: "↓"; right: auto; left: 50%; top: auto; bottom: -24px; transform: translateX(-50%); } .s-flow-steps li:nth-child(2)::after { content: "↓"; } }
+
+/* WCAG 2.5.8: menu, back and "read more" links get a hit area of at least 24px tall without moving anything */
+.site .s-links a, .site .s-more, .site .s-back { padding-block: 3px; margin-block: -3px; }
+.site .s-more { margin-block: 3px -3px; }
