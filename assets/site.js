@@ -451,8 +451,8 @@
   let eggSeq = "", eggLastI = -1, eggFound = [], eggShown = null; // eggShown: the emoji the badge shows this visit (null: 🎉 or the latest find)
   try { eggFound = JSON.parse(localStorage.getItem("it-eggs") || "[]").filter(n => EGGS[n]); } catch (e) {}
   const eggOf = word => EGGS.findIndex(([ws]) => ws.includes(word));
-  // real words that aren't among the hidden ones (4+ letters, from the ENABLE word list) get a quick shoutout instead
-  const EGG_BONUS = new Set("airn airt anta ante anti area erne etna inia inti naan nana near nene nett nine nite raia rani rant rate rein rete rite tain tare tarn tate teat tern tier tine tint titi tret aerie airer anear anent antae antra antre areae arete atria attar eaten eater enate enter entia inane inter naira niter nitre rarer ratan rater reata renin rente reran retia retie riant riata taint tarre tatar tenia terai terne tinea titer titre trier trine trite aerate aerier airier antiar arrant arrear artier attent earner entera entire errant errata eterne inaner intine irater narine natant natter nearer neaten neater netter ranter ratine ratite rattan ratten ratter rearer renter retain retear retene retine retint ritter taenia tantra tatter tattie tearer tenant teniae tenter tentie terete terrae terret territ tetter tinier tinter titian titter triene triter antiair arenite arietta ariette attaint attrite entente enterer entrain entrant entreat inertia interne intrant intreat iterant iterate nattier nettier niterie nitrite nittier rainier ratatat rattier reinter rentier retinae retirer retrain taeniae tantara tarrier tartana tattier tearier tentier ternate terrane terrene terrine tertian titania titrant titrate treater antiarin attainer inerrant inertiae intertie irritant irritate narrater rattener reattain renitent retinene retinite retirant tartrate terraria titanate titanite titterer entertain entrainer itinerant itinerate retreater intenerate reinitiate retreatant trinitarian".split(" "));
+  // common real words that aren't among the hidden ones (plus the words cut from the list) get a quick shoutout instead
+  const EGG_BONUS = new Set("are err eta ire nit ante anti area near nine rant rate rein rite teat tern tier tine tint eaten eater enter ettin inane inter rarer taint trier trite aerate airier arrant artier earner entire errant errata natter nearer neaten neater rattan ratter renter retain tatter tenant titter entrant entreat inertia iterate nitrite rainier ratatat rattier retrain tartare terrine titrate treater attainer irritant irritate entertain itinerant".split(" "));
   const eggBonusSaid = new Set();
   function eggShout(w) {
     eggBonusSaid.add(w);
@@ -487,7 +487,7 @@
       (eggFound.includes(n) ? again : fresh).push({ n, w }); }
     if (!fresh.length && !again.length) {
       // longest real word ending here, once per visit
-      for (let k = eggSeq.length; k >= 4; k--) { const w = eggSeq.slice(-k); if (EGG_BONUS.has(w) && !eggBonusSaid.has(w)) { eggShout(w); break; } }
+      for (let k = eggSeq.length; k >= 3; k--) { const w = eggSeq.slice(-k); if (EGG_BONUS.has(w) && !eggBonusSaid.has(w)) { eggShout(w); break; } }
       return;
     }
     const words = [...fresh, ...again].map(f => f.w).join(" and ");
@@ -583,14 +583,13 @@
   // sits just right of the Email me button, centered on it
   function placeEgg() {
     const box = site.querySelector(".s-egg"); if (!box) return; const a = box.parentElement.querySelector("a.s-btn[href^='mailto:']"); if (!a) return;
-    // once every word is found the badge becomes a pale yellow button, matching the real buttons' size, border, corners and shadow
-    const chip = box.firstChild, done = chip.classList.contains("done");
-    chip.style.height = done ? a.offsetHeight + "px" : "";
+    // the badge is a button the same height as Email me; once every word is found it turns pale yellow
+    box.firstChild.style.height = a.offsetHeight + "px";
     // beside Email me when it fits; on narrow phones it sits just below Email me instead, so it never runs off the screen,
     // and the button row makes room for it there so it doesn't land on what comes next
     const row = box.parentElement; row.style.paddingBottom = "";
-    const room = row.clientWidth - (a.offsetLeft + a.offsetWidth + 14);
-    if (box.hidden || box.offsetWidth <= room) { box.style.left = a.offsetLeft + a.offsetWidth + 14 + "px"; box.style.top = a.offsetTop + a.offsetHeight / 2 + "px"; }
+    const gap = matchMedia("(max-width: 600px)").matches ? 8 : 14, room = row.clientWidth - (a.offsetLeft + a.offsetWidth + gap) - 4;
+    if (box.hidden || box.offsetWidth <= room) { box.style.left = a.offsetLeft + a.offsetWidth + gap + "px"; box.style.top = a.offsetTop + a.offsetHeight / 2 + "px"; }
     else { row.style.paddingBottom = box.offsetHeight + 14 + "px"; box.style.left = a.offsetLeft + "px"; box.style.top = a.offsetTop + a.offsetHeight + 14 + box.offsetHeight / 2 + "px"; }
 
     if (!box.lastChild.hidden) placeEggPop(box);

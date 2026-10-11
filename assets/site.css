@@ -207,7 +207,20 @@ img { max-width: 100%; height: auto; }
 /* hidden words: a small badge floating beside Email me (it never moves the page), opening the full 8 by 8 collection */
 .s-egg { position: absolute; z-index: 8; transform: translateY(-50%); font-family: var(--f-ui); color: var(--s-text); }
 .s-egg[hidden] { display: none; }
-.s-egg-chip { display: inline-flex; align-items: center; gap: 7px; min-height: 36px; padding: 2px 4px; border: 0; background: none; color: inherit; font: inherit; font-size: .85rem; font-weight: 600; font-variant-numeric: tabular-nums; cursor: pointer; border-radius: 4px; }
+/* the badge is drawn like the Email me button beside it (same height, border, corners, shadow and lift on hover) at every count */
+.s-egg-chip { display: inline-flex; align-items: center; gap: 7px; min-height: 36px; padding: 0 14px; border: var(--border-btn) solid currentColor; background: transparent; color: inherit; font: inherit; font-size: .85rem; font-weight: 600; font-variant-numeric: tabular-nums; cursor: pointer; border-radius: var(--radius); box-shadow: var(--shadow); transition: transform .16s ease, box-shadow .16s ease; }
+.site[data-hover="lift"] .s-egg-chip:hover { transform: translate(-3px, -3px); box-shadow: var(--shadow-up); }
+.site[data-hover="lift"] .s-egg-chip:active, .site[data-hover="press"] .s-egg-chip:hover { transform: translate(2px, 2px); box-shadow: var(--shadow-down); }
+.site[data-hover="press"] .s-egg-chip:active { transform: translate(4px, 4px); box-shadow: none; }
+/* phones: the count sits under the emoji so the badge is narrow enough to share a line with both buttons */
+@media (max-width: 600px) {
+  .s-egg-chip { flex-direction: column; justify-content: center; gap: 4px; padding: 0 8px; font-size: .72rem; line-height: 1.1; }
+  .s-egg-chip .s-egg-e { font-size: 1.3rem; }
+  .s-hero .s-actions { gap: 8px; }
+  .s-hero .s-actions .s-btn { padding-inline: .7em; }
+}
+@media (max-width: 380px) { .s-hero .s-actions .s-btn { font-size: var(--t-ui); } }
+@media (prefers-reduced-motion: reduce) { .s-egg-chip { transition: none; } .site[data-hover] .s-egg-chip:hover { transform: none; } }
 .s-hero h1:focus { outline: none; }
 /* keyboard focus on the name: a thick accent underline that spans just the letters, instead of a box around the whole row */
 .s-hero h1:focus-visible:not(.by-pointer) { outline: none; text-decoration: underline var(--s-accent) 5px; text-decoration-skip-ink: none; text-underline-offset: .14em; }
@@ -224,7 +237,7 @@ img { max-width: 100%; height: auto; }
 .s-egg-pop.done p { padding-right: 40px; min-height: 26px; }
 .s-egg-again:focus-visible { outline: 2px solid var(--s-accent); outline-offset: 2px; }
 .s-egg-again[hidden] { display: none; }
-.s-egg-chip.done { background: #fff4c2; color: #0a0b0a; padding: 0 14px; border: var(--border-btn) solid #0a0b0a; border-radius: var(--radius); box-shadow: var(--shadow); }
+.s-egg-chip.done { background: #fff4c2; color: #0a0b0a; border-color: #0a0b0a; }
 .s-egg-grid { display: grid; grid-template-columns: repeat(8, 1.5em); grid-auto-rows: 1.5em; gap: 4px; font-size: 1.3rem; line-height: 1; margin: 0; padding: 0; list-style: none; }
 .s-egg-grid li { display: grid; place-items: center; }
 .s-egg-hint { display: grid; place-items: center; width: 100%; height: 100%; padding: 0; border: 0; border-radius: 4px; background: none; font: inherit; cursor: pointer; }
@@ -233,6 +246,8 @@ img { max-width: 100%; height: auto; }
 .s-egg-hint:empty::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--s-line, #ccc); }
 .s-egg-hint .ghost { filter: grayscale(1); opacity: .35; }
 .s-egg-hint.on { box-shadow: inset 0 0 0 2px var(--s-accent); }
+/* the smallest phones: shrink the found-words grid so it fits the screen */
+@media (max-width: 340px) { .s-egg-grid { font-size: 1.15rem; } }
 .s-egg-e { display: inline-block; cursor: default; }
 .s-egg-e.pop { animation: egg-pop .5s cubic-bezier(.3, 1.6, .5, 1); }
 .s-egg-e.pulse { animation: egg-pulse .45s ease; }
