@@ -573,19 +573,23 @@
     }
     box.hidden = state.details.eggs === false || !eggFound.length;
     const chip = box.firstChild, last = eggFound[eggFound.length - 1], n = eggFound.length, total = EGGS.length;
-    if (last != null) { const e = chip.firstChild; e.textContent = eggShown != null ? EGGS[eggShown][1] : n >= total ? "🎉" : EGGS[last][1];
+    if (last != null) { const e = chip.firstChild, em = eggShown != null ? EGGS[eggShown][1] : n >= total && !(popped && popped.length && !reduceMotion()) ? "🎉" : EGGS[last][1];
       const sk = eggShown != null ? eggShown : n >= total ? null : last, sw = sk != null ? EGGS[sk][0][0] : null;
-      chip.title = sw ? eggName(sw) : `All ${total} hidden words found`;
-      // only a new find animates the badge; re-spelling a found word pulses it in the grid alone
-      if (popped && popped.length) { e.classList.remove("pop", "pulse", "cheer"); void e.offsetWidth; e.classList.add("pop"); } }
+      const title = sw ? eggName(sw) : `All ${total} hidden words found`;
+      // one swipe can spell several words at once, so each emoji the badge shows stays up a moment before the next replaces it
+      // (only the latest waiting one is kept); only a new find animates the badge, a re-spelled word pulses in the grid alone
+      const anim = !!(popped && popped.length), show = () => { chip._badgeAt = performance.now(); chip._badgeT = null;
+        e.textContent = em; chip.title = title; if (anim) { e.classList.remove("pop", "pulse", "cheer"); void e.offsetWidth; e.classList.add("pop"); } };
+      const wait = (chip._badgeAt || -1e9) + (reduceMotion() ? 0 : 650) - performance.now();
+      clearTimeout(chip._badgeT); if (e.textContent === em && !anim) chip.title = title; else if (wait > 0) chip._badgeT = setTimeout(show, wait); else show(); }
     // the 64th find shows its own emoji first; a beat later the badge eases to pale yellow and the 🎉 swings in
     const finishing = popped && popped.length && n >= total && last != null && !reduceMotion();
     clearTimeout(chip._doneT);
     chip.lastChild.textContent = n > 1 ? `${n}/${total}` : "";
     chip.setAttribute("aria-label", `Hidden words: ${n} of ${total} found`);
     box.querySelector(".s-egg-pop").classList.toggle("done", n >= total); box.querySelector(".s-egg-again").hidden = n < total || reduceMotion(); chip.classList.toggle("done", n >= total && !finishing);
-    if (finishing) { const e = chip.firstChild; e.textContent = EGGS[last][1];
-      chip._doneT = setTimeout(() => { e.textContent = "🎉"; chip.classList.add("done"); e.classList.remove("pop"); void e.offsetWidth; e.classList.add("cheer"); }, 1400); }
+    if (finishing) {
+      chip._doneT = setTimeout(() => { const e = chip.firstChild; clearTimeout(chip._badgeT); chip._badgeAt = performance.now(); e.textContent = "🎉"; chip.classList.add("done"); e.classList.remove("pop"); void e.offsetWidth; e.classList.add("cheer"); }, 1400); }
     box.querySelector(".s-egg-pop p").textContent = n >= total ? `You found all ${total} hidden words!` : `${n} of ${total} hidden words. Spin the letters of my name to spell more, or tap a dot for a hint.`;
     const grid = box.querySelector(".s-egg-grid"); grid.textContent = "";
     // each word keeps its own square, shortest words first, then alphabetical, so hints and finds stay put
