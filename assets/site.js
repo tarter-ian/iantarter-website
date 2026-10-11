@@ -471,8 +471,8 @@
       (eggFound.includes(n) ? again : fresh).push({ n, w }); }
     if (!fresh.length && !again.length) return;
     const words = [...fresh, ...again].map(f => f.w).join(" and ");
-    // spelling a word you already have pulses its emoji, and the badge shows it until the page is reloaded
-    if (!fresh.length) { eggShown = again[again.length - 1].n; showEgg(null, again.map(f => f.n)); live.textContent = ""; setTimeout(() => { live.textContent = `You spelled ${words}.`; }, 30); return; }
+    // spelling a word you already have pulses its emoji; once all are found, the badge also shows it until the page is reloaded
+    if (!fresh.length) { if (eggDone()) eggShown = again[again.length - 1].n; showEgg(null, again.map(f => f.n)); live.textContent = ""; setTimeout(() => { live.textContent = `You spelled ${words}.`; }, 30); return; }
     fresh.forEach(f => eggFound.push(f.n)); try { localStorage.setItem("it-eggs", JSON.stringify(eggFound)); } catch (e) {}
     eggShown = eggDone() ? null : fresh[fresh.length - 1].n;
     showEgg(fresh.map(f => f.n), again.map(f => f.n));
