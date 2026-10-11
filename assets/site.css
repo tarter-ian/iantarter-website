@@ -476,3 +476,24 @@ img { max-width: 100%; height: auto; }
 .site .s-proj-list { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; }
 .site .s-proj-list li::marker { color: var(--s-accent); }
 .site .s-proj-more { margin: 0; padding-block: calc(8px * var(--density)) 0; }
+
+/* case-study diagrams: drawn in the site's own colors, borders and hard shadows */
+.s-diagram { margin: calc(8px * var(--density)) 0 calc(4px * var(--density)); display: grid; gap: 10px; }
+.s-diagram svg { width: 100%; height: auto; display: block; overflow: visible; }
+.s-diagram-narrow svg { max-width: 420px; }
+.s-diagram figcaption { font-family: var(--f-ui); font-size: calc(var(--t-ui) * .92); color: var(--s-muted); max-width: 60ch; }
+.s-diagram .d-box { fill: var(--s-surface); stroke: var(--s-line-strong); stroke-width: 2.5; }
+.s-diagram .d-shadow { fill: var(--s-text); }
+.s-diagram .d-paid { fill: #fff4c2; }
+.s-diagram rect.d-paid { stroke: var(--s-line-strong); stroke-width: 2.5; }
+.s-diagram .d-ring { fill: none; stroke: var(--s-line-strong); stroke-width: 2.5; }
+.s-diagram .d-tok { fill: var(--s-bg); stroke: var(--s-line-strong); stroke-width: 2; }
+.s-diagram .d-fav { fill: var(--s-accent); stroke: var(--s-line-strong); stroke-width: 2; }
+.s-diagram .d-star { fill: #fff; }
+.s-diagram text { font-family: var(--f-ui); fill: var(--s-text); }
+.s-diagram .d-lab { font-family: var(--f-heading); font-weight: var(--t-heading-w); font-size: 17px; }
+.s-diagram .d-small { font-size: 15px; }
+.s-diagram .d-sub { font-size: 13px; fill: var(--s-muted); }
+.s-diagram .d-note { font-size: 14px; font-weight: 600; }
+.s-diagram .d-narrow { display: none; max-width: 270px; }
+@media (max-width: 600px) { .s-diagram .d-wide { display: none; } .s-diagram .d-narrow { display: block; } }
