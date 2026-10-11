@@ -530,13 +530,19 @@
     const bits = EGGS.map(([, em]) => em).sort(() => Math.random() - .5);
     // added a few per frame, so the browser draws them in small batches instead of all at once
     let k = 0; const batch = () => { for (let j = 0; j < 8 && k < bits.length; j++, k++) {
-      const d = document.createElement("span"); d.textContent = bits[k]; d.style.left = cx + "px"; d.style.top = cy + "px"; d.style.fontSize = (1.3 + Math.random() * 1.1) + "rem";
-      layer.appendChild(d);
+      // three nested layers, so each motion is exact and smooth: sideways at a steady speed, up and down along a true gravity curve
+      // (a quadratic, which a cubic-bezier timing function draws exactly), and the spin, grow and fade on the emoji itself
+      const d = document.createElement("span"), yb = document.createElement("span"), e = document.createElement("b");
+      e.textContent = bits[k]; e.style.fontSize = (1.3 + Math.random() * 1.1) + "rem"; yb.appendChild(e); d.appendChild(yb);
+      d.style.left = cx + "px"; d.style.top = cy + "px"; layer.appendChild(d);
       const ang = -Math.PI / 2 + (Math.random() - .5) * (Math.random() < .6 ? Math.PI / 6 : Math.PI * 1.25), sp = reach * (0.75 + Math.random() * 0.75), vx = Math.cos(ang) * sp, vy = Math.sin(ang) * sp;
-      const dur = 1.7 + Math.random() * 0.8, spin = (Math.random() - .5) * 720, frames = [];
-      for (let f = 0; f <= 12; f++) { const t = f / 12 * dur, x = vx * t, y = vy * t + g * t * t / 2;
-        frames.push({ transform: `translate(-50%, -50%) translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) rotate(${(spin * f / 12).toFixed(0)}deg) scale(${f ? 1 : 0.3})`, opacity: f > 9 ? (12 - f) / 3 : 1 }); }
-      d.animate(frames, { duration: dur * 1000, easing: "linear", fill: "forwards" });
+      const dur = 1.7 + Math.random() * 0.8, spin = (Math.random() - .5) * 720, ms = dur * 1000;
+      const X = vx * dur, A = vy * dur, B = g * dur * dur / 2, Y = A + B, c = Y ? A / (2 * Y) : 0.5;
+      d.animate([{ transform: "translateX(0)" }, { transform: `translateX(${X.toFixed(1)}px)` }], { duration: ms, easing: "linear", fill: "forwards" });
+      if (Y) yb.animate([{ transform: "translateY(0)" }, { transform: `translateY(${Y.toFixed(1)}px)` }], { duration: ms, easing: `cubic-bezier(.3333, ${(2 * c / 3).toFixed(4)}, .6667, ${((2 * c + 1) / 3).toFixed(4)})`, fill: "forwards" });
+      e.animate([{ transform: "translate(-50%, -50%) rotate(0deg) scale(.3)", opacity: 1 }, { transform: `translate(-50%, -50%) rotate(${(spin / 12).toFixed(0)}deg) scale(1)`, opacity: 1, offset: 1 / 12 },
+        { transform: `translate(-50%, -50%) rotate(${(spin * .75).toFixed(0)}deg) scale(1)`, opacity: 1, offset: .75 }, { transform: `translate(-50%, -50%) rotate(${spin.toFixed(0)}deg) scale(1)`, opacity: 0 }],
+        { duration: ms, easing: "linear", fill: "forwards" });
     } if (k < bits.length) requestAnimationFrame(batch); };
     requestAnimationFrame(batch);
     // bursts can overlap, but a new one can start at most every half second

@@ -253,7 +253,9 @@ img { max-width: 100%; height: auto; }
 .s-egg-e.pulse { animation: egg-pulse .45s ease; }
 @keyframes egg-pulse { 0%, 100% { transform: none; } 40% { transform: scale(1.3); } }
 .s-egg-rain { position: fixed; inset: 0; z-index: 2147483000; pointer-events: none; overflow: hidden; }
-.s-egg-rain span { position: absolute; line-height: 1; transform: translate(-50%, -50%) scale(.3); will-change: transform, opacity; }
+.s-egg-rain span { position: absolute; line-height: 1; will-change: transform; }
+.s-egg-rain span span { position: static; display: block; }
+.s-egg-rain b { display: block; font-weight: inherit; transform: translate(-50%, -50%) scale(.3); will-change: transform, opacity; }
 @keyframes egg-pop { 0% { transform: scale(0) rotate(-25deg); } 100% { transform: none; } }
 @media (prefers-reduced-motion: reduce) { .s-egg-e.pop, .s-egg-e.pulse { animation: none; } }
 @media (prefers-reduced-motion: reduce) { .fill-cv > canvas.fx-hop, .fill-cv > canvas.fx-press, .fill-cv > canvas.fx-wobble { animation: none; } .s-copied { transition: none; transform: translate(-50%, 0); } }
