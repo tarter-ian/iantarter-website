@@ -440,13 +440,13 @@
   }
   // Hidden words: spin the name's letters in order to spell one, and its emoji joins a collection by "Email me"
   const EGGS = [[["eat", "ate", "eatin"], "🍽️"], [["ear"], "👂"], [["air"], "💨"], [["ant"], "🐜"], [["art"], "🎨"], [["net"], "🥅"], [["earn", "earnt"], "💰"],
-    [["ante"], "🪙"], [["rain"], "🌧️"], [["arena"], "🏟️"], [["ettin"], "👹"], [["tent"], "⛺"], [["tint"], "🕶️"], [["rite"], "🕯️"], [["tan"], "🏖️"],
+    [["ante"], "🪙"], [["rain"], "🌧️"], [["arena"], "🏟️"], [["entertain"], "🎭"], [["tent"], "⛺"], [["tint"], "🕶️"], [["retreat"], "🏕️"], [["tan"], "🏖️"],
     [["tin"], "🥫"], [["rear"], "🔙"], [["tear"], "😢"], [["tart"], "🥧"], [["treat"], "🍬"], [["terra"], "🌍"], [["tartar"], "🐟"], [["tater"], "🥔"],
     [["nitrate"], "🧪"], [["trainer"], "👟"], [["terrain"], "⛰️"], [["narrate"], "🎙️"], [["irate"], "😠"], [["titan"], "🪐"], [["tiara"], "👑"],
-    [["ran"], "🏃"], [["tire"], "🛞"], [["rare"], "💎"], [["tartan"], "🧣"], [["retina"], "👁️"], [["errata"], "📝"], [["ten"], "🔟"], [["tea"], "🍵"], [["ai"], "🤖"], [["train"], "🚂"], [["int"], "🧠"], [["rat"], "🐀"],
-    [["ian"], "👋"], [["tarter"], "🪪"], [["atari"], "🕹️"], [["tetra"], "🐠"], [["tern"], "🐦"], [["ratter"], "🐈"], [["tartine"], "🥖"], [["aria"], "🎶"],
-    [["tie"], "👔"], [["attire"], "🎩"], [["tar"], "🛢️"], [["rent"], "🏠"], [["attain"], "🏆"], [["retrain"], "🔁"], [["trait"], "🧬"], [["era"], "⏳"],
-    [["inert"], "🪨"], [["rate"], "⭐"], [["neat"], "✨"], [["err"], "🤷"], [["tartare"], "🥩"], [["rein"], "🐴"]];
+    [["ran"], "🏃"], [["tire"], "🛞"], [["rare"], "💎"], [["tartan"], "🧣"], [["retina"], "👁️"], [["intern"], "💼"], [["ten"], "🔟"], [["tea"], "🍵"], [["ai"], "🤖"], [["train"], "🚂"], [["int"], "🧠"], [["rat"], "🐀"],
+    [["ian"], "👋"], [["tarter"], "🪪"], [["atari"], "🕹️"], [["tetra"], "🐠"], [["tenet"], "⚖️"], [["terrier"], "🐕"], [["tartine"], "🥖"], [["aria"], "🎶"],
+    [["tie"], "👔"], [["attire"], "🎩"], [["tar"], "🛢️"], [["rent"], "🏠"], [["attain"], "🏆"], [["iterate"], "🔄"], [["trait"], "🧬"], [["era"], "⏳"],
+    [["inert"], "🪨"], [["rate"], "⭐"], [["neat"], "✨"], [["intent"], "🎯"], [["retainer"], "🦷"], [["retire"], "🧓"]];
   // generous on purpose: any word that ends on the letter just spun counts, even inside a longer swipe (sweeping "Tarter" finds tar, tart and art)
   let eggSeq = "", eggLastI = -1, eggFound = [], eggShown = null; // eggShown: the emoji the badge shows this visit (null: 🎉 or the latest find)
   try { eggFound = JSON.parse(localStorage.getItem("it-eggs") || "[]").filter(n => EGGS[n]); } catch (e) {}
