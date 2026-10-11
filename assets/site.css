@@ -456,3 +456,8 @@ img { max-width: 100%; height: auto; }
 /* WCAG 2.5.8: menu, back and "read more" links get a hit area of at least 24px tall without moving anything */
 .site .s-links a, .site .s-more, .site .s-back { padding-block: 3px; margin-block: -3px; }
 .site .s-more { margin-block: 3px -3px; }
+
+/* Projects page: short list of smaller contest entries */
+.site .s-proj-list { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; }
+.site .s-proj-list li::marker { color: var(--s-accent); }
+.site .s-proj-more { margin: 0; padding-block: calc(8px * var(--density)) 0; }
