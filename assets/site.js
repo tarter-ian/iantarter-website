@@ -451,6 +451,22 @@
   let eggSeq = "", eggLastI = -1, eggFound = [], eggShown = null; // eggShown: the emoji the badge shows this visit (null: 🎉 or the latest find)
   try { eggFound = JSON.parse(localStorage.getItem("it-eggs") || "[]").filter(n => EGGS[n]); } catch (e) {}
   const eggOf = word => EGGS.findIndex(([ws]) => ws.includes(word));
+  // real words that aren't among the hidden ones (4+ letters, from the ENABLE word list) get a quick shoutout instead
+  const EGG_BONUS = new Set("airn airt anta ante anti area erne etna inia inti naan nana near nene nett nine nite raia rani rant rate rein rete rite tain tare tarn tate teat tern tier tine tint titi tret aerie airer anear anent antae antra antre areae arete atria attar eaten eater enate enter entia inane inter naira niter nitre rarer ratan rater reata renin rente reran retia retie riant riata taint tarre tatar tenia terai terne tinea titer titre trier trine trite aerate aerier airier antiar arrant arrear artier attent earner entera entire errant errata eterne inaner intine irater narine natant natter nearer neaten neater netter ranter ratine ratite rattan ratten ratter rearer renter retain retear retene retine retint ritter taenia tantra tatter tattie tearer tenant teniae tenter tentie terete terrae terret territ tetter tinier tinter titian titter triene triter antiair arenite arietta ariette attaint attrite entente enterer entrain entrant entreat inertia interne intrant intreat iterant iterate nattier nettier niterie nitrite nittier rainier ratatat rattier reinter rentier retinae retirer retrain taeniae tantara tarrier tartana tattier tearier tentier ternate terrane terrene terrine tertian titania titrant titrate treater antiarin attainer inerrant inertiae intertie irritant irritate narrater rattener reattain renitent retinene retinite retirant tartrate terraria titanate titanite titterer entertain entrainer itinerant itinerate retreater intenerate reinitiate retreatant trinitarian".split(" "));
+  const eggBonusSaid = new Set();
+  function eggShout(w) {
+    eggBonusSaid.add(w);
+    const host = nameEl.parentElement; if (!host || !host.isConnected) return;
+    if (getComputedStyle(host).position === "static") host.style.position = "relative";
+    let tag = host.querySelector(":scope > .s-wordtag");
+    if (!tag) { tag = document.createElement("span"); tag.className = "s-copied s-wordtag"; tag.setAttribute("aria-hidden", "true"); host.appendChild(tag); }
+    tag.textContent = `${eggName(w)} is a real word! Just not a hidden one.`;
+    const r = document.createRange(); r.selectNodeContents(nameEl); const nr = r.getBoundingClientRect(), hr = host.getBoundingClientRect();
+    tag.style.left = (nr.left - hr.left + nr.width / 2) + "px"; tag.style.top = (nr.top - hr.top + nr.height * .2 - tag.offsetHeight - 8) + "px";
+    tag.classList.remove("show"); void tag.offsetWidth; tag.classList.add("show");
+    live.textContent = ""; setTimeout(() => { live.textContent = `${eggName(w)} is a real word, just not one of the hidden ones.`; }, 30);
+    clearTimeout(tag._t); tag._t = setTimeout(() => tag.classList.remove("show"), 2200);
+  }
   const EGG_ORDER = EGGS.map((_, k) => k).sort((x, y) => { const a = EGGS[x][0][0], b = EGGS[y][0][0]; return a.length - b.length || a.localeCompare(b); });
   // hints: tapping an unfound slot shows its emoji, faded, and the word's length; each tap after that reveals one more letter
   let eggHints = {}; try { eggHints = JSON.parse(localStorage.getItem("it-egg-hints") || "{}") || {}; } catch (e) {}
@@ -462,14 +478,18 @@
   function eggLetter(i) {
     if (state.details.eggs === false) return;
     // landing on the same letter again (wobbling on its edge, or slipping off the name and back) doesn't count twice
-    // there's no time limit between letters: the last nine letters spun are always what counts
+    // there's no time limit between letters: the last letters spun (as many as the longest word) are always what counts
     if (i === eggLastI) return; eggLastI = i;
     const ch = (nameEl.textContent.replace(/\s+/g, "")[i] || "").toLowerCase();
     eggSeq = (eggSeq + ch).slice(-Math.max(...EGGS.flatMap(e => e[0]).map(w => w.length)));
     const fresh = [], again = [];
     for (let k = 2; k <= eggSeq.length; k++) { const w = eggSeq.slice(-k), n = eggOf(w); if (n < 0 || fresh.some(f => f.n === n) || again.some(f => f.n === n)) continue;
       (eggFound.includes(n) ? again : fresh).push({ n, w }); }
-    if (!fresh.length && !again.length) return;
+    if (!fresh.length && !again.length) {
+      // longest real word ending here, once per visit
+      for (let k = eggSeq.length; k >= 4; k--) { const w = eggSeq.slice(-k); if (EGG_BONUS.has(w) && !eggBonusSaid.has(w)) { eggShout(w); break; } }
+      return;
+    }
     const words = [...fresh, ...again].map(f => f.w).join(" and ");
     // spelling a word you already have pulses its emoji; once all are found, the badge also shows it until the page is reloaded
     if (!fresh.length) { if (eggDone()) eggShown = again[again.length - 1].n; showEgg(null, again.map(f => f.n)); live.textContent = ""; setTimeout(() => { live.textContent = `You spelled ${words}.`; }, 30); return; }
