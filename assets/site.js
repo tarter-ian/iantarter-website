@@ -175,7 +175,13 @@
     Object.assign(cv2.style, { position: "absolute", left: (box.left - ox - hb.left + host.scrollLeft - host.clientLeft) + "px", top: (box.top - oy - hb.top + host.scrollTop - host.clientTop) + "px", width: Wc + "px", height: Hc + "px", pointerEvents: "none", zIndex: "6" });
     cv2.style.setProperty("--bob", ((glyphs[0] && glyphs[0].fs) || 40) * 0.12 + "px");
     if (getComputedStyle(el).position === "static") el.style.position = "relative"; el.style.zIndex = "7";
-    if (old) old.replaceWith(cv2); else host.insertBefore(cv2, el);
+    // turning gold fades the old letters out over the new ones, once every gold letter has its polished shine
+    const toGold = old && el === nameEl && color === SHINE_GOLD && old._fill !== color && !reduceMotion();
+    if (toGold) { old.before(cv2); old.style.zIndex = "6"; old.classList.add("fill-out");
+      const gone = () => { if (old.isConnected) old.remove(); };
+      cv2._onPrepped = () => requestAnimationFrame(() => { old.style.transition = "opacity 1.2s ease-in-out"; old.style.opacity = "0"; setTimeout(gone, 1300); });
+      setTimeout(gone, 8000); }
+    else if (old) old.replaceWith(cv2); else host.insertBefore(cv2, el);
     el._fillCv = cv2; el.classList.add("has-cv"); if (el === nameEl && typeof prepSpins === "function") prepSpins(cv2); if (typeof queueGrain === "function") queueGrain();
   }
   // ---------- Small touches ----------
@@ -390,7 +396,7 @@
     const idle = window.requestIdleCallback || (f => setTimeout(f, 60));
     const gold = wrap._fill === SHINE_GOLD;
     let i = 0; const step = () => { if (!wrap.isConnected || (nameFx() !== "spin" && !gold)) return; const g = wrap._glyphs[i++];
-      if (!g) { if (gold) startGlints(wrap); return; } if (g.base) prep(g.base, g, wrap._ink, wrap._fill); idle(step); };
+      if (!g) { if (wrap._onPrepped) { wrap._onPrepped(); wrap._onPrepped = null; } if (gold) startGlints(wrap); return; } if (g.base) prep(g.base, g, wrap._ink, wrap._fill); idle(step); };
     idle(step);
   }
   // for checking the spin frame by frame: draws letter i of your name at a given angle (radians) onto a fresh canvas
