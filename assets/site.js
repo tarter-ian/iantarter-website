@@ -491,7 +491,7 @@
       return;
     }
     const words = [...fresh, ...again].map(f => f.w).join(" and ");
-    // spelling a word you already have pulses its emoji; once all are found, the badge also shows it until the page is reloaded
+    // spelling a word you already have pulses its emoji in the grid (not the badge); once all are found, the badge also shows it until the page is reloaded
     if (!fresh.length) { if (eggDone()) eggShown = again[again.length - 1].n; showEgg(null, again.map(f => f.n)); live.textContent = ""; setTimeout(() => { live.textContent = `You spelled ${words}.`; }, 30); return; }
     fresh.forEach(f => eggFound.push(f.n)); try { localStorage.setItem("it-eggs", JSON.stringify(eggFound)); } catch (e) {}
     eggShown = eggDone() ? null : fresh[fresh.length - 1].n;
@@ -564,7 +564,8 @@
     if (last != null) { const e = chip.firstChild; e.textContent = eggShown != null ? EGGS[eggShown][1] : n >= total ? "🎉" : EGGS[last][1];
       const sk = eggShown != null ? eggShown : n >= total ? null : last, sw = sk != null ? EGGS[sk][0][0] : null;
       chip.title = sw ? eggName(sw) : `All ${total} hidden words found`;
-      const fx = popped && popped.length ? "pop" : pulsed && pulsed.length ? "pulse" : ""; if (fx) { e.classList.remove("pop", "pulse"); void e.offsetWidth; e.classList.add(fx); } }
+      // only a new find animates the badge; re-spelling a found word pulses it in the grid alone
+      if (popped && popped.length) { e.classList.remove("pop", "pulse"); void e.offsetWidth; e.classList.add("pop"); } }
     chip.lastChild.textContent = n > 1 ? `${n}/${total}` : "";
     chip.setAttribute("aria-label", `Hidden words: ${n} of ${total} found`);
     box.querySelector(".s-egg-pop").classList.toggle("done", n >= total); box.querySelector(".s-egg-again").hidden = n < total || reduceMotion(); chip.classList.toggle("done", n >= total);
