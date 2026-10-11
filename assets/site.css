@@ -238,6 +238,10 @@ img { max-width: 100%; height: auto; }
 .s-egg-again:focus-visible { outline: 2px solid var(--s-accent); outline-offset: 2px; }
 .s-egg-again[hidden] { display: none; }
 .s-egg-chip.done { background: #fff4c2; color: #0a0b0a; border-color: #0a0b0a; }
+.s-egg-chip { transition: transform .16s ease, box-shadow .16s ease, background-color .9s ease, color .9s ease, border-color .9s ease; }
+.s-egg-e.cheer { animation: egg-cheer 1.1s cubic-bezier(.25, 1.4, .45, 1); }
+@keyframes egg-cheer { 0% { transform: scale(0) rotate(-40deg); } 55% { transform: scale(1.35) rotate(12deg); } 100% { transform: none; } }
+@media (prefers-reduced-motion: reduce) { .s-egg-e.cheer { animation: none; } .s-egg-chip { transition: none; } }
 .s-egg-grid { display: grid; grid-template-columns: repeat(8, 1.5em); grid-auto-rows: 1.5em; gap: 4px; font-size: 1.3rem; line-height: 1; margin: 0; padding: 0; list-style: none; }
 .s-egg-grid li { display: grid; place-items: center; }
 .s-egg-hint { display: grid; place-items: center; width: 100%; height: 100%; padding: 0; border: 0; border-radius: 4px; background: none; font: inherit; cursor: pointer; }
