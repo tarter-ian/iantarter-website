@@ -502,3 +502,6 @@ img { max-width: 100%; height: auto; }
 .s-figure img { width: 100%; height: auto; display: block; border: var(--border) solid var(--s-line-strong); box-shadow: var(--shadow); background: var(--s-surface); }
 .s-figure-narrow img { max-width: 520px; }
 .s-figure figcaption { font-family: var(--f-ui); font-size: calc(var(--t-ui) * .92); color: var(--s-muted); max-width: 60ch; }
+.site .s-card-img { order: -2; display: block; width: calc(100% + 2 * var(--sp-card) * var(--density)); max-width: none; height: auto; aspect-ratio: 12 / 5; object-fit: cover; margin: calc(-1 * var(--sp-card) * var(--density)) calc(-1 * var(--sp-card) * var(--density)) 8px; border-bottom: var(--border) solid var(--s-line-strong); }
+.s-case-hero { margin-block: calc(24px * var(--density)) 0; }
+.s-case-hero img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 7; object-fit: cover; border: var(--border) solid var(--s-line-strong); box-shadow: var(--shadow); }
