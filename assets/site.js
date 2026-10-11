@@ -440,13 +440,13 @@
   }
   // Hidden words: spin the name's letters in order to spell one, and its emoji joins a collection by "Email me"
   const EGGS = [[["eat", "ate", "eatin"], "🍽️"], [["ear"], "👂"], [["air"], "💨"], [["ant"], "🐜"], [["art"], "🎨"], [["net"], "🥅"], [["earn", "earnt"], "💰"],
-    [["ante"], "🪙"], [["rain"], "🌧️"], [["arena"], "🏟️"], [["entertain"], "🎭"], [["tent"], "⛺"], [["tint"], "🕶️"], [["retreat"], "🏕️"], [["tan"], "🏖️"],
+    [["internet"], "🌐"], [["rain"], "🌧️"], [["arena"], "🏟️"], [["entertain"], "🎭"], [["tent"], "⛺"], [["anteater"], "👅"], [["retreat"], "🏕️"], [["tan"], "🏖️"],
     [["tin"], "🥫"], [["rear"], "🔙"], [["tear"], "😢"], [["tart"], "🥧"], [["treat"], "🍬"], [["terra"], "🌍"], [["tartar"], "🐟"], [["tater"], "🥔"],
     [["nitrate"], "🧪"], [["trainer"], "👟"], [["terrain"], "⛰️"], [["narrate"], "🎙️"], [["irate"], "😠"], [["titan"], "🪐"], [["tiara"], "👑"],
     [["ran"], "🏃"], [["tire"], "🛞"], [["rare"], "💎"], [["tartan"], "🧣"], [["retina"], "👁️"], [["intern"], "💼"], [["ten"], "🔟"], [["tea"], "🍵"], [["ai"], "🤖"], [["train"], "🚂"], [["int"], "🧠"], [["rat"], "🐀"],
     [["ian"], "👋"], [["tarter"], "🪪"], [["atari"], "🕹️"], [["tetra"], "🐠"], [["tenet"], "⚖️"], [["terrier"], "🐕"], [["tartine"], "🥖"], [["aria"], "🎶"],
     [["tie"], "👔"], [["attire"], "🎩"], [["tar"], "🛢️"], [["rent"], "🏠"], [["attain"], "🏆"], [["iterate"], "🔄"], [["trait"], "🧬"], [["era"], "⏳"],
-    [["inert"], "🪨"], [["rate"], "⭐"], [["neat"], "✨"], [["intent"], "🎯"], [["retainer"], "🦷"], [["retire"], "🧓"]];
+    [["inert"], "🪨"], [["entertainer"], "🎤"], [["neat"], "✨"], [["intent"], "🎯"], [["retainer"], "🦷"], [["retire"], "🧓"]];
   // generous on purpose: any word that ends on the letter just spun counts, even inside a longer swipe (sweeping "Tarter" finds tar, tart and art)
   let eggSeq = "", eggLastI = -1, eggFound = [], eggShown = null; // eggShown: the emoji the badge shows this visit (null: 🎉 or the latest find)
   try { eggFound = JSON.parse(localStorage.getItem("it-eggs") || "[]").filter(n => EGGS[n]); } catch (e) {}
@@ -465,7 +465,7 @@
     // there's no time limit between letters: the last nine letters spun are always what counts
     if (i === eggLastI) return; eggLastI = i;
     const ch = (nameEl.textContent.replace(/\s+/g, "")[i] || "").toLowerCase();
-    eggSeq = (eggSeq + ch).slice(-9);
+    eggSeq = (eggSeq + ch).slice(-Math.max(...EGGS.flatMap(e => e[0]).map(w => w.length)));
     const fresh = [], again = [];
     for (let k = 2; k <= eggSeq.length; k++) { const w = eggSeq.slice(-k), n = eggOf(w); if (n < 0 || fresh.some(f => f.n === n) || again.some(f => f.n === n)) continue;
       (eggFound.includes(n) ? again : fresh).push({ n, w }); }
