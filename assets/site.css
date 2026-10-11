@@ -497,3 +497,8 @@ img { max-width: 100%; height: auto; }
 .s-diagram .d-note { font-size: 14px; font-weight: 600; }
 .s-diagram .d-narrow { display: none; max-width: 270px; }
 @media (max-width: 600px) { .s-diagram .d-wide { display: none; } .s-diagram .d-narrow { display: block; } }
+/* photos and screenshots inside a case study's text column */
+.s-figure { margin: calc(8px * var(--density)) 0 calc(4px * var(--density)); display: grid; gap: 10px; }
+.s-figure img { width: 100%; height: auto; display: block; border: var(--border) solid var(--s-line-strong); box-shadow: var(--shadow); background: var(--s-surface); }
+.s-figure-narrow img { max-width: 520px; }
+.s-figure figcaption { font-family: var(--f-ui); font-size: calc(var(--t-ui) * .92); color: var(--s-muted); max-width: 60ch; }
