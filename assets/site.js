@@ -414,9 +414,12 @@
     const S = c._spin;
     if (S) { if (S.axis === axis) { const now = performance.now(), cur = S.angle(now), base = dir > 0 ? Math.ceil(cur / TAU + 1e-6) : Math.floor(cur / TAU - 1e-6);
         S.retarget(cur, (base + dir * (turns - 1)) * TAU, 560 + 280 * turns, now); S.next = null; }
-      // ...but a flick across it isn't lost: the letter remembers the latest one and turns that way the moment it lines up facing front
-      // (straight away if it has all but settled); a later flick along its own axis cancels it
-      else { const now = performance.now(), cur = S.angle(now); S.next = v; if (Math.abs(S.to - cur) < 0.35) S.retarget(cur, S.to, 40, now); }
+      // ...but a flick across it isn't lost or kept waiting: the letter snaps quickly on round to its next facing-front point
+      // (at least as fast as it was going, never slower than about a sixth of a second) and then turns the new way;
+      // a later flick along its own axis cancels that
+      else { const now = performance.now(), cur = S.angle(now), d = Math.sign(S.to - S.from) || 1;
+        const rest = Math.abs(S.to - cur) < 0.35 ? S.to : (d > 0 ? Math.ceil(cur / TAU - 1e-6) : Math.floor(cur / TAU + 1e-6)) * TAU, gap = Math.abs(rest - cur);
+        S.next = v; S.retarget(cur, rest, Math.max(30, Math.min(170, gap / Math.max(Math.abs(S.speed(now)), 1e-3))), now, true); }
       return; }
     prep(c, g, ink, fill); c._spinning = true;
     const k = c.width / parseFloat(c.style.width), F = c._face, pad = Math.ceil(Math.max(F.ox, F.oy, 4) * 2);
@@ -425,8 +428,10 @@
     const ctx = cv.getContext("2d"); draw3d(ctx, c, 0, axis, pad, pad);
     c.parentNode.insertBefore(cv, c); c.style.visibility = "hidden";
     const st = c._spin = { axis, from: 0, to: dir * TAU * turns, t0: performance.now(), dur: 560 + 280 * turns,
-      angle(now) { const t = Math.min(1, (now - this.t0) / this.dur), e = 1 - Math.pow(1 - t, 3); return this.from + (this.to - this.from) * e; },
-      retarget(from, to, dur, now) { this.from = from; this.to = to; this.dur = dur; this.t0 = now; } };
+      angle(now) { const t = Math.min(1, (now - this.t0) / this.dur), e = this.lin ? t : 1 - Math.pow(1 - t, 3); return this.from + (this.to - this.from) * e; },
+      // radians per millisecond right now
+      speed(now) { const t = Math.min(1, (now - this.t0) / this.dur); return (this.to - this.from) / this.dur * (this.lin ? 1 : 3 * (1 - t) * (1 - t)); },
+      retarget(from, to, dur, now, lin) { this.from = from; this.to = to; this.dur = dur; this.t0 = now; this.lin = !!lin; } };
     const frame = () => {
       const now = performance.now(), t = Math.min(1, (now - st.t0) / st.dur);
       ctx.clearRect(0, 0, cv.width, cv.height); draw3d(ctx, c, t < 1 ? st.angle(now) : 0, st.axis, pad, pad);
