@@ -409,7 +409,7 @@
   // axle's bearing and the air. coast() plans a spin from angle `from` at speed w (rad/ms, signed): it turns until friction
   // stops it, and lands facing front by stretching or shrinking the coast slightly (a touch less or more friction) so it
   // ends on a whole turn. It returns the plan plus its shape over normalised time, ease(t) and its slope.
-  const SPIN_A = 1.5e-5, SPIN_B = 1 / 400, SPIN_WMIN = 0.012;
+  const SPIN_A = 1.5e-5, SPIN_B = 1 / 400, SPIN_WMIN = 0.006; // the gentlest touch still starts at about one turn a second
   // a soft top speed: up to 5 turns a second the letter's edge matches the pointer exactly; past that each extra bit of force
   // adds less and less (a hard flick ~6.5 turns a second, a wild one ~8), because much faster the letter is only a blur and
   // the eye can't see it slowing down. Harder still always turns a little faster. SPIN_WMAX only bounds repeated pushes
