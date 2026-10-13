@@ -409,7 +409,7 @@
   // axle's bearing and the air. coast() plans a spin from angle `from` at speed w (rad/ms, signed): it turns until friction
   // stops it, and lands facing front by stretching or shrinking the coast slightly (a touch less or more friction) so it
   // ends on a whole turn. It returns the plan plus its shape over normalised time, ease(t) and its slope.
-  const SPIN_A = 1.2e-5, SPIN_B = 1 / 700, SPIN_WMIN = 0.012, SPIN_WMAX = 0.06;
+  const SPIN_A = 1.2e-5, SPIN_B = 1 / 700, SPIN_WMIN = 0.012, SPIN_WMAX = 0.042; // the hardest flick turns about three times
   function coast(from, w, dir) {
     const TAU = Math.PI * 2, sg = Math.sign(w) || dir, m = Math.max(SPIN_WMIN, Math.abs(w)), A = SPIN_A, B = SPIN_B;
     const T = Math.log(1 + B * m / A) / B, th = t => (m + A / B) * (1 - Math.exp(-B * t)) / B - A / B * t, dth = t => (m + A / B) * Math.exp(-B * t) - A / B;
