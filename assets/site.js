@@ -410,9 +410,9 @@
   // stops it, and lands facing front by stretching or shrinking the coast slightly (a touch less or more friction) so it
   // ends on a whole turn. It returns the plan plus its shape over normalised time, ease(t) and its slope.
   const SPIN_A = 1.5e-5, SPIN_B = 1 / 400, SPIN_WMIN = 0.012;
-  // top speed, about 12 turns a second: any faster and a 60Hz screen shows it more than a fifth of a turn apart per frame,
-  // which the eye reads as flicker (the wagon-wheel effect) rather than speed
-  const SPIN_WMAX = 12 * Math.PI * 2 / 1000;
+  // top speed, about 7 turns a second: much faster and the letter is only a blur, so the eye can't see it slowing down
+  // until it has dropped back into this range; starting here, even a hard flick visibly slows from the start
+  const SPIN_WMAX = 7 * Math.PI * 2 / 1000;
   function coast(from, w, dir) {
     const TAU = Math.PI * 2, sg = Math.sign(w) || dir, m = Math.max(SPIN_WMIN, Math.abs(w)), A = SPIN_A, B = SPIN_B;
     const T = Math.log(1 + B * m / A) / B, th = t => (m + A / B) * (1 - Math.exp(-B * t)) / B - A / B * t, dth = t => (m + A / B) * Math.exp(-B * t) - A / B;
