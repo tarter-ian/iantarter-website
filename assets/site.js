@@ -410,13 +410,17 @@
   // stops it, and lands facing front by stretching or shrinking the coast slightly (a touch less or more friction) so it
   // ends on a whole turn. It returns the plan plus its shape over normalised time, ease(t) and its slope.
   const SPIN_A = 1.5e-5, SPIN_B = 1 / 400, SPIN_WMIN = 0.012;
-  // top speed, about 7 turns a second: much faster and the letter is only a blur, so the eye can't see it slowing down
-  // until it has dropped back into this range; starting here, even a hard flick visibly slows from the start
-  const SPIN_WMAX = 7 * Math.PI * 2 / 1000;
+  // a soft top speed: up to 5 turns a second the letter's edge matches the pointer exactly; past that each extra bit of force
+  // adds less and less (a hard flick ~6.5 turns a second, a wild one ~8), because much faster the letter is only a blur and
+  // the eye can't see it slowing down. Harder still always turns a little faster. SPIN_WMAX only bounds repeated pushes
+  const SPIN_KNEE = 5, SPIN_SOFT = 0.8, SPIN_WMAX = 9 * Math.PI * 2 / 1000;
+  const softSpin = w => { const r = w * 1000 / (Math.PI * 2); return (r <= SPIN_KNEE ? r : SPIN_KNEE + SPIN_SOFT * Math.log(1 + (r - SPIN_KNEE) / SPIN_SOFT)) * Math.PI * 2 / 1000; };
   function coast(from, w, dir) {
     const TAU = Math.PI * 2, sg = Math.sign(w) || dir, m = Math.max(SPIN_WMIN, Math.abs(w)), A = SPIN_A, B = SPIN_B;
     const T = Math.log(1 + B * m / A) / B, th = t => (m + A / B) * (1 - Math.exp(-B * t)) / B - A / B * t, dth = t => (m + A / B) * Math.exp(-B * t) - A / B;
-    const full = th(T); let to = Math.round((from + sg * full) / TAU) * TAU;
+    // it lands on the next facing-front point past where it would naturally stop (unless that's only a sliver further
+    // back), so a harder flick never ends sooner than a softer one
+    const full = th(T), end = (from + sg * full) / TAU; let to = (sg > 0 ? Math.ceil(end - 0.15) : Math.floor(end + 0.15)) * TAU;
     if ((to - from) * sg < 0.3) to += sg * TAU;
     const k = Math.abs(to - from) / full;
     return { from, to, dur: T * k, ease: u => th(u * T) / full, slope: u => dth(u * T) * T / full };
@@ -432,7 +436,7 @@
     // half-width sideways, about half the letter height up or down), so the whole name reacts as one set of blocks
     const G = nameEl._fillCv && nameEl._fillCv._glyphs || [g], avgW = G.reduce((t, q) => t + q.w, 0) / G.length;
     const TAU = Math.PI * 2, rim = horiz ? Math.max(8, avgW / 2) : Math.max(8, g.h * 0.3);
-    const w0 = Math.min(SPIN_WMAX, (horiz ? Math.abs(v.vx) : Math.abs(v.vy)) / rim);
+    const w0 = softSpin((horiz ? Math.abs(v.vx) : Math.abs(v.vy)) / rim);
     // like a Rubik's cube, a letter that is turning one way is locked to that axis until it stops: a sweep along the same axis
     // pushes it again from where it is: the same way round the push adds to its speed; the other way it always reverses,
     // but some of the push goes into stopping it first, so it heads back slower than a fresh flick would
