@@ -409,10 +409,10 @@
     const sp = Math.hypot(v.vx, v.vy), horiz = sp < 0.05 || Math.abs(v.vx) > Math.abs(v.vy) * 1.4; // anything near-vertical counts as up/down
     const dir = horiz ? (v.vx < 0 ? -1 : 1) : (v.vy < 0 ? 1 : -1), axis = horiz ? "y" : "x";
     // the flick sets how fast the letter starts turning (in step with the pointer's speed); a harder flick also coasts
-    // for longer, so it makes more whole turns (one up to twenty-four). It glides almost without friction, keeping nearly
-    // all its speed for most of the spin, and only eases off at the very end, always coming to rest facing front
+    // for longer, so it makes more whole turns (one up to twenty-four). It glides with very light, steady friction,
+    // slowing gradually from the moment it's flicked, and always comes to rest facing front
     const TAU = Math.PI * 2, w0 = Math.max(0.004, 0.03 * sp), dur = Math.max(2000, Math.min(4500, 2000 + 800 * sp));
-    const turns = Math.max(1, Math.min(24, Math.round(w0 * dur * 32 / 45 / TAU - 0.5)));
+    const turns = Math.max(1, Math.min(24, Math.round(w0 * dur / 2 / TAU - 0.5)));
     // like a Rubik's cube, a letter that is turning one way is locked to that axis until it stops: a sweep along the same axis
     // takes over from where it is (the same way round it speeds up and carries on, the other way it reverses)
     const S = c._spin;
@@ -432,9 +432,9 @@
     const ctx = cv.getContext("2d"); draw3d(ctx, c, 0, axis, pad, pad);
     c.parentNode.insertBefore(cv, c); c.style.visibility = "hidden";
     const st = c._spin = { axis, from: 0, to: dir * TAU * turns, t0: performance.now(), dur,
-      angle(now) { const t = Math.min(1, (now - this.t0) / this.dur), e = this.lin ? t : (t - 2 * Math.pow(t, 5) / 5 + Math.pow(t, 9) / 9) * 45 / 32; return this.from + (this.to - this.from) * e; },
+      angle(now) { const t = Math.min(1, (now - this.t0) / this.dur), e = this.lin ? t : 1 - (1 - t) * (1 - t); return this.from + (this.to - this.from) * e; },
       // radians per millisecond right now
-      speed(now) { const t = Math.min(1, (now - this.t0) / this.dur); return (this.to - this.from) / this.dur * (this.lin ? 1 : 45 / 32 * (1 - Math.pow(t, 4)) * (1 - Math.pow(t, 4))); },
+      speed(now) { const t = Math.min(1, (now - this.t0) / this.dur); return (this.to - this.from) / this.dur * (this.lin ? 1 : 2 * (1 - t)); },
       retarget(from, to, dur, now, lin) { this.from = from; this.to = to; this.dur = dur; this.t0 = now; this.lin = !!lin; } };
     // motion blur: when the letter turns more than about a sixth of a radian between frames, the frame is the average of
     // several renders spread back over the arc it just swept (like a camera shutter), so fast spins smear instead of strobing
