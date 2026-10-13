@@ -408,15 +408,16 @@
   function spin(c, v, g, ink, fill) {
     const sp = Math.hypot(v.vx, v.vy), horiz = sp < 0.05 || Math.abs(v.vx) > Math.abs(v.vy) * 1.4; // anything near-vertical counts as up/down
     const dir = horiz ? (v.vx < 0 ? -1 : 1) : (v.vy < 0 ? 1 : -1), axis = horiz ? "y" : "x";
-    // the flick sets how fast the letter starts turning (in step with the pointer's speed) and how many whole turns it makes,
-    // from one for a gentle pass up to five for a hard flick; it always slows to a stop facing front
-    const TAU = Math.PI * 2, turns = Math.max(1, Math.min(5, Math.round(0.5 + sp * 1.5))), w0 = Math.max(0.006, 0.04 * sp);
-    const dur = Math.max(450, Math.min(1600, 3 * turns * TAU / w0));
+    // the flick sets how fast the letter starts turning (in step with the pointer's speed); a harder flick also coasts
+    // for longer, like a wheel slowing under steady friction, so it makes more whole turns (one up to eight) and
+    // always comes to rest facing front
+    const TAU = Math.PI * 2, w0 = Math.max(0.004, 0.03 * sp), dur = Math.max(1300, Math.min(2600, 1300 + 500 * sp));
+    const turns = Math.max(1, Math.min(8, Math.round(w0 * dur / (2 * TAU) - 0.5)));
     // like a Rubik's cube, a letter that is turning one way is locked to that axis until it stops: a sweep along the same axis
     // takes over from where it is (the same way round it speeds up and carries on, the other way it reverses)
     const S = c._spin;
     if (S) { if (S.axis === axis) { const now = performance.now(), cur = S.angle(now), base = dir > 0 ? Math.ceil(cur / TAU + 1e-6) : Math.floor(cur / TAU - 1e-6);
-        const to = (base + dir * (turns - 1)) * TAU; S.retarget(cur, to, Math.max(450, Math.min(1600, 3 * Math.abs(to - cur) / w0)), now); S.next = null; }
+        const to = (base + dir * (turns - 1)) * TAU; S.retarget(cur, to, dur, now); S.next = null; }
       // ...but a flick across it isn't lost or kept waiting: the letter snaps quickly on round to its next facing-front point
       // (at least as fast as it was going, never slower than about a sixth of a second) and then turns the new way;
       // a later flick along its own axis cancels that
@@ -431,9 +432,9 @@
     const ctx = cv.getContext("2d"); draw3d(ctx, c, 0, axis, pad, pad);
     c.parentNode.insertBefore(cv, c); c.style.visibility = "hidden";
     const st = c._spin = { axis, from: 0, to: dir * TAU * turns, t0: performance.now(), dur,
-      angle(now) { const t = Math.min(1, (now - this.t0) / this.dur), e = this.lin ? t : 1 - Math.pow(1 - t, 3); return this.from + (this.to - this.from) * e; },
+      angle(now) { const t = Math.min(1, (now - this.t0) / this.dur), e = this.lin ? t : 1 - (1 - t) * (1 - t); return this.from + (this.to - this.from) * e; },
       // radians per millisecond right now
-      speed(now) { const t = Math.min(1, (now - this.t0) / this.dur); return (this.to - this.from) / this.dur * (this.lin ? 1 : 3 * (1 - t) * (1 - t)); },
+      speed(now) { const t = Math.min(1, (now - this.t0) / this.dur); return (this.to - this.from) / this.dur * (this.lin ? 1 : 2 * (1 - t)); },
       retarget(from, to, dur, now, lin) { this.from = from; this.to = to; this.dur = dur; this.t0 = now; this.lin = !!lin; } };
     const frame = () => {
       const now = performance.now(), t = Math.min(1, (now - st.t0) / st.dur);
