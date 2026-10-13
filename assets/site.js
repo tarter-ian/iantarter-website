@@ -436,9 +436,20 @@
       // radians per millisecond right now
       speed(now) { const t = Math.min(1, (now - this.t0) / this.dur); return (this.to - this.from) / this.dur * (this.lin ? 1 : 2 * (1 - t)); },
       retarget(from, to, dur, now, lin) { this.from = from; this.to = to; this.dur = dur; this.t0 = now; this.lin = !!lin; } };
+    // motion blur: when the letter turns more than about a sixth of a radian between frames, the frame is the average of
+    // several renders spread back over the arc it just swept (like a camera shutter), so fast spins smear instead of strobing
+    let blurCv = null;
     const frame = () => {
-      const now = performance.now(), t = Math.min(1, (now - st.t0) / st.dur);
-      ctx.clearRect(0, 0, cv.width, cv.height); draw3d(ctx, c, t < 1 ? st.angle(now) : 0, st.axis, pad, pad);
+      const now = performance.now(), t = Math.min(1, (now - st.t0) / st.dur), a = t < 1 ? st.angle(now) : 0;
+      const arc = t < 1 ? st.speed(now) * 16.7 * 0.6 : 0, n = Math.min(6, Math.ceil(Math.abs(arc) / 0.17));
+      ctx.clearRect(0, 0, cv.width, cv.height);
+      if (n < 2) draw3d(ctx, c, a, st.axis, pad, pad);
+      else {
+        if (!blurCv) { blurCv = document.createElement("canvas"); blurCv.width = cv.width; blurCv.height = cv.height; }
+        const bx = blurCv.getContext("2d"); ctx.globalCompositeOperation = "lighter"; ctx.globalAlpha = 1 / n;
+        for (let i = 0; i < n; i++) { bx.clearRect(0, 0, cv.width, cv.height); draw3d(bx, c, a - arc * i / (n - 1), st.axis, pad, pad); ctx.drawImage(blurCv, 0, 0); }
+        ctx.globalCompositeOperation = "source-over"; ctx.globalAlpha = 1;
+      }
       if (t < 1) { requestAnimationFrame(frame); return; }
       if (c._glinted) { c._glinted = false; glintLetter(c, null); } cv.remove(); c.style.visibility = ""; c._spinning = false; c._spin = null;
       if (st.next) spin(c, st.next, g, ink, fill);
