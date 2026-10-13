@@ -410,12 +410,13 @@
     const dir = horiz ? (v.vx < 0 ? -1 : 1) : (v.vy < 0 ? 1 : -1), axis = horiz ? "y" : "x";
     const turns = sp > 2.2 ? 3 : sp > 1 ? 2 : 1, TAU = Math.PI * 2;
     // like a Rubik's cube, a letter that is turning one way is locked to that axis until it stops: a sweep along the same axis
-    // takes over from where it is (the same way round it speeds up and carries on, the other way it reverses); a sweep across it does nothing
+    // takes over from where it is (the same way round it speeds up and carries on, the other way it reverses)
     const S = c._spin;
     if (S) { if (S.axis === axis) { const now = performance.now(), cur = S.angle(now), base = dir > 0 ? Math.ceil(cur / TAU + 1e-6) : Math.floor(cur / TAU - 1e-6);
-        S.retarget(cur, (base + dir * (turns - 1)) * TAU, 560 + 280 * turns, now); }
-      // ...until it has all but settled facing front: then, like a cube face lined back up, it can turn the other way at once
-      else { const now = performance.now(), cur = S.angle(now); if (Math.abs(S.to - cur) < 0.35 && !S.next) { S.next = v; S.retarget(cur, S.to, 40, now); } }
+        S.retarget(cur, (base + dir * (turns - 1)) * TAU, 560 + 280 * turns, now); S.next = null; }
+      // ...but a flick across it isn't lost: the letter remembers the latest one and turns that way the moment it lines up facing front
+      // (straight away if it has all but settled); a later flick along its own axis cancels it
+      else { const now = performance.now(), cur = S.angle(now); S.next = v; if (Math.abs(S.to - cur) < 0.35) S.retarget(cur, S.to, 40, now); }
       return; }
     prep(c, g, ink, fill); c._spinning = true;
     const k = c.width / parseFloat(c.style.width), F = c._face, pad = Math.ceil(Math.max(F.ox, F.oy, 4) * 2);
