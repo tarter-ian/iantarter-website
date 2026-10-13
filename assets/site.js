@@ -409,7 +409,7 @@
   // axle's bearing and the air. coast() plans a spin from angle `from` at speed w (rad/ms, signed): it turns until friction
   // stops it, and lands facing front by stretching or shrinking the coast slightly (a touch less or more friction) so it
   // ends on a whole turn. It returns the plan plus its shape over normalised time, ease(t) and its slope.
-  const SPIN_A = 1.2e-5, SPIN_B = 1 / 700, SPIN_WMIN = 0.012, SPIN_WMAX = 0.048;
+  const SPIN_A = 1.5e-5, SPIN_B = 1 / 400, SPIN_WMIN = 0.012, SPIN_WMAX = 0.2;
   function coast(from, w, dir) {
     const TAU = Math.PI * 2, sg = Math.sign(w) || dir, m = Math.max(SPIN_WMIN, Math.abs(w)), A = SPIN_A, B = SPIN_B;
     const T = Math.log(1 + B * m / A) / B, th = t => (m + A / B) * (1 - Math.exp(-B * t)) / B - A / B * t, dth = t => (m + A / B) * Math.exp(-B * t) - A / B;
@@ -424,9 +424,11 @@
     const dir = horiz ? (v.vx < 0 ? -1 : 1) : (v.vy < 0 ? 1 : -1), axis = horiz ? "y" : "x";
     // the letter behaves like a wheel on an axle: the flick is a single push that sets its starting speed (in step with the
     // pointer's), and from then on only friction acts on it, so it slows the whole way and coasts gently to a stop
-    // the push grows with the flick on a curve that flattens out instead of hitting a ceiling, so every bit harder still
-    // turns a bit faster: about one turn for a gentle pass, two for a brisk sweep, three or so for a hard flick
-    const TAU = Math.PI * 2, w0 = SPIN_WMIN + (SPIN_WMAX - SPIN_WMIN) * (1 - Math.exp(-sp / 1.5));
+    // the pointer pushes the letter's edge along at its own speed, like a hand spinning a wheel by its rim: the letter starts
+    // turning so that its edge moves as fast as the pointer did (so a narrow letter turns faster than a wide one).
+    // Spinning sideways the edge is half the letter's width from the axle; flipping up or down it's about half its height
+    const TAU = Math.PI * 2, rim = horiz ? Math.max(8, g.w / 2) : Math.max(8, g.h * 0.3);
+    const w0 = Math.min(SPIN_WMAX, (horiz ? Math.abs(v.vx) : Math.abs(v.vy)) / rim);
     // like a Rubik's cube, a letter that is turning one way is locked to that axis until it stops: a sweep along the same axis
     // pushes it again from where it is: the same way round the push adds to its speed; the other way it always reverses,
     // but some of the push goes into stopping it first, so it heads back slower than a fresh flick would
