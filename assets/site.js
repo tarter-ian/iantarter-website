@@ -641,7 +641,28 @@
     if (eggFound.length) showEgg(null); else if (box) box.hidden = true;
   }
   syncEgg();
-  nameEl.addEventListener("pointermove", bobAt); nameEl.addEventListener("pointerdown", bobAt);
+  // a fast flick can jump right over a letter between two pointer readings, so every move is traced as a line
+  // from the last reading, and each letter that line passes through counts, even if neither end lands on the name
+  let lastPt = null, lastVy = 0;
+  window.addEventListener("pointermove", e => {
+    const prev = lastPt; lastPt = { x: e.clientX, y: e.clientY, t: e.timeStamp || performance.now() };
+    let fx = nameFx(); if (fx === "none" || mode !== "view") return; if (fx !== "fill" && reduceMotion()) fx = "fill";
+    const w = nameEl._fillCv; if (!w || !w._glyphs || !w.isConnected) return;
+    const b = w.getBoundingClientRect(), a = prev || lastPt, seg = Math.hypot(e.clientX - a.x, e.clientY - a.y), dt = lastPt.t - (a.t || lastPt.t);
+    // a long jump between readings means a fast flick: its own direction and speed are the truest; otherwise use the recent average
+    const v = seg > 12 && dt > 0 && dt < 80 ? { vx: (e.clientX - a.x) / Math.max(dt, 8), vy: (e.clientY - a.y) / Math.max(dt, 8) } : swipe(e);
+    const x0 = a.x - b.left, y0 = a.y - b.top, x1 = e.clientX - b.left, y1 = e.clientY - b.top;
+    // skip moves nowhere near the name
+    const pad = 4; if (Math.max(x0, x1) < -pad || Math.min(x0, x1) > b.width + pad || Math.max(y0, y1) < -pad || Math.min(y0, y1) > b.height + pad) { lastBob = -1; return; }
+    const n = Math.max(1, Math.ceil(Math.hypot(x1 - x0, y1 - y0) / 3));
+    for (let s = prev ? 1 : 0; s <= n; s++) { const x = x0 + (x1 - x0) * s / n, y = y0 + (y1 - y0) * s / n;
+      const i = w._glyphs.findIndex(g => x >= g.l && x <= g.l + g.w && y >= g.t && y <= g.t + g.h);
+      if (i !== lastBob) { lastBob = i; if (i >= 0) playLetter(i, v, fx); } }
+    // flicking up and down without leaving a letter turns it back the other way
+    if (lastBob >= 0 && Math.abs(v.vy) > 0.6 && Math.abs(v.vy) > Math.abs(v.vx) && Math.sign(v.vy) !== Math.sign(lastVy) && Math.abs(lastVy) > 0.6) playLetter(lastBob, v, fx);
+    if (Math.abs(v.vy) > 0.6) lastVy = v.vy;
+  }, { passive: true });
+  nameEl.addEventListener("pointerdown", bobAt);
   nameEl.addEventListener("pointerleave", () => { lastBob = -1; });
   const askGlint = () => { const w = nameEl._fillCv; if (w && w._sweep) w._sweep(); };
   nameEl.addEventListener("pointerenter", askGlint); nameEl.addEventListener("focus", askGlint);
