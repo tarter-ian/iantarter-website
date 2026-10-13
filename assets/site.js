@@ -438,11 +438,12 @@
     const TAU = Math.PI * 2, rim = horiz ? Math.max(8, avgW / 2) : Math.max(8, g.h * 0.3);
     const w0 = softSpin((horiz ? Math.abs(v.vx) : Math.abs(v.vy)) / rim);
     // like a Rubik's cube, a letter that is turning one way is locked to that axis until it stops: a sweep along the same axis
-    // pushes it again from where it is: the same way round the push adds to its speed; the other way it always reverses,
-    // but some of the push goes into stopping it first, so it heads back slower than a fresh flick would
+    // pushes it again from where it is, and the push simply adds to the speed it already has: the same way round it speeds
+    // up; the other way the push first has to cancel the spin, so a weak flick against a fast spin only slows it (it then
+    // coasts on to its next facing-front point) and a strong one reverses it with whatever force is left over
     const S = c._spin;
     if (S) { if (S.axis === axis) { const now = performance.now(), cur = S.angle(now), sv = S.speed(now);
-        const w = Math.sign(sv) === -dir ? dir * Math.max(SPIN_WMIN, w0 - Math.abs(sv) / 2) : Math.max(-SPIN_WMAX, Math.min(SPIN_WMAX, sv + dir * w0));
+        const w = Math.max(-SPIN_WMAX, Math.min(SPIN_WMAX, sv + dir * w0));
         Object.assign(S, coast(cur, w, dir), { t0: now, lin: false }); S.next = null; }
       // ...but a flick across it isn't lost or kept waiting: the letter snaps quickly on round to its next facing-front point
       // (at least as fast as it was going, never slower than about a sixth of a second) and then turns the new way;
