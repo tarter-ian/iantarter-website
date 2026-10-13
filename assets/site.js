@@ -405,19 +405,33 @@
     const F = c._face, pad = Math.ceil(Math.max(F.ox, F.oy, 4) * 2), cv = document.createElement("canvas"); cv.width = c.width + pad * 2; cv.height = c.height + pad * 2;
     draw3d(cv.getContext("2d"), c, ang, axis, pad, pad); return cv;
   };
+  // friction on a spinning letter: a steady drag (SPIN_A, rad/ms²) plus one that grows with speed (SPIN_B, per ms), like an
+  // axle's bearing and the air. coast() plans a spin from angle `from` at speed w (rad/ms, signed): it turns until friction
+  // stops it, and lands facing front by stretching or shrinking the coast slightly (a touch less or more friction) so it
+  // ends on a whole turn. It returns the plan plus its shape over normalised time, ease(t) and its slope.
+  const SPIN_A = 1.2e-5, SPIN_B = 1 / 700, SPIN_WMIN = 0.012, SPIN_WMAX = 0.06;
+  function coast(from, w, dir) {
+    const TAU = Math.PI * 2, sg = Math.sign(w) || dir, m = Math.max(SPIN_WMIN, Math.abs(w)), A = SPIN_A, B = SPIN_B;
+    const T = Math.log(1 + B * m / A) / B, th = t => (m + A / B) * (1 - Math.exp(-B * t)) / B - A / B * t, dth = t => (m + A / B) * Math.exp(-B * t) - A / B;
+    const full = th(T); let to = Math.round((from + sg * full) / TAU) * TAU;
+    if ((to - from) * sg < 0.3) to += sg * TAU;
+    const k = Math.abs(to - from) / full;
+    return { from, to, dur: T * k, ease: u => th(u * T) / full, slope: u => dth(u * T) * T / full };
+  }
+
   function spin(c, v, g, ink, fill) {
     const sp = Math.hypot(v.vx, v.vy), horiz = sp < 0.05 || Math.abs(v.vx) > Math.abs(v.vy) * 1.4; // anything near-vertical counts as up/down
     const dir = horiz ? (v.vx < 0 ? -1 : 1) : (v.vy < 0 ? 1 : -1), axis = horiz ? "y" : "x";
-    // the flick sets how fast the letter starts turning (in step with the pointer's speed); a harder flick also coasts
-    // for a little longer, so it makes more whole turns (one up to ten). It slows gradually from the moment it's flicked
-    // and eases softly into place facing front, with no sudden stop
-    const TAU = Math.PI * 2, w0 = Math.max(0.004, 0.03 * sp), dur = Math.max(1100, Math.min(2000, 1100 + 350 * sp));
-    const turns = Math.max(1, Math.min(10, Math.round(w0 * dur / 3 / TAU - 0.5)));
+    // the letter behaves like a wheel on an axle: the flick is a single push that sets its starting speed (in step with the
+    // pointer's), and from then on only friction acts on it, so it slows the whole way and coasts gently to a stop
+    const TAU = Math.PI * 2, w0 = Math.min(SPIN_WMAX, 0.02 * sp);
     // like a Rubik's cube, a letter that is turning one way is locked to that axis until it stops: a sweep along the same axis
-    // takes over from where it is (the same way round it speeds up and carries on, the other way it reverses)
+    // pushes it again from where it is: the same way round the push adds to its speed; the other way it always reverses,
+    // but some of the push goes into stopping it first, so it heads back slower than a fresh flick would
     const S = c._spin;
-    if (S) { if (S.axis === axis) { const now = performance.now(), cur = S.angle(now), base = dir > 0 ? Math.ceil(cur / TAU + 1e-6) : Math.floor(cur / TAU - 1e-6);
-        const to = (base + dir * (turns - 1)) * TAU; S.retarget(cur, to, dur, now); S.next = null; }
+    if (S) { if (S.axis === axis) { const now = performance.now(), cur = S.angle(now), sv = S.speed(now);
+        const w = Math.sign(sv) === -dir ? dir * Math.max(SPIN_WMIN, w0 - Math.abs(sv) / 2) : Math.max(-SPIN_WMAX, Math.min(SPIN_WMAX, sv + dir * w0));
+        Object.assign(S, coast(cur, w, dir), { t0: now, lin: false }); S.next = null; }
       // ...but a flick across it isn't lost or kept waiting: the letter snaps quickly on round to its next facing-front point
       // (at least as fast as it was going, never slower than about a sixth of a second) and then turns the new way;
       // a later flick along its own axis cancels that
@@ -431,10 +445,10 @@
     Object.assign(cv.style, { position: "absolute", left: parseFloat(c.style.left) - pad / k + "px", top: parseFloat(c.style.top) - pad / k + "px", width: cv.width / k + "px", height: cv.height / k + "px", pointerEvents: "none" });
     const ctx = cv.getContext("2d"); draw3d(ctx, c, 0, axis, pad, pad);
     c.parentNode.insertBefore(cv, c); c.style.visibility = "hidden";
-    const st = c._spin = { axis, from: 0, to: dir * TAU * turns, t0: performance.now(), dur,
-      angle(now) { const t = Math.min(1, (now - this.t0) / this.dur), e = this.lin ? t : 1 - Math.pow(1 - t, 3); return this.from + (this.to - this.from) * e; },
+    const st = c._spin = { axis, ...coast(0, dir * w0, dir), t0: performance.now(),
+      angle(now) { const t = Math.min(1, (now - this.t0) / this.dur), e = this.lin ? t : this.ease(t); return this.from + (this.to - this.from) * e; },
       // radians per millisecond right now
-      speed(now) { const t = Math.min(1, (now - this.t0) / this.dur); return (this.to - this.from) / this.dur * (this.lin ? 1 : 3 * (1 - t) * (1 - t)); },
+      speed(now) { const t = Math.min(1, (now - this.t0) / this.dur); return (this.to - this.from) / this.dur * (this.lin ? 1 : this.slope(t)); },
       retarget(from, to, dur, now, lin) { this.from = from; this.to = to; this.dur = dur; this.t0 = now; this.lin = !!lin; } };
     // motion blur: when the letter turns more than about a sixth of a radian between frames, the frame is the average of
     // several renders spread back over the arc it just swept (like a camera shutter), so fast spins smear instead of strobing
