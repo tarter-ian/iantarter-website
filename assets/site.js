@@ -409,16 +409,13 @@
     const sp = Math.hypot(v.vx, v.vy), horiz = sp < 0.05 || Math.abs(v.vx) > Math.abs(v.vy) * 1.4; // anything near-vertical counts as up/down
     const dir = horiz ? (v.vx < 0 ? -1 : 1) : (v.vy < 0 ? 1 : -1), axis = horiz ? "y" : "x";
     const turns = sp > 2.2 ? 3 : sp > 1 ? 2 : 1, TAU = Math.PI * 2;
-    // a new sweep over a letter that is still turning takes over from where it is: the same way round, it speeds up and
-    // carries on to a new number of turns; the other way round, it first rolls quickly on to facing front, then turns the new way
+    // like a Rubik's cube, a letter that is turning one way is locked to that axis until it stops: a sweep along the same axis
+    // takes over from where it is (the same way round it speeds up and carries on, the other way it reverses); a sweep across it does nothing
     const S = c._spin;
-    if (S) { const now = performance.now(), cur = S.angle(now);
-      if (S.axis === axis) { const base = dir > 0 ? Math.ceil(cur / TAU + 1e-6) : Math.floor(cur / TAU - 1e-6);
-        S.retarget(cur, (base + dir * (turns - 1)) * TAU, 560 + 280 * turns, now); S.next = null; }
-      else { const d = Math.sign(S.to - S.from) || 1, rest = (d > 0 ? Math.ceil(cur / TAU - 1e-6) : Math.floor(cur / TAU + 1e-6)) * TAU;
-        // it keeps its current speed on to facing front (no slowing down), so the new flip follows on without a pause
-        const w = Math.max(Math.abs(S.speed(now)), 0.006), ms = Math.min(260, Math.max(30, Math.abs(rest - cur) / w));
-        S.retarget(cur, rest, ms, now, true); S.next = v; }
+    if (S) { if (S.axis === axis) { const now = performance.now(), cur = S.angle(now), base = dir > 0 ? Math.ceil(cur / TAU + 1e-6) : Math.floor(cur / TAU - 1e-6);
+        S.retarget(cur, (base + dir * (turns - 1)) * TAU, 560 + 280 * turns, now); }
+      // ...until it has all but settled facing front: then, like a cube face lined back up, it can turn the other way at once
+      else { const now = performance.now(), cur = S.angle(now); if (Math.abs(S.to - cur) < 0.35 && !S.next) { S.next = v; S.retarget(cur, S.to, 40, now); } }
       return; }
     prep(c, g, ink, fill); c._spinning = true;
     const k = c.width / parseFloat(c.style.width), F = c._face, pad = Math.ceil(Math.max(F.ox, F.oy, 4) * 2);
@@ -426,11 +423,9 @@
     Object.assign(cv.style, { position: "absolute", left: parseFloat(c.style.left) - pad / k + "px", top: parseFloat(c.style.top) - pad / k + "px", width: cv.width / k + "px", height: cv.height / k + "px", pointerEvents: "none" });
     const ctx = cv.getContext("2d"); draw3d(ctx, c, 0, axis, pad, pad);
     c.parentNode.insertBefore(cv, c); c.style.visibility = "hidden";
-    const st = c._spin = { axis, from: 0, to: dir * TAU * turns, t0: performance.now(), dur: 560 + 280 * turns, next: null,
-      angle(now) { const t = Math.min(1, (now - this.t0) / this.dur), e = this.lin ? t : 1 - Math.pow(1 - t, 3); return this.from + (this.to - this.from) * e; },
-      // radians per millisecond right now
-      speed(now) { const t = Math.min(1, (now - this.t0) / this.dur); return (this.to - this.from) / this.dur * (this.lin ? 1 : 3 * (1 - t) * (1 - t)); },
-      retarget(from, to, dur, now, lin) { this.from = from; this.to = to; this.dur = dur; this.t0 = now; this.lin = !!lin; } };
+    const st = c._spin = { axis, from: 0, to: dir * TAU * turns, t0: performance.now(), dur: 560 + 280 * turns,
+      angle(now) { const t = Math.min(1, (now - this.t0) / this.dur), e = 1 - Math.pow(1 - t, 3); return this.from + (this.to - this.from) * e; },
+      retarget(from, to, dur, now) { this.from = from; this.to = to; this.dur = dur; this.t0 = now; } };
     const frame = () => {
       const now = performance.now(), t = Math.min(1, (now - st.t0) / st.dur);
       ctx.clearRect(0, 0, cv.width, cv.height); draw3d(ctx, c, t < 1 ? st.angle(now) : 0, st.axis, pad, pad);
