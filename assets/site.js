@@ -406,20 +406,33 @@
     draw3d(cv.getContext("2d"), c, ang, axis, pad, pad); return cv;
   };
   function spin(c, v, g, ink, fill) {
-    if (c._spinning) return; c._spinning = true; prep(c, g, ink, fill);
     const sp = Math.hypot(v.vx, v.vy), horiz = sp < 0.05 || Math.abs(v.vx) > Math.abs(v.vy) * 1.4; // anything near-vertical counts as up/down
-    const dir = horiz ? (v.vx < 0 ? -1 : 1) : (v.vy < 0 ? 1 : -1);
-    const turns = sp > 2.2 ? 3 : sp > 1 ? 2 : 1, dur = 560 + 280 * turns, total = dir * Math.PI * 2 * turns;
+    const dir = horiz ? (v.vx < 0 ? -1 : 1) : (v.vy < 0 ? 1 : -1), axis = horiz ? "y" : "x";
+    const turns = sp > 2.2 ? 3 : sp > 1 ? 2 : 1, TAU = Math.PI * 2;
+    // a new sweep over a letter that is still turning takes over from where it is: the same way round, it speeds up and
+    // carries on to a new number of turns; the other way round, it first rolls quickly on to facing front, then turns the new way
+    const S = c._spin;
+    if (S) { const now = performance.now(), cur = S.angle(now);
+      if (S.axis === axis) { const base = dir > 0 ? Math.ceil(cur / TAU + 1e-6) : Math.floor(cur / TAU - 1e-6);
+        S.retarget(cur, (base + dir * (turns - 1)) * TAU, 560 + 280 * turns, now); S.next = null; }
+      else { const d = Math.sign(S.to - S.from) || 1, rest = (d > 0 ? Math.ceil(cur / TAU - 1e-6) : Math.floor(cur / TAU + 1e-6)) * TAU;
+        S.retarget(cur, rest, 120 + 260 * Math.min(1, Math.abs(rest - cur) / TAU), now); S.next = v; }
+      return; }
+    prep(c, g, ink, fill); c._spinning = true;
     const k = c.width / parseFloat(c.style.width), F = c._face, pad = Math.ceil(Math.max(F.ox, F.oy, 4) * 2);
     const cv = document.createElement("canvas"); cv.width = c.width + pad * 2; cv.height = c.height + pad * 2; cv.className = "spin-cv";
     Object.assign(cv.style, { position: "absolute", left: parseFloat(c.style.left) - pad / k + "px", top: parseFloat(c.style.top) - pad / k + "px", width: cv.width / k + "px", height: cv.height / k + "px", pointerEvents: "none" });
-    const ctx = cv.getContext("2d"); draw3d(ctx, c, 0, horiz ? "y" : "x", pad, pad);
+    const ctx = cv.getContext("2d"); draw3d(ctx, c, 0, axis, pad, pad);
     c.parentNode.insertBefore(cv, c); c.style.visibility = "hidden";
-    const t0 = performance.now();
+    const st = c._spin = { axis, from: 0, to: dir * TAU * turns, t0: performance.now(), dur: 560 + 280 * turns, next: null,
+      angle(now) { const t = Math.min(1, (now - this.t0) / this.dur), e = 1 - Math.pow(1 - t, 3); return this.from + (this.to - this.from) * e; },
+      retarget(from, to, dur, now) { this.from = from; this.to = to; this.dur = dur; this.t0 = now; } };
     const frame = () => {
-      const t = Math.min(1, (performance.now() - t0) / dur), e = 1 - Math.pow(1 - t, 3);
-      ctx.clearRect(0, 0, cv.width, cv.height); draw3d(ctx, c, t < 1 ? total * e : 0, horiz ? "y" : "x", pad, pad);
-      if (t < 1) requestAnimationFrame(frame); else { if (c._glinted) { c._glinted = false; glintLetter(c, null); } cv.remove(); c.style.visibility = ""; c._spinning = false; }
+      const now = performance.now(), t = Math.min(1, (now - st.t0) / st.dur);
+      ctx.clearRect(0, 0, cv.width, cv.height); draw3d(ctx, c, t < 1 ? st.angle(now) : 0, st.axis, pad, pad);
+      if (t < 1) { requestAnimationFrame(frame); return; }
+      if (c._glinted) { c._glinted = false; glintLetter(c, null); } cv.remove(); c.style.visibility = ""; c._spinning = false; c._spin = null;
+      if (st.next) spin(c, st.next, g, ink, fill);
     };
     requestAnimationFrame(frame);
   }
