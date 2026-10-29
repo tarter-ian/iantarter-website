@@ -9,7 +9,7 @@
   const offset = el => { const root = el.closest(".x-i").getBoundingClientRect(), r = el.getBoundingClientRect();
     return { x: r.left + r.width / 2 - el.offsetWidth / 2 - root.left, y: r.top + r.height / 2 - el.offsetHeight / 2 - root.top }; };
   function put(el, ox, oy, sp, x, y, len, ang, reuse) {
-    const sw = sp.w * len / sp.h, b = reuse || document.createElement("i"); b.className = "blade"; b.setAttribute("aria-hidden", "true");
+    const sw = sp.w * len / sp.h, b = reuse || document.createElement("i"); b._base = null; b.className = "blade"; b.setAttribute("aria-hidden", "true");
     const left = x - sw / 2, top = y - len;
     Object.assign(b.style, { width: sw + "px", height: len + "px", left: left + "px", top: top + "px", transform: `rotate(${ang}deg)` });
     b.style.setProperty("--m", `url("${new URL(sp.src, location.href).href}")`); b.style.setProperty("--sp", `url("${new URL(sp.src, location.href).href}")`);
@@ -300,10 +300,10 @@
       // steps in while the cursor is bending one of its blades, then hands back to a fresh image (on phones; see freeze)
       const cv = document.createElement("canvas"), img = new Image(); img.style.visibility = "hidden"; // shown once its picture is decoded
       cv.width = Math.ceil((x1 - x0) * DPR); cv.height = Math.ceil((y1 - y0) * DPR);
-      for (const n of [cv, img]) { n.className = "blade-strip"; n.setAttribute("aria-hidden", "true"); n.alt = "";
+      for (const n of [cv, img]) { n.className = edge === "left" || edge === "right" ? "blade-strip side" : "blade-strip"; n.setAttribute("aria-hidden", "true"); n.alt = "";
         Object.assign(n.style, { left: x0 + "px", top: y0 + "px", width: cv.width / DPR + "px", height: cv.height / DPR + "px" }); }
       el.appendChild(img);
-      const st = { el, edge, cv, img, ctx: cv.getContext("2d"), x0, y0, blades: bl, W: cv.width, H: cv.height }; bl.forEach(g => g.st = st);
+      const st = { el, edge, cv, img, ctx: cv.getContext("2d", { willReadFrequently: true }), x0, y0, blades: bl, W: cv.width, H: cv.height }; bl.forEach(g => g.st = st);
       // the fresh canvas shows at once (a relayout swaps old grass for new in the same frame) and hands over to its image
       strips.add(st); if (grow(st)) continue;
       // grass out of view is painted a little at a time once the visible grass is done
@@ -318,11 +318,87 @@
       // the name draws from its own random sequence, so whenever it gets dressed the cards' grass comes out the same
       const go = (n = 0) => { const s0 = seed; seed = 911; const ok = dressName(el); seed = s0; if (ok) growName(el); if (ok) dispatchEvent(new Event("name-dressed")); else if (n < 40) setTimeout(() => go(n + 1), 150); }; go(); });
   };
+  // the name's letters were redrawn (the scatter preview): fit the sprigs already there to the new letters
+  addEventListener("name-rebuilt", () => setTimeout(() => { const el = document.querySelector(".lay-name"); if (!el) return;
+    const s0 = seed; seed = 911; dressName(el); seed = s0; index(); }, 80));
   // Each lit piece gets its scene offset, so the shared light (baked into backgrounds in CSS) lines up across pieces.
   function relight() {
     const sc = scene(); PW = sc.offsetWidth; PH = sc.offsetHeight; sc.style.setProperty("--pw", PW + "px"); sc.style.setProperty("--ph", PH + "px");
     document.querySelectorAll(".card, .hand a").forEach(el => { const o = offset(el); el.style.setProperty("--ox", o.x + "px"); el.style.setProperty("--oy", o.y + "px"); });
   }
+  // ---------- The pieces' lighting, drawn once ----------
+  // Each card and menu card is lit by a stack of see-through layers (sun flecks, canopy shade, the page-wide falloff) blended
+  // over its paper (dir-i.css). The browser redid that blending for every bit of every card it drew, which on a fast
+  // scroll couldn't keep up (bare green showed until the cards came in). So once the layout settles, each piece's stack is
+  // blended here, with the same blend steps, into one picture that then stands in for it. Redone when the layout changes.
+  const texs = new Map(), tex = src => texs.get(src) || (texs.set(src, load(src)), texs.get(src));
+  const BAKE = { card: ["tex/canopy-shade-card.webp", "tex/linen-n.webp", 512, "normal", [246, 246, 243], true], hand: ["tex/canopy-shade-L.webp", "tex/linen-n.webp", 512, "normal", [243, 243, 239], false],
+    handR: ["tex/canopy-shade-L.webp", "tex/paper006_tile-1024.webp", 220, "multiply", [34, 33, 29], false] };
+  let bakeGen = 0;
+  async function bakeLight() {
+    const gen = ++bakeGen, dpr = Math.min(2, devicePixelRatio || 1);
+    await bakeGround(gen);
+    const els = [...document.querySelectorAll(".x-i .card, .x-i .hand a")];
+    for (const el of els) {
+      if (gen !== bakeGen) return;
+      const kind = el.matches(".hand a") ? (el.classList.contains("r") ? "handR" : "hand") : "card", [shadeSrc, paperSrc, paperW, paperBlend, bg, sheen] = BAKE[kind];
+      const W = el.offsetWidth, H = el.offsetHeight, o = { x: parseFloat(el.style.getPropertyValue("--ox")) || 0, y: parseFloat(el.style.getPropertyValue("--oy")) || 0 }, key = [W, H, o.x, o.y, PW, PH, dpr].join();
+      if (!W || !H || el._bakeKey === key) continue;
+      const [sun, shade, paper] = await Promise.all([tex("assets/tex/canopy-sun-2.webp"), tex("assets/" + shadeSrc), tex("assets/" + paperSrc)]);
+      if (!sun || !shade || !paper || gen !== bakeGen) return;
+      const cv = document.createElement("canvas"); cv.width = Math.ceil(W * dpr); cv.height = Math.ceil(H * dpr);
+      const x = cv.getContext("2d"); x.scale(dpr, dpr);
+      const tile = (img, size, px, py, mode) => { const pt = x.createPattern(img, "repeat"); pt.setTransform(new DOMMatrix().translate(px, py).scale(size / img.width));
+        x.globalCompositeOperation = mode; x.fillStyle = pt; x.fillRect(0, 0, W, H); };
+      const fill = (st, mode) => { x.globalCompositeOperation = mode; x.fillStyle = st; x.fillRect(0, 0, W, H); };
+      // bottom up, as CSS stacks them: the colour, the paper, (cards: a pale wash and a sheen), then the light
+      fill(`rgb(${bg})`, "source-over"); tile(paper, paperW, 0, 0, paperBlend);
+      if (sheen) { fill("rgba(248,248,246,.78)", "source-over");
+        const g = lin(x, 125, W, H, 0, 0); g.addColorStop(0, "rgba(255,255,255,.35)"); g.addColorStop(.4, "rgba(255,255,255,0)"); g.addColorStop(.65, "rgba(255,255,255,0)"); g.addColorStop(1, "rgba(255,255,255,.12)"); fill(g, "source-over"); }
+      { const g = lin(x, 150, PW, PH, -o.x, -o.y); g.addColorStop(0, "rgb(255,253,249)"); g.addColorStop(.55, "rgb(246,246,239)"); g.addColorStop(1, "rgb(232,234,223)"); fill(g, "multiply"); }
+      // (CSS blends gradient colours premultiplied: fading from clear white to the shade is fading the shade's own colour in)
+      { x.save(); x.translate(-o.x + PW * .25, -o.y + PH * .15); x.scale(PW * 1.4, PH); const g = x.createRadialGradient(0, 0, 0, 0, 0, 1);
+        g.addColorStop(.55, "rgba(40,48,30,0)"); g.addColorStop(1, "rgba(40,48,30,.27)"); x.globalCompositeOperation = "multiply"; x.fillStyle = g;
+        x.fillRect((o.x - PW * .25) / (PW * 1.4), (o.y - PH * .15) / PH, W / (PW * 1.4), H / PH); x.restore(); }
+      tile(shade, 1600, -180 - o.x, -120 - o.y, "multiply"); tile(sun, 1600, -180 - o.x, -120 - o.y, "soft-light");
+      const blob = await new Promise(r => cv.toBlob(r)); cv.width = 0; if (!blob || gen !== bakeGen) return;
+      const url = URL.createObjectURL(blob), im = new Image(); im.src = url; await im.decode().catch(() => {});
+      if (gen !== bakeGen) { URL.revokeObjectURL(url); return; }
+      const old = el._bakeUrl; el._bakeUrl = url; el._bakeKey = key;
+      Object.assign(el.style, { backgroundImage: `url("${url}")`, backgroundSize: "100% 100%", backgroundPosition: "0 0", backgroundRepeat: "no-repeat", backgroundBlendMode: "normal", backgroundOrigin: "border-box" });
+      if (old) URL.revokeObjectURL(old);
+      await new Promise(r => (window.requestIdleCallback || setTimeout)(r));
+    }
+  }
+  // The ground: the canopy shade and the page-wide falloff only darken (multiply), so they are folded into one soft map
+  // for the whole page (drawn at half size; it has no fine detail), and the moss gets its 20% shade mixed in once. The
+  // ground is then the moss, that map and the sun flecks: three layers to draw instead of seven.
+  async function bakeGround(gen) {
+    const sc = scene(), key = [PW, PH].join(); if (!PW || !PH || sc._bakeKey === key) return;
+    const [shade, moss] = await Promise.all([tex("assets/tex/canopy-shade-L.webp"), tex("assets/tex/moss-quiet-2k.webp")]); if (!shade || !moss || gen !== bakeGen) return;
+    const k = .5, cv = document.createElement("canvas"); cv.width = Math.ceil(PW * k); cv.height = Math.ceil(PH * k); const x = cv.getContext("2d"); x.scale(k, k);
+    const fill = (st, mode) => { x.globalCompositeOperation = mode; x.fillStyle = st; x.fillRect(0, 0, PW, PH); };
+    fill("#fff", "source-over");
+    { const g = lin(x, 150, PW, PH, 0, 0); g.addColorStop(0, "rgb(255,253,249)"); g.addColorStop(.55, "rgb(246,246,239)"); g.addColorStop(1, "rgb(232,234,223)"); fill(g, "multiply"); }
+    { x.save(); x.translate(PW * .25, PH * .15); x.scale(PW * 1.4, PH); const g = x.createRadialGradient(0, 0, 0, 0, 0, 1);
+      g.addColorStop(.55, "rgba(40,48,30,0)"); g.addColorStop(1, "rgba(40,48,30,.27)"); x.globalCompositeOperation = "multiply"; x.fillStyle = g; x.fillRect(-.25 / 1.4, -.15, 1 / 1.4, 1); x.restore(); }
+    { const pt = x.createPattern(shade, "repeat"); pt.setTransform(new DOMMatrix().translate(-180, -120).scale(1600 / shade.width)); fill(pt, "multiply"); }
+    const m = document.createElement("canvas"); m.width = moss.width; m.height = moss.height; const mx = m.getContext("2d"); mx.drawImage(moss, 0, 0); mx.fillStyle = "rgba(22,28,12,.2)"; mx.fillRect(0, 0, m.width, m.height);
+    const [b1, b2] = await Promise.all([new Promise(r => cv.toBlob(r)), sc._mossUrl ? null : new Promise(r => m.toBlob(r, "image/webp", 1))]); cv.width = m.width = 0;
+    if (!b1 || gen !== bakeGen) return;
+    const u1 = URL.createObjectURL(b1), u2 = sc._mossUrl || URL.createObjectURL(b2);
+    await Promise.all([u1, u2].map(u => { const im = new Image(); im.src = u; return im.decode().catch(() => {}); })); if (gen !== bakeGen) return;
+    const old = sc._lightUrl; sc._lightUrl = u1; sc._mossUrl = u2; sc._bakeKey = key;
+    Object.assign(sc.style, { backgroundImage: `url("assets/tex/canopy-sun-2.webp"), url("${u1}"), url("${u2}")`, backgroundSize: `1600px, ${PW}px ${PH}px, 900px`,
+      backgroundPosition: "-180px -120px, 0 0, 0 0", backgroundRepeat: "repeat, no-repeat, repeat", backgroundBlendMode: "soft-light, multiply, normal" });
+    if (old) URL.revokeObjectURL(old);
+  }
+  // a CSS linear-gradient at angle a over a w x h box whose top-left is at (bx, by)
+  function lin(x, a, w, h, bx, by) {
+    const r = a * Math.PI / 180, dx = Math.sin(r), dy = -Math.cos(r), L = Math.abs(w * dx) + Math.abs(h * dy), cx = bx + w / 2, cy = by + h / 2;
+    return x.createLinearGradient(cx - dx * L / 2, cy - dy * L / 2, cx + dx * L / 2, cy + dy * L / 2);
+  }
+  addEventListener("scene-layout", () => setTimeout(bakeLight, 300));
   let sizes = "";
   function relayout() {
     const now = [...document.querySelectorAll(".x-i, .lay")].map(e => e.offsetWidth + "x" + e.offsetHeight).join() + innerWidth;
@@ -393,20 +469,39 @@
       st.ft = setTimeout(() => { if (!st.blades.some(b => b.moving)) { st.live = false; freeze(st); } }, 1500); });
     if (active.size) frame.raf = requestAnimationFrame(frame);
   }
-  // Scrolling sends a light gust through the grass in view: a quick scroll bends the blades a few degrees, the gust reaching
-  // them as a wave in the direction of the scroll, then they settle with the same wobble. At most one gust a second.
-  let lastY = scrollY, lastT = performance.now(), gustAt = 0;
+  // ---------- Scrolling pulls the grass ----------
+  // While the page scrolls, the grass in view (the sprigs on the pieces, the open ground's moss and the leaves on the name)
+  // leans the way the page moves (up when scrolling down), more for a faster scroll, and when the scrolling stops it springs back with a
+  // small overshoot. The lean follows a spring, so it never jumps, whatever the scroll does.
+  const wind = { w: 0, v: 0, aim: 0, y: scrollY, t: 0, ev: 0, raf: 0 }, windSt = new Set();
+  let windW = 0;
   addEventListener("scroll", () => {
-    const now = performance.now(), dy = scrollY - lastY, dt = Math.max(16, now - lastT); lastY = scrollY; lastT = now;
-    if (reduce() || now - gustAt < 1000 || !grid.size) return;
-    const v = dy / dt; if (Math.abs(v) < .6) return; // px per ms: only a real flick of the page, not a nudge
-    gustAt = now; const dir = Math.sign(v), amt = Math.min(6, 2 + Math.abs(v) * 1.5), top = scrollY - 100, bot = scrollY + innerHeight + 100;
-    for (const st of strips) { const r = st.el.getBoundingClientRect(); if (r.bottom < -100 || r.top > innerHeight + 100) continue;
-      for (const g of st.blades) { if (g.fy < top || g.fy > bot) continue;
-        kick(g, amt * Math.sin((g.pang || 0) * Math.PI / 180) * dir, now);
-        g.t0 = now + (dir > 0 ? bot - g.fy : g.fy - top) * .35; } }
-    dispatchEvent(new CustomEvent("grass-gust", { detail: { amt: amt / 6, dir } }));
+    if (reduce()) return; const now = performance.now(), dy = scrollY - wind.y, dt = Math.max(8, now - (wind.ev || now - 16)); wind.y = scrollY;
+    const v = dy / dt, a = Math.sign(v) * Math.min(1, Math.sqrt(Math.abs(v) / 3)); // px per ms, eased so a slow scroll still shows
+    wind.aim = wind.ev && now - wind.ev < 100 ? wind.aim * .5 + a * .5 : a; wind.ev = now;
+    if (!wind.raf) { wind.t = now; wind.raf = requestAnimationFrame(windFrame); }
   }, { passive: true });
+  function windFrame() {
+    const now = performance.now(), dt = Math.min(.034, (now - wind.t) / 1000); wind.t = now;
+    if (now - wind.ev > 90) wind.aim = 0; // scrolling has stopped
+    // a spring: the lean builds over about a fifth of a second and settles back with one small overshoot
+    wind.v += (140 * (wind.aim - wind.w) - 15 * wind.v) * dt; wind.w += wind.v * dt;
+    const calm = !wind.aim && Math.abs(wind.w) < .003 && Math.abs(wind.v) < .03; if (calm) wind.w = wind.v = 0;
+    windW = -wind.w; // the grass trails the page: scrolling down (the page moving up) leans it up
+    // the sprigs along a piece's sides lie across the pull, so they lean with it: their strip is skewed about the line their
+    // roots are on (a transform only, nothing is repainted); sprigs along the top and bottom point along the pull and hardly bend
+    // (every position is read before anything is moved, so the page is laid out once per frame, not once per strip)
+    const sides = [...strips].filter(st => st.edge === "left" || st.edge === "right"), seen = calm ? null : sides.map(st => inView(st.el)), wd = sides.map(st => windSt.has(st) || calm ? 0 : st.el.offsetWidth);
+    dispatchEvent(new CustomEvent("grass-wind", { detail: windW }));
+    for (const [i, st] of sides.entries()) {
+      const on = !calm && seen[i];
+      if (on) { if (!windSt.has(st)) { windSt.add(st); const ox = (st.edge === "left" ? 0 : wd[i]) - st.x0;
+          for (const n of [st.img, st.cv]) n.style.transformOrigin = `${ox}px 50%`; }
+        const k = (st.edge === "left" ? 1 : -1) * windW * 8, tf = `skewY(${k.toFixed(2)}deg)`; st.img.style.transform = st.cv.style.transform = tf; }
+      else if (windSt.has(st)) { windSt.delete(st); st.img.style.transform = st.cv.style.transform = ""; } }
+    if (SW && !swayFrame.raf) swayFrame.raf = requestAnimationFrame(swayFrame);
+    wind.raf = calm ? 0 : requestAnimationFrame(windFrame);
+  }
   let last = null, queued = null;
   addEventListener("pointermove", e => {
     if (e.pointerType === "touch" || reduce()) return;
@@ -451,7 +546,9 @@
   // The stirred strands are lit with the very same steps the CSS uses for the ground (dir-i.css, .x-i background): a 20%
   // shade, the page-wide falloff (a 150deg gradient and a corner-to-corner vignette, multiplied), the canopy shade
   // (multiplied) and the sun flecks (soft-light), worked out per pixel. An approximation went visibly off in strong sun.
-  const FS = `precision highp float;varying vec2 v;uniform sampler2D T,M,H,B,U;uniform vec4 K[${MAXK}];uniform vec2 S,O,P;
+  // The strands move in whole screen pixels: sampling the moss between pixels blurred it, and with the whole window
+  // leaning on a scroll that read as the ground going soft.
+  const FS = `precision highp float;varying vec2 v;uniform sampler2D T,M,H,B,U,L;uniform vec4 K[${MAXK}];uniform vec2 S,O,P;uniform vec3 Wd;uniform float NK,R;
     vec3 soft(vec3 b,vec3 s){vec3 d=mix(((16.*b-12.)*b+4.)*b,sqrt(b),step(.25,b));
       return mix(b-(1.-2.*s)*b*(1.-b),b+(2.*s-1.)*(d-b),step(.5,s));}
     vec3 lit(vec3 c,vec2 g){
@@ -462,9 +559,10 @@
       vec2 cu=(g+vec2(180.,120.))/1600.;vec4 h=texture2D(H,cu);c=mix(c,c*h.rgb,h.a);
       vec4 u=texture2D(U,cu);return mix(c,soft(c,u.rgb),u.a);}
     void main(){vec2 p=vec2(v.x,1.-v.y)*S;vec2 d=vec2(0.);
-      for(int i=0;i<${MAXK};i++){vec4 k=K[i];float r=length(p-k.xy)/${SR}.;if(r<1.){float f=1.-r;d+=k.zw*f*f*(3.-2.*f);}}
+      for(int i=0;i<${MAXK};i++){if(float(i)>=NK)break;vec4 k=K[i];float r=length(p-k.xy)/${SR}.;if(r<1.){float f=1.-r;d+=k.zw*f*f*(3.-2.*f);}}
+      vec2 gp=O+p;d+=Wd.xy*(.7+.3*sin(dot(gp,vec2(.011,.006))+Wd.z));d*=1.-smoothstep(.05,.55,texture2D(L,gp/P).a);
       vec4 m0=texture2D(M,(O+p)/900.);float a=(m0.g-.5)*1.2,c=cos(a),s=sin(a);d=vec2(c*d.x-s*d.y,s*d.x+c*d.y)*(.45+.55*m0.g);
-      vec2 q=p-d,uq=(O+q)/900.,up=(O+p)/900.;float al=clamp(length(d)*12.,0.,1.),mp=texture2D(M,up).r,mq=texture2D(M,uq).r;
+      vec2 q=p-floor(d*R+.5)/R,uq=(O+q)/900.,up=(O+p)/900.;float al=clamp(length(d)*12.,0.,1.),mp=texture2D(M,up).r,mq=texture2D(M,uq).r;
       vec3 under=mix(texture2D(T,up).rgb,texture2D(B,up).rgb,clamp((mp-mq)/(1.001-mq),0.,1.));
       vec3 col=lit(mix(under,texture2D(T,uq).rgb,mq),O+p);al*=smoothstep(.08,.35,max(mp,mq));gl_FragColor=vec4(col*al,al);}`;
   // the canopy maps are 1600px; WebGL1 only tiles power-of-two textures, so they go up as 1024px copies (they're soft)
@@ -484,18 +582,41 @@
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img); gl.generateMipmap(gl.TEXTURE_2D); if (img.getContext) img.width = 0; });
-    ["T", "M", "H", "B", "U"].forEach((n, u) => gl.uniform1i(gl.getUniformLocation(pr, n), u));
+    ["T", "M", "H", "B", "U", "L"].forEach((n, u) => gl.uniform1i(gl.getUniformLocation(pr, n), u));
+    gl.activeTexture(gl.TEXTURE5); const lt = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, lt);
+    for (const [k, v] of [[gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE], [gl.TEXTURE_MIN_FILTER, gl.LINEAR], [gl.TEXTURE_MAG_FILTER, gl.LINEAR]]) gl.texParameteri(gl.TEXTURE_2D, k, v);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(4));
     scene().prepend(cv);
-    return { cv, gl, uK: gl.getUniformLocation(pr, "K"), uO: gl.getUniformLocation(pr, "O"), uS: gl.getUniformLocation(pr, "S"), uP: gl.getUniformLocation(pr, "P"), K: new Float32Array(MAXK * 4), at: null };
+    return { cv, gl, uK: gl.getUniformLocation(pr, "K"), uO: gl.getUniformLocation(pr, "O"), uS: gl.getUniformLocation(pr, "S"), uP: gl.getUniformLocation(pr, "P"), uW: gl.getUniformLocation(pr, "Wd"), uN: gl.getUniformLocation(pr, "NK"), uR: gl.getUniformLocation(pr, "R"), K: new Float32Array(MAXK * 4), at: null };
   }
   // (the pieces' shadows are not in the light map: the layer lies under the pieces, so their own CSS shadows already fall
   // on the stirred strands, and adding them here darkened strands near a card twice)
-  addEventListener("scene-layout", () => { if (SW) SW.at = null; });
+  addEventListener("scene-layout", () => { if (SW) { SW.at = null; setTimeout(pinUnderLitter, 0); } });
+  // Moss lying under a fallen leaf or twig is held down by it: a soft map of where the litter lies (a quarter of the page's
+  // size, its edges feathered) stops the strands moving under a piece and just around it, so none slide under or out.
+  function pinUnderLitter(tries = 0) {
+    if (!SW || !PW || !PH) return; const k = .25, sc = scene().getBoundingClientRect();
+    const a = document.createElement("canvas"); a.width = Math.ceil(PW * k); a.height = Math.ceil(PH * k); const x = a.getContext("2d");
+    let waiting = false;
+    for (const img of document.querySelectorAll(".litter-ground .litter, .litter-under .litter")) {
+      if (!img.complete || !img.naturalWidth) { waiting = true; continue; }
+      const c = img.offsetParent && img.offsetParent.getBoundingClientRect(); if (!c) continue;
+      const w = img.offsetWidth, h = img.offsetHeight, l = img.offsetLeft + c.left - sc.left, t = img.offsetTop + c.top - sc.top;
+      const ang = parseFloat((img.style.transform.match(/-?[\d.]+/) || [0])[0]) * Math.PI / 180;
+      x.save(); x.scale(k, k); x.translate(l + w / 2, t + h / 2); x.rotate(ang); x.drawImage(img, -w / 2, -h / 2, w, h); x.restore();
+    }
+    const b = document.createElement("canvas"); b.width = a.width; b.height = a.height; const y = b.getContext("2d");
+    y.filter = "blur(2.5px)"; y.drawImage(a, 0, 0); y.drawImage(a, 0, 0); a.width = 0; // drawn twice: the pin reaches a little past each piece's edge
+    const { gl } = SW; gl.activeTexture(gl.TEXTURE5); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, b); b.width = 0;
+    if (waiting && tries < 10) setTimeout(() => pinUnderLitter(tries + 1), 600);
+  }
   // fit the layer to the window where it is now: size, place, and the light map for that stretch of the ground
   function placeSway() {
-    const rt = sceneRect(), W = innerWidth, H = innerHeight, x = Math.round(scrollX - rt.x), y = Math.round(scrollY - rt.y), key = [x, y, W, H].join();
+    // it lies in the page and reaches a little past the window's top and bottom: the page scrolls ahead of the drawing,
+    // and this way what was drawn stays on the moss it belongs to, with no edge scrolling into view
+    const M = 200, rt = sceneRect(), W = innerWidth, H = Math.min(PH, innerHeight + 2 * M), x = Math.round(scrollX - rt.x), y = Math.max(0, Math.min(PH - H, Math.round(scrollY - rt.y - M))), sd = DPR, key = [x, y, W, H, sd].join();
     if (SW.at === key) return; SW.at = key;
-    const { cv, gl } = SW, cw = Math.round(W * DPR), ch = Math.round(H * DPR);
+    const { cv, gl } = SW, cw = Math.round(W * sd), ch = Math.round(H * sd); SW.d = sd;
     if (cv.width !== cw || cv.height !== ch) { cv.width = cw; cv.height = ch; cv.style.width = W + "px"; cv.style.height = H + "px"; }
     cv.style.left = x + "px"; cv.style.top = y + "px";
     gl.uniform2f(SW.uP, PW, PH); gl.uniform2f(SW.uO, x, y); gl.uniform2f(SW.uS, W, H); SW.x = x; SW.y = y;
@@ -503,22 +624,25 @@
   function swayFrame() {
     swayFrame.raf = 0; const now = performance.now();
     kicks = kicks.filter(k => now - k.t0 < k.dur);
-    if (!SW || !kicks.length) { if (SW) SW.cv.style.display = "none"; return; }
+    if (!SW || (!kicks.length && !windW)) { if (SW) SW.cv.style.display = "none"; return; }
     placeSway();
     const { gl, K, cv } = SW; K.fill(0);
     let l = Infinity, t = Infinity, r = -Infinity, b = -Infinity;
-    kicks.slice(-MAXK).forEach((k, i) => { const w = k.amt * wob((now - k.t0) / k.dur), x = k.x - SW.x, y = k.y - SW.y; K.set([x, y, k.dx * w, k.dy * w], i * 4);
+    const ks = kicks.slice(-MAXK); ks.forEach((k, i) => { const w = k.amt * wob((now - k.t0) / k.dur), x = k.x - SW.x, y = k.y - SW.y; K.set([x, y, k.dx * w, k.dy * w], i * 4);
       l = Math.min(l, x); t = Math.min(t, y); r = Math.max(r, x); b = Math.max(b, y); });
+    // the scroll's pull moves every strand in view, so then the whole window is drawn
+    if (windW) { l = t = -1e4; r = b = 1e4; }
+    gl.uniform3f(SW.uW, 0, windW * 3.2, now / 900); gl.uniform1f(SW.uN, ks.length); gl.uniform1f(SW.uR, SW.d || DPR);
     gl.viewport(0, 0, cv.width, cv.height); gl.disable(gl.SCISSOR_TEST); gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
     // only the box around the stirring is drawn (GL counts rows from the bottom)
-    const m = SR + 8, X = Math.max(0, Math.floor((l - m) * DPR)), Y = Math.max(0, Math.floor((cv.height / DPR - b - m) * DPR));
-    const X1 = Math.min(cv.width, Math.ceil((r + m) * DPR)), Y1 = Math.min(cv.height, Math.ceil((cv.height / DPR - t + m) * DPR));
+    const D = SW.d, m = SR + 8, X = Math.max(0, Math.floor((l - m) * D)), Y = Math.max(0, Math.floor((cv.height / D - b - m) * D));
+    const X1 = Math.min(cv.width, Math.ceil((r + m) * D)), Y1 = Math.min(cv.height, Math.ceil((cv.height / D - t + m) * D));
     if (X1 > X && Y1 > Y) { gl.enable(gl.SCISSOR_TEST); gl.scissor(X, Y, X1 - X, Y1 - Y); gl.uniform4fv(SW.uK, K); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); }
     if (cv.style.display === "none") cv.style.display = "";
     swayFrame.raf = requestAnimationFrame(swayFrame);
   }
   // the layer (and its one-time texture uploads) is made while the page is idle, not on the first sweep
-  (window.requestIdleCallback || setTimeout)(() => { if (reduce() || matchMedia("(hover: none)").matches) return; SW = makeSway(); });
+  (window.requestIdleCallback || setTimeout)(() => { if (reduce() || matchMedia("(hover: none)").matches) return; SW = makeSway(); pinUnderLitter(); });
   let lastSway = null;
   function sway(p, vx, vy, sp, now) {
     if (!SW || (lastSway && Math.hypot(p.x - lastSway.x, p.y - lastSway.y) < 20)) return; lastSway = p;

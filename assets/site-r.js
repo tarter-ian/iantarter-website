@@ -68,6 +68,10 @@
   // Draws the text to a canvas, finds the empty areas enclosed by exactly one ring of ink
   // (the letter faces, not the counters inside them), and paints those behind the real text.
   const fillGen = new WeakMap();
+  // per letter: turn (degrees), sideways and up/down nudge (in font sizes), at scatter 1
+  const SCATTER = [[-4, 0, .03], [3, .01, -.05], [-2, -.01, .06], [5, .015, -.02], [-3, 0, .05], [2, .01, -.06], [-5, -.015, .04], [3, .01, -.03], [-2, 0, .05]];
+  const pref = (k, d) => { let v = d; try { const s = localStorage.getItem(k); if (s != null) v = +s; } catch (e) {} return isFinite(v) ? v : d; };
+  const scatterAmt = () => pref("it-scatter", 1), spreadAmt = () => pref("it-spread2", 1.75);
   async function fillHollow(el, color, altColor) {
     if (!el) return;
     const gen = (fillGen.get(el) || 0) + 1; fillGen.set(el, gen);
@@ -86,32 +90,56 @@
     const box = el.getBoundingClientRect(); if (!box.width || !box.height) return;
     // redrawn only when something it depends on changed: rebuilding swapped every letter (and the leaves around the name)
     // for new ones, which some browsers showed as a blink whenever the page's size was re-measured
-    const key = [box.width, box.height, (box.left * (window.devicePixelRatio || 1)) % 1, window.devicePixelRatio, color, altColor, cs0.font, el.textContent].join("|");
+    // the name's letters lie a little out of line, as if dropped in the moss one by one: each one turned a few degrees and
+    // nudged up or down (in order, so it still reads at a glance and the hidden words still work)
+    const SC = el === nameEl ? scatterAmt() : 0, SP = el === nameEl ? spreadAmt() : 0;
+    const key = [SC, SP, box.width, box.height, (box.left * (window.devicePixelRatio || 1)) % 1, window.devicePixelRatio, color, altColor, cs0.font, el.textContent].join("|");
     if (old && old.isConnected && el._fillKey === key) return; el._fillKey = key;
     // draw at a whole multiple of the screen's pixel density and snap to its pixel grid, so the image lands crisp
     const dpr = window.devicePixelRatio || 1, S = dpr * Math.max(1, Math.ceil(Math.max(2, 100 / (parseFloat(cs0.fontSize) || 20)) / dpr));
     const ox = box.left - Math.floor(box.left * dpr) / dpr, oy = box.top - Math.floor(box.top * dpr) / dpr;
-    const Wc = box.width + ox + 1, Hc = box.height + oy + 1;
+    let Wc = box.width + ox + 1; const Hc = box.height + oy + 1;
     // each letter gets its own little canvas, so a single letter can hop on hover
     const glyphs = []; const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT); const range = document.createRange(); let n;
     const mctx = document.createElement("canvas").getContext("2d");
+    let ws = false; // a space came before the next letter (each letter can be its own span)
     while ((n = walker.nextNode())) {
       const cs = getComputedStyle(n.parentElement); const font = `${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`; mctx.font = font;
       const asc = mctx.measureText("Hg").fontBoundingBoxAscent, fs = parseFloat(cs.fontSize) || 20;
       for (let i = 0; i < n.data.length; i++) {
-        let ch = n.data[i]; if (!ch.trim()) continue;
+        let ch = n.data[i]; if (!ch.trim()) { ws = true; continue; }
         if (cs.textTransform === "uppercase") ch = ch.toUpperCase(); else if (cs.textTransform === "lowercase") ch = ch.toLowerCase();
         range.setStart(n, i); range.setEnd(n, i + 1); const r = range.getClientRects()[0]; if (!r) continue;
         const l = r.left - box.left + ox, t = r.top - box.top + oy;
-        glyphs.push({ ch, font, fs, x: l, y: t + asc, l, t, w: r.width, h: r.height });
+        const m = mctx.measureText(ch); // the ink's own left and right, for even gaps between letters
+        glyphs.push({ ch, font, fs, x: l, y: t + asc, l, t, w: r.width, h: r.height, ws: ws && glyphs.length > 0, il: l - m.actualBoundingBoxLeft, ir: l + m.actualBoundingBoxRight }); ws = false;
       }
     }
     const [R, G, B] = hexToRgb(color); const [IR, IG, IB] = (inkCol.match(/[\d.]+/g) || [0, 0, 0]).map(Number);
     const wrap = document.createElement("div"); wrap._glyphs = glyphs; wrap._ink = inkCol; wrap._fill = color;
+    // spread: the letters move apart so the space between one letter's ink and the next is the same all along (the gap
+    // between the words stays as much wider as the font made it), and only as far as the room the name has: up to the
+    // edge of its row, or of the photo card beside it
+    const gaps = glyphs.map((g, i) => i ? g.il - glyphs[i - 1].ir : 0), inner = gaps.filter((d, i) => i && !glyphs[i].ws);
+    const mean = inner.length ? inner.reduce((t, d) => t + d, 0) / inner.length : 0, word = glyphs.filter(g => g.ws).map(g => gaps[glyphs.indexOf(g)]);
+    const wordGap = word.length ? word.reduce((t, d) => t + d, 0) / word.length : 0, even = Math.min(1, SP);
+    let add = SP && glyphs.length ? SP * .05 * glyphs[0].fs : 0;
+    const target = i => (glyphs[i].ws ? gaps[i] + (wordGap - gaps[i]) * even : gaps[i] + (mean - gaps[i]) * even) + add;
+    if (SP && glyphs.length > 1) { const row = el.closest("section") || el.parentElement, rr = row.getBoundingClientRect(); let right = Math.min(rr.right, innerWidth - 16);
+      const end = box.left - ox + Math.max(...glyphs.map(g => g.l + g.w)); // where the last letter ends now
+      for (const c of row.querySelectorAll(".card")) { const cr = c.getBoundingClientRect(); if (cr.left >= end && cr.top < box.bottom && cr.bottom > box.top) right = Math.min(right, cr.left - 24); }
+      let grow = 0; for (let i = 1; i < glyphs.length; i++) grow += target(i) - gaps[i];
+      if (grow > right - end) add = Math.max(0, add - (grow - (right - end)) / (glyphs.length - 1)); }
+    let shift = 0;
+    glyphs.forEach((g, i) => { const j = SCATTER[i % SCATTER.length];
+      if (i && SP) shift += target(i) - gaps[i];
+      const dx = shift, dy = SC * j[2] * g.fs;
+      g.l += dx; g.x += dx; g.t += dy; g.y += dy; g.rot = SC * j[0] * Math.PI / 180; g.dx = g.dy = 0;
+      Wc = Math.max(Wc, g.l + g.w + g.fs * .3 + 1); });
     for (const g of glyphs) {
-      const mg = g.fs * 0.3, snap = v => Math.floor(v * dpr) / dpr;
-      const left = Math.max(0, snap(g.l - mg)), top = Math.max(0, snap(g.t - mg * 0.4));
-      const cw = Math.min(Wc, g.l + g.w + mg) - left, chh = Math.min(Hc, g.t + g.h + mg * 0.4) - top;
+      const mg = g.fs * 0.3, my = mg * 0.4 + Math.abs(g.dy) + Math.abs(g.rot) * g.w * .6, snap = v => Math.floor(v * dpr) / dpr;
+      const left = SC ? snap(g.l - mg + Math.min(0, g.dx)) : Math.max(0, snap(g.l - mg)), top = SC ? snap(g.t - my) : Math.max(0, snap(g.t - mg * 0.4));
+      const cw = (SC ? g.l + g.w + mg + Math.max(0, g.dx) : Math.min(Wc, g.l + g.w + mg)) - left, chh = (SC ? g.t + g.h + my : Math.min(Hc, g.t + g.h + mg * 0.4)) - top;
       const piece = paintGlyph(g, left, top, cw, chh, [R, G, B]); if (el === nameEl) solidify(piece, [R, G, B]);
       Object.assign(piece.style, { left: left + "px", top: top + "px", width: piece.width / dpr + "px", height: piece.height / dpr + "px" });
       wrap.appendChild(piece); g.base = piece;
@@ -150,6 +178,7 @@
     const W = Math.ceil(cw * S), H = Math.ceil(chh * S);
     const cv = document.createElement("canvas"); cv.width = W; cv.height = H;
     const ctx = cv.getContext("2d", { willReadFrequently: true }); ctx.scale(S, S); ctx.translate(-left, -top); ctx.fillStyle = "#000";
+    if (g.rot || g.dx || g.dy) { const cx = g.l + g.w / 2, cy = g.t + g.h * .55; ctx.translate(cx + g.dx, cy + g.dy); ctx.rotate(g.rot); ctx.translate(-cx, -cy); }
     ctx.font = g.font; ctx.fillText(g.ch, g.x, g.y);
     const img = ctx.getImageData(0, 0, W, H), a = img.data, N = W * H;
     const ink = new Uint8Array(N); for (let i = 0; i < N; i++) ink[i] = a[i * 4 + 3] > 40 ? 1 : 0;
@@ -214,7 +243,7 @@
       cv2._onPrepped = () => requestAnimationFrame(() => { old.style.transition = "opacity 1.2s ease-in-out"; old.style.opacity = "0"; setTimeout(gone, 1300); });
       setTimeout(gone, 8000); }
     else if (old) old.replaceWith(cv2); else host.insertBefore(cv2, el);
-    el._fillCv = cv2; el.classList.add("has-cv"); if (el === nameEl && typeof prepSpins === "function") prepSpins(cv2); if (el === nameEl && typeof mountTiles === "function") mountTiles(cv2); if (typeof queueGrain === "function") queueGrain();
+    el._fillCv = cv2; el.classList.add("has-cv"); if (el === nameEl && old && old !== cv2) dispatchEvent(new Event("name-rebuilt")); if (el === nameEl && typeof prepSpins === "function") prepSpins(cv2); if (el === nameEl && typeof mountTiles === "function") mountTiles(cv2); if (typeof queueGrain === "function") queueGrain();
   }
   // ---------- Small touches ----------
   // Name letters hop when the pointer reaches them
@@ -562,23 +591,26 @@
     const f = (p - SW_AT[i - 1]) / (SW_AT[i] - SW_AT[i - 1]), s = i === 1 ? f : 1;
     return (SW_V[i - 1] + (SW_V[i] - SW_V[i - 1]) * f) * w.amp + w.c0 * (1 - s);
   }
+  let windWas = 0;
   function swayFrame() {
-    const now = performance.now();
-    for (const [b, w] of sways) {
-      if (now >= w.t0 && w.prev) { w.c0 = w.d; w.prev = null; }
-      if (now - w.t0 >= w.dur) { b.style.transform = w.base; sways.delete(b); continue; }
-      const d = w.d = swayD(w, now);
-      b.style.transform = `${w.base} rotate(${d.toFixed(2)}deg)`;
-    }
-    swayFrame.raf = sways.size ? requestAnimationFrame(swayFrame) : 0;
+    const now = performance.now(), lay = nameEl.closest(".lay"), blow = nameWind || windWas; windWas = nameWind;
+    // with the wind, every leaf leans (its sideways share of the pull, a bit different per leaf); sways ride on top
+    const leaves = blow && lay && lay._grown ? lay.querySelectorAll(":scope > .blade") : [...sways.keys()];
+    for (const b of leaves) { const w = sways.get(b); if (b._base == null) b._base = w ? w.base : b.style.transform;
+      let d = 0;
+      if (w) { if (now >= w.t0 && w.prev) { w.c0 = w.d; w.prev = null; }
+        if (now - w.t0 >= w.dur) sways.delete(b); else d = w.d = swayD(w, now); }
+      if (nameWind) { if (b._wk == null) { b._wk = .6 + Math.random() * .6; b._wa = Math.sin(parseFloat((b._base.match(/-?[\d.]+/) || [0])[0]) * Math.PI / 180); } d += nameWind * 5 * b._wk * b._wa; }
+      b.style.transform = d ? `${b._base} rotate(${d.toFixed(2)}deg)` : b._base; }
+    swayFrame.raf = sways.size || nameWind ? requestAnimationFrame(swayFrame) : 0;
   }
   const swayNext = (b, amp, t0, dur) => { const prev = sways.get(b);
-    sways.set(b, { base: prev ? prev.base : b.style.transform, amp, t0, dur, c0: prev ? prev.d || 0 : 0, prev: prev || null, d: prev ? prev.d || 0 : 0 }); };
-  // a gust from scrolling sways all the name's leaves a little, a moment after the grass below
-  addEventListener("grass-gust", e => { const lay = nameEl.closest(".lay"); if (!lay || !lay._grown || reduceMotion()) return;
-    const r = lay.getBoundingClientRect(); if (r.bottom < 0 || r.top > innerHeight) return; const now = performance.now();
-    lay.querySelectorAll(":scope > .blade").forEach(b => swayNext(b, e.detail.dir * e.detail.amt * (.25 + Math.random() * .2), now + 120 + Math.random() * 160, 1100 + Math.random() * 400));
-    if (!swayFrame.raf) swayFrame.raf = requestAnimationFrame(swayFrame); });
+    sways.set(b, { base: prev ? prev.base : b._base != null ? b._base : b.style.transform, amp, t0, dur, c0: prev ? prev.d || 0 : 0, prev: prev || null, d: prev ? prev.d || 0 : 0 }); };
+  // scrolling pulls the name's leaves along with the rest of the grass (see blades.js)
+  let nameWind = 0;
+  addEventListener("grass-wind", e => { const lay = nameEl.closest(".lay"), r = lay && lay.getBoundingClientRect(), seen = r && r.bottom > 0 && r.top < innerHeight;
+    // only while the name is on screen: moving its leaves makes the browser redraw each one
+    nameWind = reduceMotion() || !seen ? 0 : e.detail; if (!swayFrame.raf && (nameWind || windWas)) swayFrame.raf = requestAnimationFrame(swayFrame); });
   function swayAt(c, s, force) {
     const lay = nameEl.closest(".lay"); if (!lay || !lay._grown) return; // still growing in: its own loop is moving them
     const r = c.getBoundingClientRect(), now = performance.now();
@@ -632,7 +664,7 @@
     // shadows-only copy (S), so the letter can be left out without cutting into the shadow under its edges
     { const mk = () => { const n = document.createElement("canvas"); n.width = sh.width; n.height = sh.height; return n; };
       let I = mk(), S = mk(); I.getContext("2d").drawImage(c, P * k, P * k);
-      for (const [dx, dy, b, col] of [[1, 1, 0, "rgba(6,8,2,.6)"], [4, 6, 3, "rgba(6,8,2,.75)"], [14, 20, 16, "rgba(6,8,2,.5)"]]) {
+      for (const [dx, dy, b, col] of [[.5, .8, .5, "rgba(6,8,2,.7)"], [1.5, 2.5, 2, "rgba(6,8,2,.6)"], [3, 5, 7, "rgba(6,8,2,.35)"]] /* same as the CSS one in dir-i.css */) {
         const F = 1e5, one = mk(), o = one.getContext("2d"); // this step's shadow alone: the source drawn far away, its shadow pulled back
         // (CSS drop-shadow's blur is the standard deviation; canvas shadowBlur is twice it)
         Object.assign(o, { shadowColor: col, shadowOffsetX: dx * k + F, shadowOffsetY: dy * k, shadowBlur: b * k * 2 }); o.drawImage(I, -F, 0);
@@ -749,7 +781,7 @@
     [["tie"], "👔"], [["attire"], "🎩"], [["tar"], "🛢️"], [["rent"], "🏠"], [["attain"], "🏆"], [["reiterate"], "🔁"], [["trait"], "🧬"], [["era"], "⏳"],
     [["inert"], "🪨"], [["entertainer"], "🎤"], [["neat"], "✨"], [["intent"], "🎯"], [["retainer"], "🦷"], [["retire"], "🧓"]];
   // generous on purpose: any word that ends on the letter just spun counts, even inside a longer swipe (sweeping "Tarter" finds tar, tart and art)
-  let eggSeq = "", eggLastI = -1, eggFound = [], eggShown = null; // eggShown: the emoji the badge shows this visit (null: 🎉 or the latest find)
+  let eggSeq = "", eggSeqR = "", eggLastI = -1, eggFound = [], eggShown = null; // eggShown: the emoji the badge shows this visit (null: 🎉 or the latest find)
   try { eggFound = JSON.parse(localStorage.getItem("it-eggs") || "[]").filter(n => EGGS[n]); } catch (e) {}
   const eggOf = word => EGGS.findIndex(([ws]) => ws.includes(word));
   // common real words that aren't among the hidden ones (plus the words cut from the list) get a quick shoutout instead
@@ -778,19 +810,24 @@
     return `Hint: ${pat} (${w.length} letters).` + (shown < w.length ? " Tap again for another letter." : " Now spell it with my name."); };
   function eggLetter(i) {
     if (state.details.eggs === false) return;
-    // landing on the same letter again (wobbling on its edge, or slipping off the name and back) doesn't count twice
+    // two readings of what was spelled: one keeps every landing (the same letter twice in a row counts twice, so "err" can be
+    // spelled on one r), the other skips landing on the same letter again. Only one thing shows per landing, in this order:
+    // a new hidden word with repeats, one without, then a real-word shoutout with repeats, then without.
     // there's no time limit between letters: the last letters spun (as many as the longest word) are always what counts
-    if (i === eggLastI) return; eggLastI = i;
-    const ch = (nameEl.textContent.replace(/\s+/g, "")[i] || "").toLowerCase();
-    eggSeq = (eggSeq + ch).slice(-Math.max(...EGGS.flatMap(e => e[0]).map(w => w.length)));
-    const fresh = [], again = [];
-    for (let k = 2; k <= eggSeq.length; k++) { const w = eggSeq.slice(-k), n = eggOf(w); if (n < 0 || fresh.some(f => f.n === n) || again.some(f => f.n === n)) continue;
-      (eggFound.includes(n) ? again : fresh).push({ n, w }); }
+    const ch = (nameEl.textContent.replace(/\s+/g, "")[i] || "").toLowerCase(), MAX = Math.max(...EGGS.flatMap(e => e[0]).map(w => w.length));
+    eggSeqR = (eggSeqR + ch).slice(-MAX);
+    const moved = i !== eggLastI; eggLastI = i; if (moved) eggSeq = (eggSeq + ch).slice(-MAX);
+    const seqs = moved ? [eggSeqR, eggSeq] : [eggSeqR];
+    // the longest hidden word each reading ends on, new ones first
+    const ends = q => { const f = [], g = []; for (let k = 2; k <= q.length; k++) { const w = q.slice(-k), n = eggOf(w); if (n >= 0) (eggFound.includes(n) ? g : f).push({ n, w }); } return [f, g]; };
+    let fresh = [], again = [];
+    for (const q of seqs) { const [f, g] = ends(q); if (f.length) { fresh = [f[f.length - 1]]; again = []; break; } if (g.length && !again.length) again = [g[g.length - 1]]; }
     if (!fresh.length && !again.length) {
-      // longest real word ending here, once per visit
-      for (let k = eggSeq.length; k >= 3; k--) { const w = eggSeq.slice(-k); if (EGG_BONUS.has(w) && !eggBonusSaid.has(w)) { eggShout(w); break; } }
+      // the longest real word ending here, once per visit
+      for (const q of seqs) for (let k = q.length; k >= 3; k--) { const w = q.slice(-k); if (EGG_BONUS.has(w) && !eggBonusSaid.has(w)) { eggShout(w); return; } }
       return;
     }
+    { const tag = nameEl.parentElement && nameEl.parentElement.querySelector(":scope > .s-wordtag"); if (tag) { clearTimeout(tag._t); tag.classList.remove("show"); } } // one thing at a time
     const words = [...fresh, ...again].map(f => f.w).join(" and ");
     // spelling a word you already have pulses its emoji in the grid (not the badge); once all are found, the badge also shows it until the page is reloaded
     if (!fresh.length) { if (eggDone()) eggShown = again[again.length - 1].n; showEgg(null, again.map(f => f.n)); live.textContent = ""; setTimeout(() => { live.textContent = `You spelled ${words}.`; }, 30); return; }
@@ -1003,6 +1040,7 @@
   // follow the reduced-motion setting live if it changes while the page is open
   const rmq = window.matchMedia("(prefers-reduced-motion: reduce)"); rmq.addEventListener && rmq.addEventListener("change", () => updateDraw());
   let fillT;
+  addEventListener("scatter-change", () => scheduleFills());
   function scheduleFills() { clearTimeout(fillT); fillT = setTimeout(() => {
     const F = state.fonts, c = state.colors;
     // finding every hidden word turns the name gold, for that visitor, from then on

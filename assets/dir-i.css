@@ -110,9 +110,9 @@ body:has(.x-i) { background: #4a5233; }
     1px 1px 0 var(--edge), 2px 2px 0 var(--edge), 3px 3px 0 var(--edge), 4px 4px 0 var(--edge), 4px 5px 2px var(--cast), 9px 12px 14px var(--cast);
   transform: translate(0, 0); transition: transform .14s ease, box-shadow .14s ease; }
 .x-i .s-btn:not(.primary) { background-color: #efe9da; color: var(--ink); --edge: #a69c84; }
-.x-i .s-hero .s-btn:hover, .x-i .s-btn:hover { transform: translate(-1px, -1px);
+.x-i .s-hero .s-btn:hover, .site.x-i .s-btn:hover, .site.x-i .s-btn:focus-visible { /* .site.x-i: outranks site.css's lift-on-hover, which gave buttons outside the hero a hard black shadow */ transform: translate(-1px, -1px);
   box-shadow: inset 1px 1.5px 0 rgba(255,236,210,.45), inset -1px -1px 0 rgba(60,10,0,.25), 1px 1px 0 var(--edge), 2px 2px 0 var(--edge), 3px 3px 0 var(--edge), 4px 4px 0 var(--edge), 5px 5px 0 var(--edge), 6px 7px 3px var(--cast), 12px 16px 18px var(--cast); }
-.x-i .s-hero .s-btn:active, .x-i .s-btn:active { transform: translate(3px, 3px);
+.x-i .s-hero .s-btn:active, .site.x-i .s-btn:active { transform: translate(3px, 3px);
   box-shadow: inset 1px 1.5px 0 rgba(255,236,210,.35), inset -1px -1px 0 rgba(60,10,0,.25), 1px 1px 0 var(--edge), 2px 2px 1px var(--cast), 4px 5px 6px var(--cast); }
 .i-label { color: #2b2720; background: rgba(226,214,180,.9) url("tex/paper001_tile-1024.webp") center / 300px; background-blend-mode: multiply; border-radius: 0; padding: 8px 22px 7px;
   clip-path: polygon(0 8%, 3% 0, 5% 12%, 8% 2%, 10% 0, 90% 0, 92% 6%, 95% 0, 97% 10%, 100% 4%, 98% 30%, 100% 55%, 97% 78%, 100% 100%, 94% 92%, 91% 100%, 88% 95%, 10% 100%, 7% 92%, 4% 100%, 2% 90%, 0 100%, 2% 70%, 0 45%, 3% 24%);
@@ -360,7 +360,8 @@ body:has(.x-i) { background: #4a5233; }
 @media (max-width: 700px) { .hand { width: 380px; } .hand a { width: 70px; translate: calc(var(--i) * 76px) 0; } .hand a span { font-size: 10px; left: 6px; } }
 /* the letters cast their thickness again from each canvas; a rocking tile casts it from its bottom slice */
 .i-name .fill-cv { filter: none; }
-.i-name .fill-cv > canvas, .rock-tile > canvas.rock-base { filter: drop-shadow(1px 1px 0 rgba(6,8,2,.6)) drop-shadow(4px 6px 3px rgba(6,8,2,.75)) drop-shadow(14px 20px 16px rgba(6,8,2,.5)); }
+/* the letters lie flat on the ground, so their shadow hugs them: a dark contact line and a short soft spread, barely offset */
+.i-name .fill-cv > canvas, .rock-tile > canvas.rock-base { filter: drop-shadow(.5px .8px .5px rgba(6,8,2,.7)) drop-shadow(1.5px 2.5px 2px rgba(6,8,2,.6)) drop-shadow(3px 5px 7px rgba(6,8,2,.35)); }
 .i-name .rock-tile canvas { filter: none !important; }
 .i-name canvas.rock-shadow { filter: none !important; }
 /* a rocking letter's shadow: the same chain as a resting letter's (the letter itself is masked out in site-r.js) */
@@ -484,3 +485,12 @@ body > p[role="status"] { top: 0; left: 0; }
 .i-name > .blade, .i-name > .blade-strip { translate: 0 0 200px; }
 /* the letters keep one flat layer of their own, so their 3D tipping stays inside it and can't cut through the leaves */
 .i-name { isolation: isolate; } .i-name > .fill-cv { will-change: transform; }
+
+/* the scene keeps one layer of its own for good, so the moss layer under it showing and hiding, or sprigs being redrawn,
+   never makes the browser re-layer (and redraw) the whole page mid-scroll: that showed as bare green on a fast scroll */
+.x-i .i-scene { will-change: transform; }
+
+/* each contact link stays on one line (Ian); on the narrowest phones the label sits above its link instead */
+.x-i .card .c-links a { white-space: nowrap; overflow-wrap: normal; }
+.c-links li { grid-template-columns: 76px auto; }
+@media (max-width: 420px) { .c-links li { grid-template-columns: 1fr; gap: 2px; } }
