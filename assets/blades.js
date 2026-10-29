@@ -450,7 +450,7 @@
   // Blades near the cursor bend the way it moves (harder when it's closer and faster), then spring back with a couple of
   // wobbles. A strip turns back into a live canvas while its blades bend. Only grass that is
   // already there moves: nothing appears out of the open ground.
-  const reduce = () => matchMedia("(prefers-reduced-motion: reduce)").matches, CELL = 80, R = 70;
+  const reduce = () => matchMedia("(prefers-reduced-motion: reduce)").matches, CELL = 100, R = 95; // (Ian: the cursor's impact felt small)
   let grid = new Map(), root = { x: 0, y: 0 };
   const sceneRect = () => { const r = scene().getBoundingClientRect(); return { x: r.left + scrollX, y: r.top + scrollY }; };
   function index() {
@@ -587,7 +587,7 @@
     const d = Math.hypot(x - p.x, y - p.y); if (d > R) return 0;
     // bend away from the cursor, like parting grass with a hand (from GrassBending): the turn's sign comes from which side
     // of the blade the cursor is on. Strongest close in, fading out smoothly toward the edge of its reach (GodotGrass)
-    const f = 1 - d / R, cross = dx * (y - p.y) - dy * (x - p.x), amt = Math.min(22, (6 + sp * 9) * f * f * (3 - 2 * f)) * Math.sign(cross || 1);
+    const f = 1 - d / R, cross = dx * (y - p.y) - dy * (x - p.x), amt = Math.min(30, (10 + sp * 12) * f * f * (3 - 2 * f)) * Math.sign(cross || 1);
     return Math.abs(amt) < 1 ? 0 : amt;
   };
   function brush() {
@@ -616,7 +616,7 @@
   // touched, so the copy can't blur or shade it. The copy fades in with the push (over the first px), so at rest it is invisible and nothing pops.
   // It's one WebGL layer the size of the window, under every piece (cards and their grass cover it), and each frame only
   // the box around the stirring is drawn.
-  const MAXK = 40, SR = 70; // the same reach as the sprigs on the pieces (R)
+  const MAXK = 40, SR = 95; // the same reach as the sprigs on the pieces (R)
   const VS = "attribute vec2 a;varying vec2 v;void main(){v=a*.5+.5;gl_Position=vec4(a,0.,1.);}";
   // the moss, the strand map and the canopy maps are uploaded once and tile in the shader; nothing is repainted per move
   // The stirred strands are lit with the very same steps the CSS uses for the ground (dir-i.css, .x-i background): a 20%
@@ -734,7 +734,7 @@
   let lastSway = null;
   function sway(p, vx, vy, sp, now) {
     if (!SW || (lastSway && Math.hypot(p.x - lastSway.x, p.y - lastSway.y) < 20)) return; lastSway = p;
-    const L = sp || 1, amt = Math.min(4, 1.2 + sp * 2);
+    const L = sp || 1, amt = Math.min(7, 2.4 + sp * 3);
     kicks.push({ x: p.x - root.x, y: p.y - root.y, dx: vx / L, dy: vy / L, amt, t0: now, dur: 1000 + Math.random() * 300 });
     if (kicks.length > MAXK) kicks.shift();
     if (!swayFrame.raf) swayFrame.raf = requestAnimationFrame(swayFrame);
