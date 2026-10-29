@@ -479,3 +479,6 @@ body > p[role="status"] { top: 0; left: 0; }
 /* the name's sprigs keep their own layer all the time: the browser drew them a little differently while they swayed than at
    rest, so they flickered at the start and end of every sway */
 .i-name > .blade { will-change: transform; }
+/* Safari sorts a tipping 3D letter by depth against the leaves lying over it, and drew the raised edge in front of them; the
+   leaves sit well above the highest a letter can tip (no perspective above them, so nothing changes size) */
+.i-name > .blade, .i-name > .blade-strip { translate: 0 0 200px; }

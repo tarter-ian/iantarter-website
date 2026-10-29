@@ -46,7 +46,9 @@
   // strips (one per edge) instead of being hundreds of masked elements, which is what made scrolling and brushing lag.
   const DPR = Math.min(2, devicePixelRatio || 1);
   const load = src => new Promise(r => { const i = new Image(); i.onload = () => r(i); i.onerror = () => r(null); i.src = src; });
-  const [MOSS, SHADE, SUN, FRONDS, BARE] = await Promise.all(["assets/tex/moss-quiet-2k.webp", "assets/tex/canopy-shade-L.webp", "assets/tex/canopy-sun-2.webp", "assets/tex/moss-fronds.webp", "assets/tex/moss-bare.webp?v=2"].map(load));
+  // the strand maps only matter where a cursor can stir the moss, so touch screens skip downloading them
+  const stir = matchMedia("(hover: hover)").matches;
+  const [MOSS, SHADE, SUN, FRONDS, BARE] = await Promise.all(["assets/tex/moss-quiet-2k.webp", "assets/tex/canopy-shade-L.webp", "assets/tex/canopy-sun-2.webp", stir && "assets/tex/moss-fronds.webp", stir && "assets/tex/moss-bare.webp?v=2"].map(u => u ? load(u) : null));
   const imgs = new Map(); const sprite = sp => imgs.get(sp.src) || (imgs.set(sp.src, load(sp.src)), imgs.get(sp.src));
   await Promise.all(sprites.map(sprite)); for (const sp of sprites) sp.img = await sprite(sp);
   let PW = 1, PH = 1;
