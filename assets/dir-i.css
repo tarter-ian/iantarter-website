@@ -520,3 +520,17 @@ body > p[role="status"] { top: 0; left: 0; }
 .site.x-i .s-tight .s-egg-chip { padding: 0 6px; }
 @media (max-width: 400px) { .x-i .c-intro .cf { padding-left: 20px; padding-right: 20px; } }
 @media (max-width: 370px) { .x-i .c-intro .s-actions.s-tight .s-btn { font-size: .86em; } }
+/* The pages lie side by side on the forest floor: the games to the left of the homepage, the case studies to its right,
+   in the homepage's order. Following a link pans across to the next page (browsers with cross-page view transitions;
+   others just load the page). The direction is set by the little script in each page's head. */
+@view-transition { navigation: auto; }
+@media (prefers-reduced-motion: reduce) { @view-transition { navigation: none; } }
+::view-transition-group(root) { animation-duration: .75s; }
+html:active-view-transition-type(pan-right)::view-transition-old(root) { animation: pan-to-left .75s cubic-bezier(.65, 0, .35, 1) both; }
+html:active-view-transition-type(pan-right)::view-transition-new(root) { animation: pan-from-right .75s cubic-bezier(.65, 0, .35, 1) both; }
+html:active-view-transition-type(pan-left)::view-transition-old(root) { animation: pan-to-right .75s cubic-bezier(.65, 0, .35, 1) both; }
+html:active-view-transition-type(pan-left)::view-transition-new(root) { animation: pan-from-left .75s cubic-bezier(.65, 0, .35, 1) both; }
+@keyframes pan-to-left { to { transform: translateX(-100vw); } }
+@keyframes pan-from-right { from { transform: translateX(100vw); } }
+@keyframes pan-to-right { to { transform: translateX(100vw); } }
+@keyframes pan-from-left { from { transform: translateX(-100vw); } }
