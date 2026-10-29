@@ -180,8 +180,10 @@
     // (an edge can be several strips: they all start together)
     for (const st of strips) if (st.el === el && st.wait) { if (at[st.edge] === "wait") at[st.edge] = vt + 60; st.wait = false; grow(st); }
     // grass out of view is painted ahead of time; any not painted yet when its piece comes into view grows in there instead
-    for (const st of strips) if (st.el === el && st.pending) { st.pending = false; const j = prep.findIndex(q => q[0] === st); if (j >= 0) prep.splice(j, 1);
-      at[st.edge] = vt + 60; grow(st); } } });
+    for (const st of strips) if (st.el === el && st.pending) { const j = prep.findIndex(q => q[0] === st); if (j >= 0) prep.splice(j, 1);
+      // grass that has shown before is finished right away; grass never seen yet grows in here
+      if (el._shown && el._shown[st.edge]) { for (const g of st.blades) { bladeImage(g); softShadow(g); } st.ready = true; putUp(st); continue; }
+      st.pending = false; if (--el._pend <= 0) dropOld(el); at[st.edge] = vt + 60; grow(st); } } });
   function grow(st) {
     const k = st.edge, at = st.el._growAt || (st.el._growAt = {}), now = vt;
     // everything on screen grows at once (Ian: simultaneous), not top of the page first or one edge after another
@@ -203,7 +205,7 @@
       if (!st.begun && now >= st.gr.t0 && held) { st.gr.t0 = st.el._growAt[st.edge] = now; continue; }
       if (now < st.gr.t0) continue;
       if (!st.begun) { st.begun = true; if (!grassGo) { grassGo = true; dispatchEvent(new Event("grass-go")); } }
-      if (now > st.gr.t0 + st.gr.dur) { st.gr = null; growing.delete(st); paintStrip(st); st.live = false; freeze(st); continue; }
+      if (now > st.gr.t0 + st.gr.dur) { st.gr = null; growing.delete(st); paintStrip(st); st.live = false; freeze(st); shown(st); continue; }
       paintStrip(st); }
     if (growing.size) growFrame.raf = requestAnimationFrame(growFrame); else lastFrame = null;
   }
@@ -286,7 +288,10 @@
   let noGrass = [];
   const small = () => innerWidth < 700, K = () => small() ? .7 : 1;
   function dress(el) {
-    el.querySelectorAll(":scope > .blade, :scope > .blade-clip, :scope > .blade-strip").forEach(b => b.remove());
+    // grass that has already shown stays up until its replacement is painted, so a relayout never leaves a piece bare
+    el.querySelectorAll(":scope > .blade, :scope > .blade-clip").forEach(b => b.remove());
+    const olds = (el._olds || []).concat([...el.querySelectorAll(":scope > .blade-strip")]); el._olds = null; el._pend = 0;
+    if (!el._shown) olds.forEach(b => b.remove()); else el._olds = olds;
     for (const st of [...strips]) if (st.el === el) { strips.delete(st); growing.delete(st); }
     const { x: ox, y: oy } = offset(el), list = [];
     const name = el.classList.contains("lay-name"), tab = !!el.closest(".hand");
@@ -334,10 +339,15 @@
       // the fresh canvas shows at once (a relayout swaps old grass for new in the same frame) and hands over to its image
       strips.add(st); if (grow(st)) continue;
       // grass out of view is painted a little at a time once the visible grass is done
-      if (inView(el)) { paintStrip(st); for (const s of pair(st)) s.img.after(s.cv); freeze(st); }
-      else { st.pending = true; if (seen) seen.observe(el); prepare(st, s => { s.pending = false; paintStrip(s); for (const q of pair(s)) q.img.after(q.cv); freeze(s); }); }
+      if (inView(el)) { paintStrip(st); for (const s of pair(st)) s.img.after(s.cv); freeze(st); shown(st); }
+      else { st.pending = true; el._pend++; if (seen) seen.observe(el); prepare(st, putUp); }
     }
+    if (!el._pend) dropOld(el);
   }
+  // an edge that has shown once never grows in again: a relayout's new grass just replaces it
+  const shown = st => { (st.el._shown || (st.el._shown = {}))[st.edge] = true; };
+  const dropOld = el => { if (el._olds) { el._olds.forEach(b => b.remove()); el._olds = null; } };
+  function putUp(st) { st.pending = false; paintStrip(st); for (const q of pair(st)) q.img.after(q.cv); freeze(st); shown(st); if (--st.el._pend <= 0) dropOld(st.el); }
   const all = () => {
     noGrass = [...document.querySelectorAll(".no-grass")].map(n => ({ el: n, r: n.getBoundingClientRect() }));
     document.querySelectorAll(".lay").forEach(el => {
