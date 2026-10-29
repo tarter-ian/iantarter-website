@@ -587,7 +587,7 @@
   const sways = new Map();
   const easeOut = t => { let lo = 0, hi = 1; for (let i = 0; i < 20; i++) { const u = (lo + hi) / 2, x = 3 * u * u * (1 - u) * .58 + u * u * u; if (x < t) lo = u; else hi = u; }
     const u = (lo + hi) / 2; return 3 * u * u * (1 - u) + u * u * u; };
-  const SW_AT = [0, .2, .6, 1], SW_V = [0, 11, -1.3, 0];
+  const SW_AT = [0, .2, 1], SW_V = [0, 11, 0];
   // a new sway that arrives while a leaf still swings starts from the angle it's at (the old swing fades out over the new
   // one's first push), and until the new one reaches it the old one carries on, so a leaf never snaps back to rest
   function swayD(w, now) {
@@ -617,8 +617,8 @@
     sways.set(b, { base: prev ? prev.base : b._base != null ? b._base : b.style.transform, amp, t0, dur, c0: prev ? prev.d || 0 : 0, prev: prev || null, d: prev ? prev.d || 0 : 0 }); };
   // scrolling pulls the name's leaves along with the rest of the grass (see blades.js)
   let nameWind = 0, nameGust = null;
-  // the cursor's wobble (blades.js KEYS): out, a small swing back past rest, still
-  const GW = [[0, 0], [.2, 1], [.6, -.12], [1, 0]];
+  // the cursor's wobble (blades.js KEYS): out, then eased back to rest
+  const GW = [[0, 0], [.2, 1], [1, 0]];
   const gustWob = t => { for (let k = 1; k < GW.length; k++) if (t <= GW[k][0]) { const [t0, a0] = GW[k - 1], [t1, a1] = GW[k], u = (t - t0) / (t1 - t0); return a0 + (a1 - a0) * u * u * (3 - 2 * u); } return 0; };
   addEventListener("grass-wind", e => { const lay = nameEl.closest(".lay"), r = lay && lay.getBoundingClientRect(), seen = r && r.bottom > 0 && r.top < innerHeight;
     // only while the name is on screen: moving its leaves makes the browser redraw each one
