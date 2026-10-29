@@ -475,8 +475,8 @@
   }
   let domBlades = [];
   const active = new Set();
-  // wobble: out to amt, back past rest, a smaller swing, then still
-  const KEYS = [[0, 0], [.18, 1], [.48, -.38], [.74, .14], [1, 0]];
+  // wobble: out to amt, a small swing back past rest, then still
+  const KEYS = [[0, 0], [.2, 1], [.6, -.12], [1, 0]]; // nearly critically damped: one small swing back, no bounce (Ian: too bouncy)
   const wob = t => { for (let k = 1; k < KEYS.length; k++) if (t <= KEYS[k][0]) { const [t0, a0] = KEYS[k - 1], [t1, a1] = KEYS[k], u = (t - t0) / (t1 - t0), e = u * u * (3 - 2 * u); return a0 + (a1 - a0) * e; } return 0; };
   // a blade's bend at a moment: a new kick starts from the bend it has (that bend fades out over the new push), and until
   // a delayed kick (a gust) reaches it, the swing it already had carries on, so a blade never snaps back to rest
@@ -528,8 +528,8 @@
   const windDist = (x, y) => wdir > 0 ? y + x * .2893 : innerHeight - y + (innerWidth - x) * .2893;
   const envAt = (x, y) => { const f = Math.max(0, windDist(x, y)) / WV * WHZ, i = Math.min(WH - 2, Math.floor(f)), u = Math.min(1, f - i); return whist[i] + (whist[i + 1] - whist[i]) * u; };
   // how much of a gust is at a spot in the scene now: crests about 520px apart, slanted a little, rolling the way the wind
-  // blows. As one passes, each spot goes through the same wobble as a sprig the cursor brushed (out, back past rest, a
-  // smaller swing, still), over about a second, then waits for the next.
+  // blows. As one passes, each spot goes through the same wobble as a sprig the cursor brushed (out, a small swing
+  // back past rest, still), over about a second, then waits for the next.
   const gust = (x, y) => { const q = wdir * (y * .0121 + x * .0035), u = (((wind.ph - q) / (2 * Math.PI)) % 1 + 1) % 1; return u < .48 ? wob(u / .48) : 0; };
   addEventListener("scroll", () => {
     if (reduce()) return; const now = performance.now(), dy = scrollY - wind.y, dt = Math.max(8, now - (wind.ev || now - 16)); wind.y = scrollY;
@@ -620,7 +620,7 @@
   // leaning on a scroll that read as the ground going soft.
   const FS = `precision highp float;varying vec2 v;uniform sampler2D T,M,H,B,U,L,E;uniform vec4 K[${MAXK}],V;uniform vec2 S,O,P;uniform vec3 Wd;uniform float NK,R;
     float ss(float x){return x*x*(3.-2.*x);}
-    float wb(float t){if(t<.18)return ss(t/.18);if(t<.48)return mix(1.,-.38,ss((t-.18)/.3));if(t<.74)return mix(-.38,.14,ss((t-.48)/.26));return mix(.14,0.,ss((t-.74)/.26));}
+    float wb(float t){if(t<.2)return ss(t/.2);if(t<.6)return mix(1.,-.12,ss((t-.2)/.4));return mix(-.12,0.,ss((t-.6)/.4));}
     vec3 soft(vec3 b,vec3 s){vec3 d=mix(((16.*b-12.)*b+4.)*b,sqrt(b),step(.25,b));
       return mix(b-(1.-2.*s)*b*(1.-b),b+(2.*s-1.)*(d-b),step(.5,s));}
     vec3 lit(vec3 c,vec2 g){
