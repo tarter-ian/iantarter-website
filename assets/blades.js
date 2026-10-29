@@ -9,7 +9,7 @@
   const offset = el => { const root = el.closest(".x-i").getBoundingClientRect(), r = el.getBoundingClientRect();
     return { x: r.left + r.width / 2 - el.offsetWidth / 2 - root.left, y: r.top + r.height / 2 - el.offsetHeight / 2 - root.top }; };
   function put(el, ox, oy, sp, x, y, len, ang, reuse) {
-    const sw = sp.w * len / sp.h, b = reuse || document.createElement("i"); b._base = null; b.className = "blade"; b.setAttribute("aria-hidden", "true");
+    const sw = sp.w * len / sp.h, b = reuse || document.createElement("i"); b._base = b._pp = null; b.className = "blade"; b.setAttribute("aria-hidden", "true");
     const left = x - sw / 2, top = y - len;
     Object.assign(b.style, { width: sw + "px", height: len + "px", left: left + "px", top: top + "px", transform: `rotate(${ang}deg)` });
     b.style.setProperty("--m", `url("${new URL(sp.src, location.href).href}")`); b.style.setProperty("--sp", `url("${new URL(sp.src, location.href).href}")`);
@@ -122,33 +122,34 @@
   const reach = g => g.rr || (g.rr = Math.hypot(g.w / 2, g.len) + 2);
   // with `dirty` (the blades that moved), only the box around them is repainted, which keeps brushing cheap
   function paintStrip(st, dirty) {
-    const { cv, ctx, x0, y0 } = st; ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0);
+    // a strip with a twin keeps its sprigs' shadows there, on a layer under every sprig of its edge (see dress)
+    const { cv, ctx, x0, y0 } = st, sx = st.twin ? st.twin.ctx : ctx, cxs = st.twin ? [ctx, sx] : [ctx];
     let box = null;
+    for (const c of cxs) { c.save(); c.setTransform(1, 0, 0, 1, 0, 0); }
     if (dirty) { let l = Infinity, t = Infinity, r = -Infinity, b = -Infinity;
       for (const g of dirty) { const R = reach(g) + SP + 2; l = Math.min(l, g.x - R); t = Math.min(t, g.y - R); r = Math.max(r, g.x + R); b = Math.max(b, g.y + R); }
       box = [l, t, r, b]; const X = Math.floor((l - x0) * DPR), Y = Math.floor((t - y0) * DPR), W = Math.ceil((r - x0) * DPR) - X, H = Math.ceil((b - y0) * DPR) - Y;
-      ctx.beginPath(); ctx.rect(X, Y, W, H); ctx.clip(); ctx.clearRect(X, Y, W, H); }
-    else ctx.clearRect(0, 0, cv.width, cv.height);
-    ctx.setTransform(DPR, 0, 0, DPR, -x0 * DPR, -y0 * DPR);
+      for (const c of cxs) { c.beginPath(); c.rect(X, Y, W, H); c.clip(); c.clearRect(X, Y, W, H); } }
+    else for (const c of cxs) c.clearRect(0, 0, cv.width, cv.height);
+    for (const c of cxs) c.setTransform(DPR, 0, 0, DPR, -x0 * DPR, -y0 * DPR);
     const gr = st.gr, now = vt, near = g => { if (!box) return true; const R = reach(g) + SP + 2; return !(g.x + R < box[0] || g.x - R > box[2] || g.y + R < box[1] || g.y - R > box[3]); };
     // where each blade is now: its turn, and while growing in, its size and fade
     const pose = g => { if (!gr) return [g.moving ? g.ang + g.bend : g.ang, 1, 1];
       const u = Math.min(1, Math.max(0, (now - gr.t0 - g.gd) / GROW)); return u <= 0 ? null : [g.ang, Math.min(1, u * 4), .12 + .88 * (1 - Math.pow(1 - u, 3))]; };
     // the blades' shadows fall only on the piece (on the ground they'd show as dark smudges), and move with their blades
     if (!st.shape) { const el = st.el; st.shape = [el.offsetWidth, el.offsetHeight, parseFloat(getComputedStyle(el).borderTopLeftRadius) || 0]; }
-    const [w, h, rad] = st.shape; ctx.save(); ctx.beginPath(); ctx.roundRect ? ctx.roundRect(0, 0, w, h, rad) : ctx.rect(0, 0, w, h); ctx.clip();
-    for (const g of st.blades) { if (!near(g)) continue; const P = pose(g); if (P) drawShadow(ctx, g, g.x, g.y, P[0], P[1], P[2]); }
-    ctx.restore();
+    const [w, h, rad] = st.shape; sx.save(); sx.beginPath(); sx.roundRect ? sx.roundRect(0, 0, w, h, rad) : sx.rect(0, 0, w, h); sx.clip();
+    for (const g of st.blades) { if (!near(g)) continue; const P = pose(g); if (P) drawShadow(sx, g, g.x, g.y, P[0], P[1], P[2]); }
+    sx.restore();
     // a bending blade is drawn right here in its own strip, so it stays under whatever lies on top of its piece
     for (const g of st.blades) { if (!near(g)) continue; const P = pose(g); if (P) drawBlade(ctx, g, g.x, g.y, P[0], P[1], P[2]); }
     // the piece's own shadow doesn't fall on them: they lean up over its edge, above it
-    ctx.restore();
+    for (const c of cxs) c.restore();
   }
   // On first load the grass grows in: each strip rises from the ground outside its edge onto the card, the name's sprigs
-  // from their roots, top of the page first. Only once per edge: a relayout or a brushed strip
+  // from their roots, all at once. Only once per edge: a relayout or a brushed strip
   // just shows.
   const still = () => matchMedia("(prefers-reduced-motion: reduce)").matches, EASE = "cubic-bezier(.2, .7, .3, 1)";
-  const lag = el => Math.min(700, Math.max(0, el.getBoundingClientRect().top) * .45);
   // a strip grows as a live canvas: every sprig rises from its own root, scaling up whole (not squashed), each a little
   // after the last; the sprigs' shadows on the card come in with them. Then it turns back into an image as usual.
   const GROW = 950, growing = new Set();
@@ -157,13 +158,13 @@
   // Growth runs on its own clock, which only moves while frames are actually drawn (at most a frame's worth per frame):
   // while loading, the page can be too busy to draw for seconds, and on the wall clock the grass had finished growing
   // before anyone saw it, so it just flicked on.
-  let vt = 0, lastFrame = null;
+  let vt = 0, lastFrame = null, grassGo = false;
   const tick = () => { const n = performance.now(); if (lastFrame != null) vt += Math.min(34, n - lastFrame); lastFrame = n; return vt; };
   // Only grass in view grows (the rest is ready before it's scrolled to), and each strip's sprigs are painted a few at a
   // time ahead of their turn, so a growing frame only places finished pictures.
   const inView = el => { const r = el.getBoundingClientRect(); return r.bottom > -80 && r.top < innerHeight + 80; };
   const prep = [];
-  function prepare(st, then) { st.ready = false; prep.push([st, 0, then]); if (!prepare.raf) prepare.raf = requestAnimationFrame(prepFrame); }
+  function prepare(st, then) { st.ready = false; if (then) prep.push([st, 0, then]); else prep.unshift([st, 0]); /* growing grass first */ if (!prepare.raf) prepare.raf = requestAnimationFrame(prepFrame); }
   function prepFrame() {
     prepare.raf = 0; const end = performance.now() + 5;
     while (prep.length && performance.now() < end) { const job = prep[0], [st] = job;
@@ -176,24 +177,32 @@
   // grass below the first screen waits, blank, until its piece scrolls into view, then grows there
   const seen = "IntersectionObserver" in window && new IntersectionObserver(es => { for (const e of es) { if (!e.isIntersecting) continue;
     const el = e.target, at = el._growAt; seen.unobserve(el);
-    for (const st of strips) if (st.el === el && at[st.edge] === "wait") { at[st.edge] = vt + 60 + EDGE[st.edge]; grow(st); } } });
+    // (an edge can be several strips: they all start together)
+    for (const st of strips) if (st.el === el && st.wait) { if (at[st.edge] === "wait") at[st.edge] = vt + 60; st.wait = false; grow(st); }
+    // grass out of view is painted ahead of time; any not painted yet when its piece comes into view grows in there instead
+    for (const st of strips) if (st.el === el && st.pending) { st.pending = false; const j = prep.findIndex(q => q[0] === st); if (j >= 0) prep.splice(j, 1);
+      at[st.edge] = vt + 60; grow(st); } } });
   function grow(st) {
     const k = st.edge, at = st.el._growAt || (st.el._growAt = {}), now = vt;
-    if (at[k] == null) at[k] = inView(st.el) || still() || !seen ? now + lag(st.el) + EDGE[k] : "wait";
-    if (at[k] === "wait") { prepare(st); seen.observe(st.el); return true; }
+    // everything on screen grows at once (Ian: simultaneous), not top of the page first or one edge after another
+    // and grass out of view is simply there when it's scrolled to (Ian: it can be instant if not visible)
+    if (at[k] == null) at[k] = inView(st.el) || still() ? now + 120 : -1e9;
+    if (at[k] === "wait") { st.wait = true; prepare(st); seen.observe(st.el); return true; }
     const t0 = at[k], dur = GROW + 500; if (now > t0 + dur) return false;
-    if (still()) { st.img.animate && st.img.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 500, delay: t0 - now, fill: "backwards" }); return false; }
+    if (still()) { for (const s of pair(st)) s.img.animate && s.img.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 500, delay: t0 - now, fill: "backwards" }); return false; }
     st.gr = { t0, dur };
-    st.blades.forEach((g, i) => { g.gd = ((i * 2654435761) % 1000) / 1000 * 500; });
+    st.blades.forEach((g, i) => { g.gd = ((i * 2654435761) % 1000) / 1000 * 120; });
     // a redress mid-growth carries straight on
-    thaw(st); growing.add(st); if (now >= t0) st.ready = true; else if (!st.ready) prepare(st); if (!growFrame.raf) growFrame.raf = requestAnimationFrame(growFrame); return true;
+    thaw(st); growing.add(st); if (now >= t0) st.ready = st.begun = true; else if (!st.ready) prepare(st); if (!growFrame.raf) growFrame.raf = requestAnimationFrame(growFrame); return true;
   }
   function growFrame() {
     growFrame.raf = 0; const now = tick();
+    // while any strip due to start isn't painted yet, every strip that hasn't begun waits with it, so they all start together
+    let held = false; for (const st of growing) if (!st.ready && now >= st.gr.t0) held = true;
     for (const st of growing) {
-      // not painted yet: its start waits for it (it hasn't begun to show, so nothing jumps)
-      if (!st.ready) { if (now > st.gr.t0) st.gr.t0 = st.el._growAt[st.edge] = now; continue; }
+      if (!st.begun && now >= st.gr.t0 && held) { st.gr.t0 = st.el._growAt[st.edge] = now; continue; }
       if (now < st.gr.t0) continue;
+      if (!st.begun) { st.begun = true; if (!grassGo) { grassGo = true; dispatchEvent(new Event("grass-go")); } }
       if (now > st.gr.t0 + st.gr.dur) { st.gr = null; growing.delete(st); paintStrip(st); st.live = false; freeze(st); continue; }
       paintStrip(st); }
     if (growing.size) growFrame.raf = requestAnimationFrame(growFrame); else lastFrame = null;
@@ -206,15 +215,15 @@
   const nameEase = bez(.2, .7, .3, 1);
   function growName(lay) {
     if (lay._grown) return;
-    const quiet = still(), bl = [...lay.querySelectorAll(":scope > .blade")].map((b, i) => ({ b, t: b.style.transform, h: parseFloat(b.style.height) / 2, d: (i % 9) * 40 }));
-    if (lay._gv == null) { lay._gv = 0; lay._g0 = lag(lay) + 200; }
-    const dur = quiet ? 500 : 1000, end = lay._g0 + 8 * 40 + dur;
+    const quiet = still(), bl = [...lay.querySelectorAll(":scope > .blade")].map((b, i) => ({ b, t: b.style.transform, h: parseFloat(b.style.height) / 2, d: (i % 9) * 15 }));
+    if (lay._gv == null) { lay._gv = 0; lay._g0 = 0; }
+    const dur = quiet ? 500 : 1000, end = lay._g0 + 8 * 15 + dur;
     const pose = () => { for (const o of bl) { const u = Math.min(1, Math.max(0, (lay._gv - lay._g0 - o.d) / dur)), p = quiet ? u : nameEase(u);
       o.b.style.opacity = quiet ? p : Math.min(1, p / .35); if (!quiet) o.b.style.transform = `${o.t} translateY(${o.h}px) scale(${(.12 + .88 * p).toFixed(4)}) translateY(${-o.h}px)`; } };
     pose(); cancelAnimationFrame(lay._graf); let last = null;
     const frame = () => {
       if (!bl[0] || !bl[0].b.isConnected) return; // redressed: the new sprigs carry on from lay._gv
-      const n = performance.now(); if (last != null && document.documentElement.classList.contains("ground-in")) lay._gv += Math.min(34, n - last); last = n;
+      const n = performance.now(); if (last != null && document.documentElement.classList.contains("ground-in") && (grassGo || n > 4000)) lay._gv += Math.min(34, n - last); last = n;
       if (lay._gv >= end) { for (const o of bl) { o.b.style.opacity = "1"; o.b.style.transform = o.t; } lay._grown = true; return; }
       pose(); lay._graf = requestAnimationFrame(frame); };
     lay._graf = requestAnimationFrame(frame);
@@ -245,12 +254,14 @@
   // With a mouse, a strip simply stays a canvas: encoding it to an image after every brush cost a hitch each time, and the
   // swap between the two could shift the sprigs' colour a touch. Phones (no brushing, tight on canvas memory) still get images.
   const KEEP = matchMedia("(hover: hover)").matches;
-  function freeze(st) {
-    if (KEEP) { if (!st.cv.parentNode) st.img.after(st.cv); st.img.style.visibility = "hidden"; st.img.removeAttribute("src"); return; }
-    st.cv.toBlob(b => { if (!b || st.live) return; const old = st.url; st.url = URL.createObjectURL(b);
+  const pair = st => st.twin ? [st.twin, st] : [st];
+  function freeze(st) { for (const s of pair(st)) freezeOne(s, st); }
+  function freezeOne(s, st) {
+    if (KEEP) { if (!s.cv.parentNode) s.img.after(s.cv); s.img.style.visibility = "hidden"; s.img.removeAttribute("src"); return; }
+    s.cv.toBlob(b => { if (!b || st.live) return; const old = s.url; s.url = URL.createObjectURL(b);
       // swap back only once the new image is decoded and ready to paint, so the strip never blinks
-      st.img.src = st.url; st.img.decode().catch(() => {}).then(() => { if (old) URL.revokeObjectURL(old); if (st.live) return;
-        st.img.style.visibility = ""; requestAnimationFrame(() => { if (!st.live) { st.cv.remove(); release(st); } }); }); });
+      s.img.src = s.url; s.img.decode().catch(() => {}).then(() => { if (old) URL.revokeObjectURL(old); if (st.live) return;
+        s.img.style.visibility = ""; requestAnimationFrame(() => { if (!st.live) { s.cv.remove(); if (s === st) release(st); else s.cv.width = s.cv.height = 0; } }); }); });
   }
   // a frozen strip gives back its canvases' memory (phones run out of canvas memory and then draw new canvases blank);
   // they're painted again the next time a blade in it bends
@@ -258,8 +269,8 @@
     st.cv.width = st.cv.height = 0; if (st.shade) st.shade.width = 0;
     for (const g of st.blades) for (const k of ["cv", "shd"]) if (g[k]) { g[k].width = g[k].height = 0; g[k] = null; }
   }
-  function thaw(st) { clearTimeout(st.ft); if (st.live) return; st.live = true; if (st.cv.width !== st.W) { st.cv.width = st.W; st.cv.height = st.H; }
-    if (!st.cv.parentNode) st.img.after(st.cv); st.img.style.visibility = "hidden"; }
+  function thaw(st) { clearTimeout(st.ft); if (st.live) return; st.live = true;
+    for (const s of pair(st)) { if (s.cv.width !== st.W) { s.cv.width = st.W; s.cv.height = st.H; } if (!s.cv.parentNode) s.img.after(s.cv); s.img.style.visibility = "hidden"; } }
   function place(el, list, ox, oy, sp, edge, t, len, intrude, jitter) {
     const w = el.offsetWidth, h = el.offsetHeight, sw = sp.w * len / sp.h;
     const ang = { top: 180, bottom: 0, left: 90, right: -90 }[edge] + jitter;
@@ -291,8 +302,18 @@
         place(el, list, ox, oy, pick(m ? moss : clump ? clumps : blades), edge, Math.min(.98, Math.max(.02, t)), len, tab ? 3 + rnd() * 7 : (name ? 10 : 5) + rnd() * (name ? 16 : 12), (rnd() - .5) * 80);
       }
     }
+    // the sprigs along the left and right edges are cut into pieces about 90px long, so a gust from scrolling can lean each
+    // piece as it passes instead of the whole edge at once. Each piece's shadows go on a twin layer, and all of an edge's
+    // shadow layers lie under all of its sprig layers, so no piece's shadow ever falls on a neighbour's sprigs.
+    const groups = [];
     for (const edge of edges) {
-      const bl = list.filter(g => g.edge === edge); if (!bl.length) continue;
+      const all = list.filter(g => g.edge === edge); if (!all.length) continue;
+      if (edge !== "left" && edge !== "right") { groups.push([edge, all, false]); continue; }
+      const by = new Map(); for (const g of all) { const k = Math.floor(g.y / 90); (by.get(k) || by.set(k, []).get(k)).push(g); }
+      [...by.keys()].sort((a, b) => a - b).forEach(k => groups.push([edge, by.get(k), true]));
+    }
+    const shadowsFirst = new Map();
+    for (const [edge, bl, cut] of groups) {
       let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
       for (const g of bl) { const R = Math.hypot(g.w / 2, g.len) + 4; x0 = Math.min(x0, g.x - R); y0 = Math.min(y0, g.y - R); x1 = Math.max(x1, g.x + R); y1 = Math.max(y1, g.y + R); }
       x0 = Math.floor(x0); y0 = Math.floor(y0);
@@ -300,15 +321,21 @@
       // steps in while the cursor is bending one of its blades, then hands back to a fresh image (on phones; see freeze)
       const cv = document.createElement("canvas"), img = new Image(); img.style.visibility = "hidden"; // shown once its picture is decoded
       cv.width = Math.ceil((x1 - x0) * DPR); cv.height = Math.ceil((y1 - y0) * DPR);
-      for (const n of [cv, img]) { n.className = edge === "left" || edge === "right" ? "blade-strip side" : "blade-strip"; n.setAttribute("aria-hidden", "true"); n.alt = "";
+      const mk = () => { const c = document.createElement("canvas"), m = new Image(); m.style.visibility = "hidden"; c.width = cv.width; c.height = cv.height;
+        return [c, m]; };
+      const [tcv, timg] = cut ? mk() : [null, null];
+      for (const n of [cv, img, tcv, timg]) { if (!n) continue; n.className = cut ? "blade-strip side" : "blade-strip"; n.setAttribute("aria-hidden", "true"); n.alt = "";
         Object.assign(n.style, { left: x0 + "px", top: y0 + "px", width: cv.width / DPR + "px", height: cv.height / DPR + "px" }); }
-      el.appendChild(img);
+      if (cut) { // the edge's shadow layers go in front of its first sprig layer, in order
+        const first = shadowsFirst.get(edge); if (first) el.insertBefore(timg, first); else el.appendChild(timg); }
+      el.appendChild(img); if (cut && !shadowsFirst.has(edge)) shadowsFirst.set(edge, img);
       const st = { el, edge, cv, img, ctx: cv.getContext("2d", { willReadFrequently: true }), x0, y0, blades: bl, W: cv.width, H: cv.height }; bl.forEach(g => g.st = st);
+      if (cut) st.twin = { cv: tcv, img: timg, ctx: tcv.getContext("2d", { willReadFrequently: true }) };
       // the fresh canvas shows at once (a relayout swaps old grass for new in the same frame) and hands over to its image
       strips.add(st); if (grow(st)) continue;
       // grass out of view is painted a little at a time once the visible grass is done
-      if (inView(el)) { paintStrip(st); img.after(cv); freeze(st); }
-      else prepare(st, s => { paintStrip(s); s.img.after(s.cv); freeze(s); });
+      if (inView(el)) { paintStrip(st); for (const s of pair(st)) s.img.after(s.cv); freeze(st); }
+      else { st.pending = true; if (seen) seen.observe(el); prepare(st, s => { s.pending = false; paintStrip(s); for (const q of pair(s)) q.img.after(q.cv); freeze(s); }); }
     }
   }
   const all = () => {
@@ -469,45 +496,78 @@
       st.ft = setTimeout(() => { if (!st.blades.some(b => b.moving)) { st.live = false; freeze(st); } }, 1500); });
     if (active.size) frame.raf = requestAnimationFrame(frame);
   }
-  // ---------- Scrolling pulls the grass ----------
-  // While the page scrolls, the grass in view (the sprigs on the pieces, the open ground's moss and the leaves on the name)
-  // leans the way the page moves (up when scrolling down), more for a faster scroll, and when the scrolling stops it springs back with a
-  // small overshoot. The lean follows a spring, so it never jumps, whatever the scroll does.
-  const wind = { w: 0, v: 0, aim: 0, y: scrollY, t: 0, ev: 0, raf: 0 }, windSt = new Set();
-  let windW = 0;
+  // ---------- Scrolling sends wind through the grass ----------
+  // While the page scrolls, gusts roll through the grass in view (the open ground's moss, the sprigs along the pieces'
+  // sides and the leaves on the name): bands of leaning grass that travel across the page the way you're heading (down
+  // when scrolling down), stronger for a faster scroll. When the scrolling stops the wind dies down over a second and a half and the
+  // last gusts roll on and fade, so the grass settles instead of snapping back.
+  const wind = { e: 0, aim: 0, ph: 0, y: scrollY, t: 0, ev: 0, raf: 0 }, windSt = new Set();
+  let windW = 0, wdir = 1;
+  // what the wind did over the last six seconds, so a gust that sets off from the window's upwind edge keeps the strength
+  // it had then all the way across: even a short scroll rolls through the whole screen (taking about five seconds)
+  const WH = 96, WHZ = 16, WV = 248, wrec = [], whist = new Float32Array(WH);
+  function recordWind(now, w) {
+    wrec.push([now, w]); while (wrec.length > 2 && now - wrec[1][0] > WH / WHZ * 1000) wrec.shift();
+    let j = wrec.length - 1, top = 0;
+    for (let i = 0; i < WH; i++) { const t = now - i * 1000 / WHZ; while (j > 0 && wrec[j][0] > t) j--;
+      const a = wrec[j], b = wrec[j + 1]; whist[i] = a[0] > t ? 0 : !b ? a[1] : a[1] + (b[1] - a[1]) * (t - a[0]) / (b[0] - a[0]);
+      top = Math.max(top, Math.abs(whist[i])); }
+    return top;
+  }
+  // how far a spot in the window is from the edge the gusts come in at, and so how long ago they set off
+  const windDist = (x, y) => wdir > 0 ? y + x * .2893 : innerHeight - y + (innerWidth - x) * .2893;
+  const envAt = (x, y) => { const f = Math.max(0, windDist(x, y)) / WV * WHZ, i = Math.min(WH - 2, Math.floor(f)), u = Math.min(1, f - i); return whist[i] + (whist[i + 1] - whist[i]) * u; };
+  // how much of a gust is at a spot in the scene now: crests about 520px apart, slanted a little, rolling the way the wind
+  // blows. As one passes, each spot goes through the same wobble as a sprig the cursor brushed (out, back past rest, a
+  // smaller swing, still), over about a second, then waits for the next.
+  const gust = (x, y) => { const q = wdir * (y * .0121 + x * .0035), u = (((wind.ph - q) / (2 * Math.PI)) % 1 + 1) % 1; return u < .48 ? wob(u / .48) : 0; };
   addEventListener("scroll", () => {
     if (reduce()) return; const now = performance.now(), dy = scrollY - wind.y, dt = Math.max(8, now - (wind.ev || now - 16)); wind.y = scrollY;
     const v = dy / dt, a = Math.sign(v) * Math.min(1, Math.sqrt(Math.abs(v) / 3)); // px per ms, eased so a slow scroll still shows
     wind.aim = wind.ev && now - wind.ev < 100 ? wind.aim * .5 + a * .5 : a; wind.ev = now;
-    if (!wind.raf) { wind.t = now; wind.raf = requestAnimationFrame(windFrame); }
+    if (!wind.raf) { wind.t = now; wrec.length = 0; wrec.push([now - 7000, 0]); wind.raf = requestAnimationFrame(windFrame); }
   }, { passive: true });
   function windFrame() {
     const now = performance.now(), dt = Math.min(.034, (now - wind.t) / 1000); wind.t = now;
     if (now - wind.ev > 90) wind.aim = 0; // scrolling has stopped
-    // a spring: the lean builds over about a fifth of a second and settles back with one small overshoot
-    wind.v += (140 * (wind.aim - wind.w) - 15 * wind.v) * dt; wind.w += wind.v * dt;
-    const calm = !wind.aim && Math.abs(wind.w) < .003 && Math.abs(wind.v) < .03; if (calm) wind.w = wind.v = 0;
-    windW = -wind.w; // the grass trails the page: scrolling down (the page moving up) leans it up
-    // the sprigs along a piece's sides lie across the pull, so they lean with it: their strip is skewed about the line their
-    // roots are on (a transform only, nothing is repainted); sprigs along the top and bottom point along the pull and hardly bend
+    // the wind picks up in about a fifth of a second and dies down over a second and a half
+    const rate = Math.abs(wind.aim) > Math.abs(wind.e) ? 6 : 1.2; wind.e += (wind.aim - wind.e) * Math.min(1, rate * dt);
+    if (!wind.aim && Math.abs(wind.e) < .004) wind.e = 0;
+    // it blows the way you're heading, against the page's motion: scrolling down, the grass leans and the gusts roll down
+    // (the mock's switch can turn it round)
+    let dir = 1; try { if (localStorage.getItem("it-winddir2") === "-1") dir = -1; } catch (e) {}
+    if (wind.e) wdir = dir * Math.sign(wind.e);
+    const top = recordWind(now, dir * wind.e), calm = !wind.aim && top < .004;
+    windW = calm ? 0 : wdir * Math.max(top, .004); // nonzero while any gust is still crossing the window
+    wind.ph += 3 * dt; // the gusts travel at about 250px a second
+    // the sprigs along a piece's sides lie across the wind, so they lean with the gust passing them: their strip is skewed
+    // about the line their roots are on (a transform only, nothing is repainted); sprigs along the top and bottom point
+    // along the wind and hardly bend
     // (every position is read before anything is moved, so the page is laid out once per frame, not once per strip)
-    const sides = [...strips].filter(st => st.edge === "left" || st.edge === "right"), seen = calm ? null : sides.map(st => inView(st.el)), wd = sides.map(st => windSt.has(st) || calm ? 0 : st.el.offsetWidth);
-    dispatchEvent(new CustomEvent("grass-wind", { detail: windW }));
+    const sr = sceneRect(), sides = [...strips].filter(st => st.edge === "left" || st.edge === "right");
+    const rs = calm ? null : sides.map(st => st.el.getBoundingClientRect()), seen = calm ? null : rs.map(r => r.bottom > -80 && r.top < innerHeight + 80);
+    const wd = sides.map(st => windSt.has(st) || calm ? 0 : st.el.offsetWidth);
+    dispatchEvent(new CustomEvent("grass-wind", { detail: { w: windW, dir: wdir, env: envAt, ph: wind.ph, sx: sr.x, sy: sr.y } }));
     for (const [i, st] of sides.entries()) {
       const on = !calm && seen[i];
       if (on) { if (!windSt.has(st)) { windSt.add(st); const ox = (st.edge === "left" ? 0 : wd[i]) - st.x0;
-          for (const n of [st.img, st.cv]) n.style.transformOrigin = `${ox}px 50%`; }
-        const k = (st.edge === "left" ? 1 : -1) * windW * 8, tf = `skewY(${k.toFixed(2)}deg)`; st.img.style.transform = st.cv.style.transform = tf; }
-      else if (windSt.has(st)) { windSt.delete(st); st.img.style.transform = st.cv.style.transform = ""; } }
+          for (const q of pair(st)) for (const n of [q.img, q.cv]) n.style.transformOrigin = `${ox}px 50%`; }
+        const r = rs[i], ex = r.left + (st.edge === "left" ? 0 : r.width), ey = r.top + st.y0 + st.H / DPR / 2, k = (st.edge === "left" ? 1 : -1) * envAt(ex, ey) * 12 * gust(r.left + (st.edge === "left" ? 0 : r.width) + scrollX - sr.x, r.top + st.y0 + st.H / DPR / 2 + scrollY - sr.y), tf = `skewY(${k.toFixed(2)}deg)`; for (const q of pair(st)) q.img.style.transform = q.cv.style.transform = tf; }
+      else if (windSt.has(st)) { windSt.delete(st); for (const q of pair(st)) q.img.style.transform = q.cv.style.transform = ""; } }
     if (SW && !swayFrame.raf) swayFrame.raf = requestAnimationFrame(swayFrame);
     wind.raf = calm ? 0 : requestAnimationFrame(windFrame);
   }
   let last = null, queued = null;
+  let mouseAt = null;
   addEventListener("pointermove", e => {
-    if (e.pointerType === "touch" || reduce()) return;
+    if (e.pointerType === "touch" || reduce()) { mouseAt = null; return; } mouseAt = [e.clientX, e.clientY];
     queued = { x: e.clientX + scrollX, y: e.clientY + scrollY, t: performance.now() };
     if (!brush.raf) brush.raf = requestAnimationFrame(brush);
   }, { passive: true });
+  // scrolling under a resting cursor moves the page past it, so it brushes the grass just as dragging over the same stretch would
+  document.addEventListener("pointerleave", () => { mouseAt = null; });
+  addEventListener("scroll", () => { if (!mouseAt || reduce()) return;
+    queued = { x: mouseAt[0] + scrollX, y: mouseAt[1] + scrollY, t: performance.now() }; if (!brush.raf) brush.raf = requestAnimationFrame(brush); }, { passive: true });
   const bend = (dx, dy, x, y, p, vx, vy, sp) => {
     const d = Math.hypot(x - p.x, y - p.y); if (d > R) return 0;
     // bend toward the motion: the sign of the turn comes from which side of the blade the cursor is moving to
@@ -540,7 +600,7 @@
   // touched, so the copy can't blur or shade it. The copy fades in with the push (over the first px), so at rest it is invisible and nothing pops.
   // It's one WebGL layer the size of the window, under every piece (cards and their grass cover it), and each frame only
   // the box around the stirring is drawn.
-  const MAXK = 40, SR = 55;
+  const MAXK = 40, SR = 70; // the same reach as the sprigs on the pieces (R)
   const VS = "attribute vec2 a;varying vec2 v;void main(){v=a*.5+.5;gl_Position=vec4(a,0.,1.);}";
   // the moss, the strand map and the canopy maps are uploaded once and tile in the shader; nothing is repainted per move
   // The stirred strands are lit with the very same steps the CSS uses for the ground (dir-i.css, .x-i background): a 20%
@@ -548,7 +608,9 @@
   // (multiplied) and the sun flecks (soft-light), worked out per pixel. An approximation went visibly off in strong sun.
   // The strands move in whole screen pixels: sampling the moss between pixels blurred it, and with the whole window
   // leaning on a scroll that read as the ground going soft.
-  const FS = `precision highp float;varying vec2 v;uniform sampler2D T,M,H,B,U,L;uniform vec4 K[${MAXK}];uniform vec2 S,O,P;uniform vec3 Wd;uniform float NK,R;
+  const FS = `precision highp float;varying vec2 v;uniform sampler2D T,M,H,B,U,L,E;uniform vec4 K[${MAXK}],V;uniform vec2 S,O,P;uniform vec3 Wd;uniform float NK,R;
+    float ss(float x){return x*x*(3.-2.*x);}
+    float wb(float t){if(t<.18)return ss(t/.18);if(t<.48)return mix(1.,-.38,ss((t-.18)/.3));if(t<.74)return mix(-.38,.14,ss((t-.48)/.26));return mix(.14,0.,ss((t-.74)/.26));}
     vec3 soft(vec3 b,vec3 s){vec3 d=mix(((16.*b-12.)*b+4.)*b,sqrt(b),step(.25,b));
       return mix(b-(1.-2.*s)*b*(1.-b),b+(2.*s-1.)*(d-b),step(.5,s));}
     vec3 lit(vec3 c,vec2 g){
@@ -560,7 +622,8 @@
       vec4 u=texture2D(U,cu);return mix(c,soft(c,u.rgb),u.a);}
     void main(){vec2 p=vec2(v.x,1.-v.y)*S;vec2 d=vec2(0.);
       for(int i=0;i<${MAXK};i++){if(float(i)>=NK)break;vec4 k=K[i];float r=length(p-k.xy)/${SR}.;if(r<1.){float f=1.-r;d+=k.zw*f*f*(3.-2.*f);}}
-      vec2 gp=O+p;d+=Wd.xy*(.7+.3*sin(dot(gp,vec2(.011,.006))+Wd.z));d*=1.-smoothstep(.05,.55,texture2D(L,gp/P).a);
+      vec2 gp=O+p,sc=gp-V.xy;float u=fract((Wd.z-Wd.x*(gp.y*.0121+gp.x*.0035))/6.2831853),wd=Wd.x>0.?sc.y+sc.x*.2893:V.w-sc.y+(V.z-sc.x)*.2893;
+      float ew=(texture2D(E,vec2((max(wd,0.)/${WV}.*${WHZ}.+.5)/${WH}.,.5)).r*255.-128.)/127.;d.y+=Wd.y*ew*(u<.48?wb(u/.48):0.);d*=1.-smoothstep(.05,.55,texture2D(L,gp/P).a);
       vec4 m0=texture2D(M,(O+p)/900.);float a=(m0.g-.5)*1.2,c=cos(a),s=sin(a);d=vec2(c*d.x-s*d.y,s*d.x+c*d.y)*(.45+.55*m0.g);
       vec2 q=p-floor(d*R+.5)/R,uq=(O+q)/900.,up=(O+p)/900.;float al=clamp(length(d)*12.,0.,1.),mp=texture2D(M,up).r,mq=texture2D(M,uq).r;
       vec3 under=mix(texture2D(T,up).rgb,texture2D(B,up).rgb,clamp((mp-mq)/(1.001-mq),0.,1.));
@@ -575,19 +638,21 @@
     const gl = cv.getContext("webgl", { premultipliedAlpha: true, alpha: true, antialias: false }); if (!gl) return null;
     const sh = (t, src) => { const o = gl.createShader(t); gl.shaderSource(o, src); gl.compileShader(o); return o; };
     const pr = gl.createProgram(); gl.attachShader(pr, sh(gl.VERTEX_SHADER, VS)); gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, FS)); gl.linkProgram(pr);
-    if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) return null; gl.useProgram(pr);
+    if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) { console.warn("sway shader:", gl.getShaderInfoLog(gl.getAttachedShaders(pr)[1])); return null; } gl.useProgram(pr);
     gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer()); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
     const a = gl.getAttribLocation(pr, "a"); gl.enableVertexAttribArray(a); gl.vertexAttribPointer(a, 2, gl.FLOAT, false, 0, 0);
     [MOSS, FRONDS, pot(SHADE), BARE, pot(SUN)].forEach((img, u) => { gl.activeTexture(gl.TEXTURE0 + u); gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img); gl.generateMipmap(gl.TEXTURE_2D); if (img.getContext) img.width = 0; });
-    ["T", "M", "H", "B", "U", "L"].forEach((n, u) => gl.uniform1i(gl.getUniformLocation(pr, n), u));
+    ["T", "M", "H", "B", "U", "L", "E"].forEach((n, u) => gl.uniform1i(gl.getUniformLocation(pr, n), u));
     gl.activeTexture(gl.TEXTURE5); const lt = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, lt);
     for (const [k, v] of [[gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE], [gl.TEXTURE_MIN_FILTER, gl.LINEAR], [gl.TEXTURE_MAG_FILTER, gl.LINEAR]]) gl.texParameteri(gl.TEXTURE_2D, k, v);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(4));
+    gl.activeTexture(gl.TEXTURE6); const et = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, et);
+    for (const [k, v] of [[gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE], [gl.TEXTURE_MIN_FILTER, gl.LINEAR], [gl.TEXTURE_MAG_FILTER, gl.LINEAR]]) gl.texParameteri(gl.TEXTURE_2D, k, v);
     scene().prepend(cv);
-    return { cv, gl, uK: gl.getUniformLocation(pr, "K"), uO: gl.getUniformLocation(pr, "O"), uS: gl.getUniformLocation(pr, "S"), uP: gl.getUniformLocation(pr, "P"), uW: gl.getUniformLocation(pr, "Wd"), uN: gl.getUniformLocation(pr, "NK"), uR: gl.getUniformLocation(pr, "R"), K: new Float32Array(MAXK * 4), at: null };
+    return { et, eb: new Uint8Array(WH), uV: gl.getUniformLocation(pr, "V"), cv, gl, uK: gl.getUniformLocation(pr, "K"), uO: gl.getUniformLocation(pr, "O"), uS: gl.getUniformLocation(pr, "S"), uP: gl.getUniformLocation(pr, "P"), uW: gl.getUniformLocation(pr, "Wd"), uN: gl.getUniformLocation(pr, "NK"), uR: gl.getUniformLocation(pr, "R"), K: new Float32Array(MAXK * 4), at: null };
   }
   // (the pieces' shadows are not in the light map: the layer lies under the pieces, so their own CSS shadows already fall
   // on the stirred strands, and adding them here darkened strands near a card twice)
@@ -632,7 +697,10 @@
       l = Math.min(l, x); t = Math.min(t, y); r = Math.max(r, x); b = Math.max(b, y); });
     // the scroll's pull moves every strand in view, so then the whole window is drawn
     if (windW) { l = t = -1e4; r = b = 1e4; }
-    gl.uniform3f(SW.uW, 0, windW * 3.2, now / 900); gl.uniform1f(SW.uN, ks.length); gl.uniform1f(SW.uR, SW.d || DPR);
+    gl.uniform3f(SW.uW, wdir, 6, wind.ph);
+    if (windW) { const sr = sceneRect(); gl.uniform4f(SW.uV, scrollX - sr.x, scrollY - sr.y, innerWidth, innerHeight);
+      for (let i = 0; i < WH; i++) SW.eb[i] = Math.max(1, Math.min(255, Math.round(whist[i] * 127) + 128));
+      gl.activeTexture(gl.TEXTURE6); gl.bindTexture(gl.TEXTURE_2D, SW.et); gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, WH, 1, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, SW.eb); } gl.uniform1f(SW.uN, ks.length); gl.uniform1f(SW.uR, SW.d || DPR);
     gl.viewport(0, 0, cv.width, cv.height); gl.disable(gl.SCISSOR_TEST); gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
     // only the box around the stirring is drawn (GL counts rows from the bottom)
     const D = SW.d, m = SR + 8, X = Math.max(0, Math.floor((l - m) * D)), Y = Math.max(0, Math.floor((cv.height / D - b - m) * D));
@@ -642,7 +710,8 @@
     swayFrame.raf = requestAnimationFrame(swayFrame);
   }
   // the layer (and its one-time texture uploads) is made while the page is idle, not on the first sweep
-  (window.requestIdleCallback || setTimeout)(() => { if (reduce() || matchMedia("(hover: none)").matches) return; SW = makeSway(); pinUnderLitter(); });
+  // (within a second and a half at most: a busy page can go many seconds without an idle moment, and the moss stayed still)
+  (window.requestIdleCallback || setTimeout)(() => { if (reduce() || matchMedia("(hover: none)").matches) return; SW = makeSway(); pinUnderLitter(); }, { timeout: 1500 });
   let lastSway = null;
   function sway(p, vx, vy, sp, now) {
     if (!SW || (lastSway && Math.hypot(p.x - lastSway.x, p.y - lastSway.y) < 20)) return; lastSway = p;

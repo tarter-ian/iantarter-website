@@ -205,6 +205,9 @@
     const out = ctx.createImageData(W, H), o = out.data;
     // faces, then grown under the outline by about 3/4 of a CSS px so no light edge shows between fill and ink
     let m = new Uint8Array(N); for (let p = 0; p < N; p++) m[p] = !ink[p] && depth[lab[p]] === 2 ? 1 : 0;
+    // a tiny pocket inside the font's drawn-on depth (the "e" has one in its lower counter) is not part of the face
+    { const area = new Int32Array(L); for (let p = 0; p < N; p++) if (m[p]) area[lab[p]]++; const big = Math.max(...area);
+      for (let p = 0; p < N; p++) if (m[p] && area[lab[p]] < big * .02) m[p] = 0; }
     const soft = new Uint8Array(N); for (let p = 0; p < N; p++) { const al = a[p * 4 + 3]; soft[p] = al > 0 && al < 170 ? 1 : 0; }
     for (let k = 0, K = Math.max(2, Math.round(S * 0.6)); k < K; k++) {
       const n2 = m.slice();
@@ -254,11 +257,13 @@
   // recent pointer positions, so a spin can follow the direction and speed of the swipe
   // (tracked across the whole page, so a swipe that comes in from above or below already has a direction when it reaches a letter)
   const trail = [];
-  site.addEventListener("pointermove", e => { const now = performance.now(); trail.push({ x: e.clientX, y: e.clientY, t: now }); while (trail.length > 2 && now - trail[0].t > 120) trail.shift(); }, { passive: true });
+  // (kept in page positions, so scrolling under a resting cursor counts as moving it over the page)
+  const track = (cx, cy) => { const now = performance.now(); trail.push({ x: cx + scrollX, y: cy + scrollY, t: now }); while (trail.length > 2 && now - trail[0].t > 120) trail.shift(); };
+  site.addEventListener("pointermove", e => track(e.clientX, e.clientY), { passive: true });
   function swipe(e) {
     const a = trail[0]; if (!a) return { vx: 0, vy: 0 };
     const dt = Math.max(16, performance.now() - a.t);
-    return { vx: (e.clientX - a.x) / dt, vy: (e.clientY - a.y) / dt }; // px per ms
+    return { vx: (e.clientX + scrollX - a.x) / dt, vy: (e.clientY + scrollY - a.y) / dt }; // px per ms
   }
   // A spinning letter gets real depth: copies of its silhouette stacked behind it, and a back face,
   // so it reads as a solid block when it turns edge-on.
@@ -600,17 +605,24 @@
       let d = 0;
       if (w) { if (now >= w.t0 && w.prev) { w.c0 = w.d; w.prev = null; }
         if (now - w.t0 >= w.dur) sways.delete(b); else d = w.d = swayD(w, now); }
-      if (nameWind) { if (b._wk == null) { b._wk = .6 + Math.random() * .6; b._wa = Math.sin(parseFloat((b._base.match(/-?[\d.]+/) || [0])[0]) * Math.PI / 180); } d += nameWind * 5 * b._wk * b._wa; }
+      if (nameWind) { if (b._wk == null) { b._wk = .6 + Math.random() * .6; b._wa = Math.sin(parseFloat((b._base.match(/-?[\d.]+/) || [0])[0]) * Math.PI / 180); }
+        // each leaf leans with the gust passing it (the same rolling bands as the grass, see blades.js)
+        if (!b._pp) { const r = b.getBoundingClientRect(); b._pp = [r.left + r.width / 2 + scrollX - nameGust.sx, r.top + r.height / 2 + scrollY - nameGust.sy]; }
+        const q = nameGust.dir * (b._pp[1] * .0121 + b._pp[0] * .0035), u = (((nameGust.ph - q) / (2 * Math.PI)) % 1 + 1) % 1;
+        d += nameGust.env(b._pp[0] + nameGust.sx - scrollX, b._pp[1] + nameGust.sy - scrollY) * 8 * b._wk * b._wa * (u < .48 ? gustWob(u / .48) : 0); }
       b.style.transform = d ? `${b._base} rotate(${d.toFixed(2)}deg)` : b._base; }
     swayFrame.raf = sways.size || nameWind ? requestAnimationFrame(swayFrame) : 0;
   }
   const swayNext = (b, amp, t0, dur) => { const prev = sways.get(b);
     sways.set(b, { base: prev ? prev.base : b._base != null ? b._base : b.style.transform, amp, t0, dur, c0: prev ? prev.d || 0 : 0, prev: prev || null, d: prev ? prev.d || 0 : 0 }); };
   // scrolling pulls the name's leaves along with the rest of the grass (see blades.js)
-  let nameWind = 0;
+  let nameWind = 0, nameGust = null;
+  // the cursor's wobble (blades.js KEYS): out, back past rest, a smaller swing, still
+  const GW = [[0, 0], [.18, 1], [.48, -.38], [.74, .14], [1, 0]];
+  const gustWob = t => { for (let k = 1; k < GW.length; k++) if (t <= GW[k][0]) { const [t0, a0] = GW[k - 1], [t1, a1] = GW[k], u = (t - t0) / (t1 - t0); return a0 + (a1 - a0) * u * u * (3 - 2 * u); } return 0; };
   addEventListener("grass-wind", e => { const lay = nameEl.closest(".lay"), r = lay && lay.getBoundingClientRect(), seen = r && r.bottom > 0 && r.top < innerHeight;
     // only while the name is on screen: moving its leaves makes the browser redraw each one
-    nameWind = reduceMotion() || !seen ? 0 : e.detail; if (!swayFrame.raf && (nameWind || windWas)) swayFrame.raf = requestAnimationFrame(swayFrame); });
+    nameWind = reduceMotion() || !seen ? 0 : e.detail.w; nameGust = e.detail; if (!swayFrame.raf && (nameWind || windWas)) swayFrame.raf = requestAnimationFrame(swayFrame); });
   function swayAt(c, s, force) {
     const lay = nameEl.closest(".lay"); if (!lay || !lay._grown) return; // still growing in: its own loop is moving them
     const r = c.getBoundingClientRect(), now = performance.now();
@@ -943,8 +955,10 @@
     box.firstChild.style.height = a.offsetHeight + "px";
     // beside Email me when it fits; on narrow phones it sits just below Email me instead, so it never runs off the screen,
     // and the button row makes room for it there so it doesn't land on what comes next
-    const row = box.parentElement; row.style.paddingBottom = "";
-    const gap = matchMedia("(max-width: 600px)").matches ? 8 : 14, room = row.clientWidth - (a.offsetLeft + a.offsetWidth + gap) - 4;
+    // where the row is too narrow, the buttons tighten up a little first so all three still share one row
+    const row = box.parentElement; row.style.paddingBottom = ""; row.classList.remove("s-tight");
+    const fits = () => { box.firstChild.style.height = a.offsetHeight + "px"; const g = parseFloat(getComputedStyle(row).columnGap) || 12; return [g, row.clientWidth - (a.offsetLeft + a.offsetWidth + g) - 2]; };
+    let [gap, room] = fits(); if (!box.hidden && box.offsetWidth > room) { row.classList.add("s-tight"); [gap, room] = fits(); }
     if (box.hidden || box.offsetWidth <= room) { box.style.left = a.offsetLeft + a.offsetWidth + gap + "px"; box.style.top = a.offsetTop + a.offsetHeight / 2 + "px"; }
     else { row.style.paddingBottom = box.offsetHeight + 14 + "px"; box.style.left = a.offsetLeft + "px"; box.style.top = a.offsetTop + a.offsetHeight + 14 + box.offsetHeight / 2 + "px"; }
 
@@ -964,11 +978,17 @@
   // a fast flick can jump right over a letter between two pointer readings, so every move is traced as a line
   // from the last reading, and each letter that line passes through counts, even if neither end lands on the name
   let lastPt = null, lastVy = 0;
-  window.addEventListener("pointermove", e => {
-    const prev = lastPt; lastPt = { x: e.clientX, y: e.clientY, t: e.timeStamp || performance.now() };
+  // (the last reading is kept as a page position, so a scroll under a resting cursor traces a line over the name too)
+  let mouseAt = null;
+  window.addEventListener("pointermove", e => { mouseAt = e.pointerType === "touch" ? null : [e.clientX, e.clientY]; nameMove(e); }, { passive: true });
+  document.addEventListener("pointerleave", () => { mouseAt = null; });
+  addEventListener("scroll", () => { if (!mouseAt) return; const e = { clientX: mouseAt[0], clientY: mouseAt[1], timeStamp: performance.now() }; track(e.clientX, e.clientY); nameMove(e); }, { passive: true });
+  function nameMove(e) {
+    const pv = lastPt, prev = pv && { x: pv.x - scrollX, y: pv.y - scrollY, t: pv.t }; lastPt = { x: e.clientX + scrollX, y: e.clientY + scrollY, t: e.timeStamp || performance.now() };
+    const cur = { x: e.clientX, y: e.clientY, t: lastPt.t };
     let fx = nameFx(); if (fx === "none" || mode !== "view") return; if (fx !== "fill" && reduceMotion()) fx = "fill";
     const w = nameEl._fillCv; if (!w || !w._glyphs || !w.isConnected) return;
-    const b = w.getBoundingClientRect(), a = prev || lastPt, seg = Math.hypot(e.clientX - a.x, e.clientY - a.y), dt = lastPt.t - (a.t || lastPt.t);
+    const b = w.getBoundingClientRect(), a = prev || cur, seg = Math.hypot(e.clientX - a.x, e.clientY - a.y), dt = cur.t - (a.t || cur.t);
     // a long jump between readings means a fast flick: its own direction and speed are the truest; otherwise use the recent average
     const v = seg > 12 && dt > 0 && dt < 80 ? { vx: (e.clientX - a.x) / Math.max(dt, 8), vy: (e.clientY - a.y) / Math.max(dt, 8) } : swipe(e);
     const x0 = a.x - b.left, y0 = a.y - b.top, x1 = e.clientX - b.left, y1 = e.clientY - b.top;
@@ -981,7 +1001,7 @@
     // flicking up and down without leaving a letter turns it back the other way
     if (lastBob >= 0 && Math.abs(v.vy) > 0.6 && Math.abs(v.vy) > Math.abs(v.vx) && Math.sign(v.vy) !== Math.sign(lastVy) && Math.abs(lastVy) > 0.6) playLetter(lastBob, v, fx);
     if (Math.abs(v.vy) > 0.6) lastVy = v.vy;
-  }, { passive: true });
+  }
   nameEl.addEventListener("pointerdown", bobAt);
   nameEl.addEventListener("pointerleave", () => { lastBob = -1; });
   const askGlint = () => { const w = nameEl._fillCv; if (w && w._sweep) w._sweep(); };

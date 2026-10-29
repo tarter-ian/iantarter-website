@@ -490,7 +490,33 @@ body > p[role="status"] { top: 0; left: 0; }
    never makes the browser re-layer (and redraw) the whole page mid-scroll: that showed as bare green on a fast scroll */
 .x-i .i-scene { will-change: transform; }
 
-/* each contact link stays on one line (Ian); on the narrowest phones the label sits above its link instead */
+/* each contact link stays on one line (Ian), and the three links are laid out alike: label and link side by side while
+   the longest one (linkedin.com/in/ian-tarter) fits, otherwise every link sits under its label */
 .x-i .card .c-links a { white-space: nowrap; overflow-wrap: normal; }
+.c-links { container-type: inline-size; }
 .c-links li { grid-template-columns: 76px auto; }
-@media (max-width: 420px) { .c-links li { grid-template-columns: 1fr; gap: 2px; } }
+@container (max-width: 372px) { .c-links li { grid-template-columns: 1fr; row-gap: 2px; } }
+
+.site.x-i .s-egg-chip { position: relative; border: 0; border-radius: 10px; color: var(--ink); background: #f3f3ef url("tex/linen-n.webp") center / 150px; --edge: #a3a39b; --cast: rgba(10,14,4,.4);
+  box-shadow: inset 1px 1.5px 0 rgba(255,236,210,.45), inset -1px -1px 0 rgba(60,10,0,.25), 1px 1px 0 var(--edge), 2px 2px 0 var(--edge), 3px 3px 0 var(--edge), 4px 4px 0 var(--edge), 4px 5px 2px var(--cast), 9px 12px 14px var(--cast);
+  transition: transform .14s ease, box-shadow .14s ease; filter: brightness(.95); }
+.site.x-i .s-egg-chip:active { transform: translate(3px, 3px);
+  box-shadow: inset 1px 1.5px 0 rgba(255,236,210,.35), inset -1px -1px 0 rgba(60,10,0,.25), 1px 1px 0 var(--edge), 2px 2px 1px var(--cast), 4px 5px 6px var(--cast); }
+/* Buttons are thick tokens lying on the card, seen from straight above like everything else: no side walls show, only
+   a thin rim (light on the upper left, darker on the lower right) and the shadow they cast. Pointed at, a token grows
+   taller: its top comes closer, so it looks a little bigger, and its shadow reaches further from it. Pressed, it sinks.
+   The three states use the same list of layers, so one slides smoothly into the next. The hidden-words badge is the
+   same kind of token as "Email me" beside it. */
+.site.x-i .s-btn, .site.x-i .s-egg-chip { transform: none; transition: transform .16s ease, box-shadow .16s ease;
+  box-shadow: inset 1px 1px 0 rgba(255,240,220,.5), inset -1px -1.5px 0 rgba(40,20,0,.28), 0 0 0 .5px var(--edge), .5px 1px 1px rgba(10,14,4,.55), 3px 4px 3px var(--cast), 8px 11px 12px var(--cast); }
+.site.x-i .s-btn:hover, .site.x-i .s-btn:focus-visible, .site.x-i .s-egg-chip:hover, .site.x-i .s-egg-chip:focus-visible { transform: scale(1.02);
+  box-shadow: inset 1px 1px 0 rgba(255,240,220,.5), inset -1px -1.5px 0 rgba(40,20,0,.28), 0 0 0 .5px var(--edge), .75px 1.5px 1.5px rgba(10,14,4,.5), 4.5px 6px 4px var(--cast), 11px 15px 15px var(--cast); }
+.site.x-i .s-btn:active, .site.x-i .s-egg-chip:active { transform: scale(.992);
+  box-shadow: inset 1px 1px 0 rgba(255,240,220,.4), inset -1px -1.5px 0 rgba(40,20,0,.3), 0 0 0 .5px var(--edge), .5px .75px .75px rgba(10,14,4,.58), 2px 3px 2.5px var(--cast), 6px 8px 9px var(--cast); }
+@media (prefers-reduced-motion: reduce) { .site.x-i .s-btn, .site.x-i .s-egg-chip { transition: none; } }
+/* the hidden-words badge shares the button row: on a narrow card the buttons tighten up so all three fit */
+.x-i .s-actions.s-tight { gap: 7px; }
+.x-i .c-intro .s-actions.s-tight .s-btn { padding: .62em .5em; font-size: .9em; }
+.site.x-i .s-tight .s-egg-chip { padding: 0 6px; }
+@media (max-width: 400px) { .x-i .c-intro .cf { padding-left: 20px; padding-right: 20px; } }
+@media (max-width: 370px) { .x-i .c-intro .s-actions.s-tight .s-btn { font-size: .86em; } }
