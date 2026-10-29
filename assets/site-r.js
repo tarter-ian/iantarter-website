@@ -547,16 +547,34 @@
     swayAt(c, ux >= 0 ? 1 : -1, Math.min(1.6, .5 + sp));
   }
   // sway the blades growing around a letter
+  // The leaves at a pushed letter's foot sway with it. They're moved by one frame loop that only ever changes their
+  // transform, never by animations that start and end: Safari rebuilt a leaf's layer as an animation began or finished,
+  // and the leaves blinked just after the letters came to rest.
+  const sways = new Map();
+  const easeOut = t => { let lo = 0, hi = 1; for (let i = 0; i < 20; i++) { const u = (lo + hi) / 2, x = 3 * u * u * (1 - u) * .58 + u * u * u; if (x < t) lo = u; else hi = u; }
+    const u = (lo + hi) / 2; return 3 * u * u * (1 - u) + u * u * u; };
+  const SW_AT = [0, .2, .5, .75, 1], SW_V = [0, 11, -5, 2, 0];
+  function swayFrame() {
+    const now = performance.now();
+    for (const [b, w] of sways) {
+      const t = (now - w.t0) / w.dur; if (t < 0) continue;
+      if (t >= 1) { b.style.transform = w.base; sways.delete(b); continue; }
+      const p = easeOut(t); let i = 1; while (p > SW_AT[i]) i++;
+      const f = (p - SW_AT[i - 1]) / (SW_AT[i] - SW_AT[i - 1]), d = (SW_V[i - 1] + (SW_V[i] - SW_V[i - 1]) * f) * w.amp;
+      b.style.transform = `${w.base} rotate(${d.toFixed(2)}deg)`;
+    }
+    swayFrame.raf = sways.size ? requestAnimationFrame(swayFrame) : 0;
+  }
   function swayAt(c, s, force) {
     const lay = nameEl.closest(".lay"); if (!lay) return;
-    const r = c.getBoundingClientRect();
+    const r = c.getBoundingClientRect(), now = performance.now();
     lay.querySelectorAll(":scope > .blade").forEach(b => {
       const br = b.getBoundingClientRect(), bx = br.left + br.width / 2;
       if (bx < r.left - 14 || bx > r.right + 14) return;
-      const k = (.6 + Math.random() * .5) * force;
-      b.animate([{ rotate: "0deg" }, { rotate: `${(s * 11 * k).toFixed(1)}deg`, offset: .2 }, { rotate: `${(-s * 5 * k).toFixed(1)}deg`, offset: .5 }, { rotate: `${(s * 2 * k).toFixed(1)}deg`, offset: .75 }, { rotate: "0deg" }],
-        { duration: 1000 + Math.random() * 400, delay: Math.random() * 80, easing: "ease-out" });
+      const k = (.6 + Math.random() * .5) * force, prev = sways.get(b);
+      sways.set(b, { base: prev ? prev.base : b.style.transform, amp: s * k, t0: now + Math.random() * 80, dur: 1000 + Math.random() * 400 });
     });
+    if (!swayFrame.raf && sways.size) swayFrame.raf = requestAnimationFrame(swayFrame);
   }
   // Twirl: the letters lie flat in the moss, so a sweep turns a letter round in place, like spinning a tile on a table.
   // Same wheel physics as the old spin (the flick sets the speed so the letter's edge keeps pace with the pointer, then only
@@ -639,9 +657,10 @@
   function tilt(R, k) {
     // flat, the sides' soft rims peek out under the face's edge, so they fade in and out with the tilt (over the first
     // 4 degrees): the letter never visibly gains or loses its edge, and a still name has no side layers
-    const a = Math.abs(R.th * k), up = a > .05, op = Math.min(1, a / 4).toFixed(3);
-    if (up !== R.up || (up && op !== R.op)) { R.up = up; R.op = op;
-      for (const n of R.wrap.children) if (n !== R.top) { n.style.display = up ? "" : "none"; n.style.opacity = op; } }
+    // once made, they stay in place (only their opacity changes): switching them off as the letter settled made Safari
+    // rebuild the letter's layers, and the leaves over it blinked
+    const a = Math.abs(R.th * k), op = Math.min(1, a / 4).toFixed(3);
+    if (op !== R.op) { R.op = op; for (const n of R.wrap.children) if (n !== R.top) { n.style.display = ""; n.style.opacity = op; } }
     const e = k >= 0 ? R.hi : R.lo, px = (R.ux * e).toFixed(2), py = (R.uy * e).toFixed(2);
     R.sh.style.transform = R.wrap.style.transform = `perspective(600px) translate3d(${px}px, ${py}px, ${-R.D}px) rotate3d(${(-R.uy).toFixed(3)}, ${R.ux.toFixed(3)}, 0, ${(Math.abs(R.th * k) < .02 ? .02 : R.th * k).toFixed(2)}deg) translate3d(${-px}px, ${-py}px, ${R.D}px)`;
   }

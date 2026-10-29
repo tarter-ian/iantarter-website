@@ -482,3 +482,5 @@ body > p[role="status"] { top: 0; left: 0; }
 /* Safari sorts a tipping 3D letter by depth against the leaves lying over it, and drew the raised edge in front of them; the
    leaves sit well above the highest a letter can tip (no perspective above them, so nothing changes size) */
 .i-name > .blade, .i-name > .blade-strip { translate: 0 0 200px; }
+/* the letters keep one flat layer of their own, so their 3D tipping stays inside it and can't cut through the leaves */
+.i-name { isolation: isolate; } .i-name > .fill-cv { will-change: transform; }
