@@ -615,7 +615,7 @@
   // strand gets its own share and slant of the push while soil, twigs and leaves stay put. Where a strand moves off its
   // spot, the ground under it shows (moss-bare: the strands smeared into their own average colour; soil showed as a dark shadow that pulsed), or the
   // strand would seem doubled. Only strand pixels and the spots strands left are redrawn; the soil between is never
-  // touched, so the copy can't blur or shade it. The copy fades in with the push (over the first px), so at rest it is invisible and nothing pops.
+  // touched, so the copy can't blur or shade it. The copy only shows where a strand has actually moved by a whole screen pixel: a copy sitting unmoved at rest was a shade off the ground and read as a flicker as it faded out.
   // It's one WebGL layer the size of the window, under every piece (cards and their grass cover it), and each frame only
   // the box around the stirring is drawn.
   const MAXK = 40, SR = 95; // the same reach as the sprigs on the pieces (R)
@@ -646,7 +646,7 @@
       vec2 gp=O+p,sc=gp-V.xy;float u=fract((Wd.z-Wd.x*(gp.y*.0121+gp.x*.0035))/6.2831853),wd=Wd.x>0.?sc.y+sc.x*.2893:V.w-sc.y+(V.z-sc.x)*.2893;
       float ew=(texture2D(E,vec2((max(wd,0.)/${WV}.*${WHZ}.+.5)/${WH}.,.5)).r*255.-128.)/127.;d.y+=Wd.y*ew*(u<.48?wb(u/.48)*gn(gp):0.);d*=1.-smoothstep(.05,.55,texture2D(L,gp/P).a);
       vec4 m0=texture2D(M,(O+p)/900.);float a=(m0.g-.5)*1.2,c=cos(a),s=sin(a);d=vec2(c*d.x-s*d.y,s*d.x+c*d.y)*(.45+.55*m0.g);
-      vec2 q=p-floor(d*R+.5)/R,uq=(O+q)/900.,up=(O+p)/900.;float al=clamp(length(d)*12.,0.,1.),mp=texture2D(M,up).r,mq=texture2D(M,uq).r;
+      vec2 sn=floor(d*R+.5)/R,q=p-sn,uq=(O+q)/900.,up=(O+p)/900.;float al=step(.001,length(sn)),mp=texture2D(M,up).r,mq=texture2D(M,uq).r;
       vec3 under=mix(texture2D(T,up).rgb,texture2D(B,up).rgb,clamp((mp-mq)/(1.001-mq),0.,1.));
       vec3 col=lit(mix(under,texture2D(T,uq).rgb,mq),O+p);al*=smoothstep(.08,.35,max(mp,mq));gl_FragColor=vec4(col*al,al);}`;
   // the canopy maps are 1600px; WebGL1 only tiles power-of-two textures, so they go up as 1024px copies (they're soft)
