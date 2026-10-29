@@ -609,7 +609,7 @@
         // each leaf leans with the gust passing it (the same rolling bands as the grass, see blades.js)
         if (!b._pp) { const r = b.getBoundingClientRect(); b._pp = [r.left + r.width / 2 + scrollX - nameGust.sx, r.top + r.height / 2 + scrollY - nameGust.sy]; }
         const q = nameGust.dir * (b._pp[1] * .0121 + b._pp[0] * .0035), u = (((nameGust.ph - q) / (2 * Math.PI)) % 1 + 1) % 1;
-        d += nameGust.env(b._pp[0] + nameGust.sx - scrollX, b._pp[1] + nameGust.sy - scrollY) * 8 * b._wk * b._wa * (u < .48 ? gustWob(u / .48) : 0); }
+        d += nameGust.env(b._pp[0] + nameGust.sx - scrollX, b._pp[1] + nameGust.sy - scrollY) * 8 * b._wk * b._wa * (u < .48 ? gustWob(u / .48) * nameGust.gn(b._pp[0], b._pp[1]) : 0); }
       b.style.transform = d ? `${b._base} rotate(${d.toFixed(2)}deg)` : b._base; }
     swayFrame.raf = sways.size || nameWind ? requestAnimationFrame(swayFrame) : 0;
   }

@@ -530,7 +530,12 @@
   // how much of a gust is at a spot in the scene now: crests about 520px apart, slanted a little, rolling the way the wind
   // blows. As one passes, each spot goes through the same wobble as a sprig the cursor brushed (out, then eased
   // back to rest), over about a second, then waits for the next.
-  const gust = (x, y) => { const q = wdir * (y * .0121 + x * .0035), u = (((wind.ph - q) / (2 * Math.PI)) % 1 + 1) % 1; return u < .48 ? wob(u / .48) : 0; };
+  // the wind isn't even: slowly drifting patches gust harder or softer (from GodotGrass's noise-driven wind), so a gust
+  // percolates through the grass instead of rolling by as a regular band. Same noise in the moss shader (gn there).
+  const h2 = (i, j) => { const s = Math.sin(i * 127.1 + j * 311.7) * 43758.5453; return s - Math.floor(s); };
+  const gn = (x, y) => { x /= 420; y = (y - wdir * wind.ph * 40) / 420; const i = Math.floor(x), j = Math.floor(y), fx = x - i, fy = y - j, ux = fx * fx * (3 - 2 * fx), uy = fy * fy * (3 - 2 * fy);
+    const a = h2(i, j), b = h2(i + 1, j), c = h2(i, j + 1), d = h2(i + 1, j + 1); return .35 + 1.3 * (a + (b - a) * ux + (c - a) * uy + (a - b - c + d) * ux * uy); };
+  const gust = (x, y) => { const q = wdir * (y * .0121 + x * .0035), u = (((wind.ph - q) / (2 * Math.PI)) % 1 + 1) % 1; return u < .48 ? wob(u / .48) * gn(x, y) : 0; };
   addEventListener("scroll", () => {
     if (reduce()) return; const now = performance.now(), dy = scrollY - wind.y, dt = Math.max(8, now - (wind.ev || now - 16)); wind.y = scrollY;
     const v = dy / dt, a = Math.sign(v) * Math.min(1, Math.sqrt(Math.abs(v) / 3)); // px per ms, eased so a slow scroll still shows
@@ -557,7 +562,7 @@
     const sr = sceneRect(), sides = [...strips].filter(st => st.edge === "left" || st.edge === "right");
     const rs = calm ? null : sides.map(st => st.el.getBoundingClientRect()), seen = calm ? null : rs.map(r => r.bottom > -80 && r.top < innerHeight + 80);
     const wd = sides.map(st => windSt.has(st) || calm ? 0 : st.el.offsetWidth);
-    dispatchEvent(new CustomEvent("grass-wind", { detail: { w: windW, dir: wdir, env: envAt, ph: wind.ph, sx: sr.x, sy: sr.y } }));
+    dispatchEvent(new CustomEvent("grass-wind", { detail: { w: windW, dir: wdir, env: envAt, gn, ph: wind.ph, sx: sr.x, sy: sr.y } }));
     for (const [i, st] of sides.entries()) {
       const on = !calm && seen[i];
       if (on) { if (!windSt.has(st)) { windSt.add(st); const ox = (st.edge === "left" ? 0 : wd[i]) - st.x0;
@@ -580,9 +585,10 @@
     queued = { x: mouseAt[0] + scrollX, y: mouseAt[1] + scrollY, t: performance.now() }; if (!brush.raf) brush.raf = requestAnimationFrame(brush); }, { passive: true });
   const bend = (dx, dy, x, y, p, vx, vy, sp) => {
     const d = Math.hypot(x - p.x, y - p.y); if (d > R) return 0;
-    // bend toward the motion: the sign of the turn comes from which side of the blade the cursor is moving to
-    const cross = dx * vy - dy * vx, amt = Math.min(22, (6 + sp * 9) * (1 - d / R)) * Math.sign(cross || 1);
-    return Math.abs(amt) < 2 ? 0 : amt;
+    // bend away from the cursor, like parting grass with a hand (from GrassBending): the turn's sign comes from which side
+    // of the blade the cursor is on. Strongest close in, fading out smoothly toward the edge of its reach (GodotGrass)
+    const f = 1 - d / R, cross = dx * (y - p.y) - dy * (x - p.x), amt = Math.min(22, (6 + sp * 9) * f * f * (3 - 2 * f)) * Math.sign(cross || 1);
+    return Math.abs(amt) < 1 ? 0 : amt;
   };
   function brush() {
     brush.raf = 0; const p = queued; if (!p) return;
@@ -596,13 +602,13 @@
     for (const g of domBlades) {
       if (Math.abs(g.x - p.x) > R || Math.abs(g.y - p.y) > R || now - (g.b._bt || 0) < 260) continue;
       const amt = bend(g.dx, g.dy, g.x, g.y, p, vx, vy, sp); if (!amt) continue; g.b._bt = now;
-      g.b.animate([{ rotate: "0deg" }, { rotate: amt + "deg", offset: .18 }, { rotate: (-amt * .38) + "deg", offset: .48 }, { rotate: (amt * .14) + "deg", offset: .74 }, { rotate: "0deg" }], { duration: 900 + Math.random() * 300, easing: "ease-out" });
+      g.b.animate([{ rotate: "0deg" }, { rotate: amt + "deg", offset: .2, easing: "ease-in-out" }, { rotate: "0deg" }], { duration: 900 + Math.random() * 300, easing: "ease-out" });
     }
   }
 
   // ---------- The open ground's own moss sways ----------
   // Nothing is added: around the cursor's path, a copy of the ground's moss strands is laid over them, and only the strands
-  // are pushed a few px the way the cursor went, then spring back with the same wobble as the blades. Which pixels are
+  // are pushed a few px away from the cursor, then ease back like the blades. Which pixels are
   // strands comes from a map made from the original scan (moss-fronds: R = strand, G = a random number per strand), so each
   // strand gets its own share and slant of the push while soil, twigs and leaves stay put. Where a strand moves off its
   // spot, the ground under it shows (moss-bare: the strands smeared into their own average colour; soil showed as a dark shadow that pulsed), or the
@@ -620,6 +626,9 @@
   // leaning on a scroll that read as the ground going soft.
   const FS = `precision highp float;varying vec2 v;uniform sampler2D T,M,H,B,U,L,E;uniform vec4 K[${MAXK}],V;uniform vec2 S,O,P;uniform vec3 Wd;uniform float NK,R;
     float ss(float x){return x*x*(3.-2.*x);}
+    float h2(vec2 c){return fract(sin(c.x*127.1+c.y*311.7)*43758.5453);}
+    float gn(vec2 g){g=vec2(g.x,g.y-Wd.x*Wd.z*40.)/420.;vec2 i=floor(g),f=g-i,u=f*f*(3.-2.*f);float a=h2(i),b=h2(i+vec2(1.,0.)),c=h2(i+vec2(0.,1.)),e=h2(i+1.);
+      return .35+1.3*(a+(b-a)*u.x+(c-a)*u.y+(a-b-c+e)*u.x*u.y);}
     float wb(float t){if(t<.2)return ss(t/.2);return 1.-ss((t-.2)/.8);}
     vec3 soft(vec3 b,vec3 s){vec3 d=mix(((16.*b-12.)*b+4.)*b,sqrt(b),step(.25,b));
       return mix(b-(1.-2.*s)*b*(1.-b),b+(2.*s-1.)*(d-b),step(.5,s));}
@@ -631,9 +640,9 @@
       vec2 cu=(g+vec2(180.,120.))/1600.;vec4 h=texture2D(H,cu);c=mix(c,c*h.rgb,h.a);
       vec4 u=texture2D(U,cu);return mix(c,soft(c,u.rgb),u.a);}
     void main(){vec2 p=vec2(v.x,1.-v.y)*S;vec2 d=vec2(0.);
-      for(int i=0;i<${MAXK};i++){if(float(i)>=NK)break;vec4 k=K[i];float r=length(p-k.xy)/${SR}.;if(r<1.){float f=1.-r;d+=k.zw*f*f*(3.-2.*f);}}
+      for(int i=0;i<${MAXK};i++){if(float(i)>=NK)break;vec4 k=K[i];vec2 a=p-k.xy;float r=length(a)/${SR}.;if(r<1.){float f=1.-r;d+=a/(length(a)+.001)*k.z*f*f*(3.-2.*f)*min(1.,r*4.);}}
       vec2 gp=O+p,sc=gp-V.xy;float u=fract((Wd.z-Wd.x*(gp.y*.0121+gp.x*.0035))/6.2831853),wd=Wd.x>0.?sc.y+sc.x*.2893:V.w-sc.y+(V.z-sc.x)*.2893;
-      float ew=(texture2D(E,vec2((max(wd,0.)/${WV}.*${WHZ}.+.5)/${WH}.,.5)).r*255.-128.)/127.;d.y+=Wd.y*ew*(u<.48?wb(u/.48):0.);d*=1.-smoothstep(.05,.55,texture2D(L,gp/P).a);
+      float ew=(texture2D(E,vec2((max(wd,0.)/${WV}.*${WHZ}.+.5)/${WH}.,.5)).r*255.-128.)/127.;d.y+=Wd.y*ew*(u<.48?wb(u/.48)*gn(gp):0.);d*=1.-smoothstep(.05,.55,texture2D(L,gp/P).a);
       vec4 m0=texture2D(M,(O+p)/900.);float a=(m0.g-.5)*1.2,c=cos(a),s=sin(a);d=vec2(c*d.x-s*d.y,s*d.x+c*d.y)*(.45+.55*m0.g);
       vec2 q=p-floor(d*R+.5)/R,uq=(O+q)/900.,up=(O+p)/900.;float al=clamp(length(d)*12.,0.,1.),mp=texture2D(M,up).r,mq=texture2D(M,uq).r;
       vec3 under=mix(texture2D(T,up).rgb,texture2D(B,up).rgb,clamp((mp-mq)/(1.001-mq),0.,1.));
@@ -703,7 +712,7 @@
     placeSway();
     const { gl, K, cv } = SW; K.fill(0);
     let l = Infinity, t = Infinity, r = -Infinity, b = -Infinity;
-    const ks = kicks.slice(-MAXK); ks.forEach((k, i) => { const w = k.amt * wob((now - k.t0) / k.dur), x = k.x - SW.x, y = k.y - SW.y; K.set([x, y, k.dx * w, k.dy * w], i * 4);
+    const ks = kicks.slice(-MAXK); ks.forEach((k, i) => { const w = k.amt * wob((now - k.t0) / k.dur), x = k.x - SW.x, y = k.y - SW.y; K.set([x, y, w, 0], i * 4);
       l = Math.min(l, x); t = Math.min(t, y); r = Math.max(r, x); b = Math.max(b, y); });
     // the scroll's pull moves every strand in view, so then the whole window is drawn
     if (windW) { l = t = -1e4; r = b = 1e4; }
