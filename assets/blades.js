@@ -585,9 +585,10 @@
     queued = { x: mouseAt[0] + scrollX, y: mouseAt[1] + scrollY, t: performance.now() }; if (!brush.raf) brush.raf = requestAnimationFrame(brush); }, { passive: true });
   const bend = (dx, dy, x, y, p, vx, vy, sp) => {
     const d = Math.hypot(x - p.x, y - p.y); if (d > R) return 0;
-    // bend away from the cursor, like parting grass with a hand (from GrassBending): the turn's sign comes from which side
-    // of the blade the cursor is on. Strongest close in, fading out smoothly toward the edge of its reach (GodotGrass)
-    const f = 1 - d / R, cross = dx * (y - p.y) - dy * (x - p.x), amt = Math.min(30, (10 + sp * 12) * f * f * (3 - 2 * f)) * Math.sign(cross || 1);
+    // part the grass like a hand moving through it: mostly pushed away from the cursor (from GrassBending), partly dragged
+    // along the way it's moving, so the wake depends on where it came from. Strongest close in, fading out smoothly toward
+    // the edge of its reach (GodotGrass)
+    const f = 1 - d / R, s = sp || 1, px = (x - p.x) / (d || 1) * .67 + vx / s * .33, py = (y - p.y) / (d || 1) * .67 + vy / s * .33, cross = dx * py - dy * px, amt = Math.min(30, (10 + sp * 12) * f * f * (3 - 2 * f)) * Math.sign(cross || 1);
     return Math.abs(amt) < 1 ? 0 : amt;
   };
   function brush() {
@@ -608,7 +609,7 @@
 
   // ---------- The open ground's own moss sways ----------
   // Nothing is added: around the cursor's path, a copy of the ground's moss strands is laid over them, and only the strands
-  // are pushed a few px away from the cursor, then ease back like the blades. Which pixels are
+  // are pushed a few px away from the cursor and a little along its path, then ease back like the blades. Which pixels are
   // strands comes from a map made from the original scan (moss-fronds: R = strand, G = a random number per strand), so each
   // strand gets its own share and slant of the push while soil, twigs and leaves stay put. Where a strand moves off its
   // spot, the ground under it shows (moss-bare: the strands smeared into their own average colour; soil showed as a dark shadow that pulsed), or the
@@ -640,7 +641,7 @@
       vec2 cu=(g+vec2(180.,120.))/1600.;vec4 h=texture2D(H,cu);c=mix(c,c*h.rgb,h.a);
       vec4 u=texture2D(U,cu);return mix(c,soft(c,u.rgb),u.a);}
     void main(){vec2 p=vec2(v.x,1.-v.y)*S;vec2 d=vec2(0.);
-      for(int i=0;i<${MAXK};i++){if(float(i)>=NK)break;vec4 k=K[i];vec2 a=p-k.xy;float r=length(a)/${SR}.;if(r<1.){float f=1.-r;d+=a/(length(a)+.001)*k.z*f*f*(3.-2.*f)*min(1.,r*4.);}}
+      for(int i=0;i<${MAXK};i++){if(float(i)>=NK)break;vec4 k=K[i];vec2 a=p-k.xy;float r=length(a)/${SR}.;if(r<1.){float f=1.-r,am=length(k.zw);d+=(a/(length(a)+.001)*.67+k.zw/(am+.001)*.33)*am*f*f*(3.-2.*f)*min(1.,r*4.);}}
       vec2 gp=O+p,sc=gp-V.xy;float u=fract((Wd.z-Wd.x*(gp.y*.0121+gp.x*.0035))/6.2831853),wd=Wd.x>0.?sc.y+sc.x*.2893:V.w-sc.y+(V.z-sc.x)*.2893;
       float ew=(texture2D(E,vec2((max(wd,0.)/${WV}.*${WHZ}.+.5)/${WH}.,.5)).r*255.-128.)/127.;d.y+=Wd.y*ew*(u<.48?wb(u/.48)*gn(gp):0.);d*=1.-smoothstep(.05,.55,texture2D(L,gp/P).a);
       vec4 m0=texture2D(M,(O+p)/900.);float a=(m0.g-.5)*1.2,c=cos(a),s=sin(a);d=vec2(c*d.x-s*d.y,s*d.x+c*d.y)*(.45+.55*m0.g);
@@ -712,7 +713,7 @@
     placeSway();
     const { gl, K, cv } = SW; K.fill(0);
     let l = Infinity, t = Infinity, r = -Infinity, b = -Infinity;
-    const ks = kicks.slice(-MAXK); ks.forEach((k, i) => { const w = k.amt * wob((now - k.t0) / k.dur), x = k.x - SW.x, y = k.y - SW.y; K.set([x, y, w, 0], i * 4);
+    const ks = kicks.slice(-MAXK); ks.forEach((k, i) => { const w = k.amt * wob((now - k.t0) / k.dur), x = k.x - SW.x, y = k.y - SW.y; K.set([x, y, k.dx * w, k.dy * w], i * 4);
       l = Math.min(l, x); t = Math.min(t, y); r = Math.max(r, x); b = Math.max(b, y); });
     // the scroll's pull moves every strand in view, so then the whole window is drawn
     if (windW) { l = t = -1e4; r = b = 1e4; }
