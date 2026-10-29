@@ -365,7 +365,13 @@
   // wobble: out to amt, back past rest, a smaller swing, then still
   const KEYS = [[0, 0], [.18, 1], [.48, -.38], [.74, .14], [1, 0]];
   const wob = t => { for (let k = 1; k < KEYS.length; k++) if (t <= KEYS[k][0]) { const [t0, a0] = KEYS[k - 1], [t1, a1] = KEYS[k], u = (t - t0) / (t1 - t0), e = u * u * (3 - 2 * u); return a0 + (a1 - a0) * e; } return 0; };
+  // a blade's bend at a moment: a new kick starts from the bend it has (that bend fades out over the new push), and until
+  // a delayed kick (a gust) reaches it, the swing it already had carries on, so a blade never snaps back to rest
+  const bendAt = (a, now) => { const t = (now - a.t0) / a.dur; if (t < 0) return a.prev ? bendAt(a.prev, now) : a.c0; if (t >= 1) return 0;
+    const w = wob(t); return a.amt * w + a.c0 * (1 - (t < KEYS[1][0] ? w : 1)); };
   function kick(g, amt, now) {
+    const c0 = g.moving ? g.bend || 0 : 0;
+    g.prev = g.moving ? { t0: g.t0, dur: g.dur, amt: g.amt, c0: g.c0 || 0, prev: null } : null; g.c0 = c0;
     g.moving = true; g.t0 = now; g.dur = 900 + Math.random() * 300; g.amt = amt; g.bt = now; g.bend = g.bend || 0;
     if (!active.has(g)) { active.add(g); if (g.st) { thaw(g.st); paintStrip(g.st); } }
     if (!frame.raf) frame.raf = requestAnimationFrame(frame);
@@ -375,8 +381,10 @@
     const dirt = g => { if (g.st) (live.get(g.st) || live.set(g.st, []).get(g.st)).push(g); };
     for (const g of active) {
       const t = (now - g.t0) / g.dur;
+      if (t < 0) { if (g.prev) { g.bend = bendAt(g.prev, now); dirt(g); } continue; } // a gust that hasn't reached this blade yet
+      if (g.prev) { g.c0 = g.bend || 0; g.prev = null; } // it starts from where the old swing has got to
       if (t >= 1) { active.delete(g); g.moving = false; g.bend = 0; if (g.st) touched.add(g.st); dirt(g); continue; }
-      g.bend = g.amt * wob(t); dirt(g);
+      g.bend = bendAt(g, now); dirt(g);
     }
     live.forEach((gs, st) => paintStrip(st, gs));
     // a strip goes back to being an image once its blades have been still for a moment (not on every settle, so brushing back
@@ -385,6 +393,20 @@
       st.ft = setTimeout(() => { if (!st.blades.some(b => b.moving)) { st.live = false; freeze(st); } }, 1500); });
     if (active.size) frame.raf = requestAnimationFrame(frame);
   }
+  // Scrolling sends a light gust through the grass in view: a quick scroll bends the blades a few degrees, the gust reaching
+  // them as a wave in the direction of the scroll, then they settle with the same wobble. At most one gust a second.
+  let lastY = scrollY, lastT = performance.now(), gustAt = 0;
+  addEventListener("scroll", () => {
+    const now = performance.now(), dy = scrollY - lastY, dt = Math.max(16, now - lastT); lastY = scrollY; lastT = now;
+    if (reduce() || now - gustAt < 1000 || !grid.size) return;
+    const v = dy / dt; if (Math.abs(v) < .6) return; // px per ms: only a real flick of the page, not a nudge
+    gustAt = now; const dir = Math.sign(v), amt = Math.min(6, 2 + Math.abs(v) * 1.5), top = scrollY - 100, bot = scrollY + innerHeight + 100;
+    for (const st of strips) { const r = st.el.getBoundingClientRect(); if (r.bottom < -100 || r.top > innerHeight + 100) continue;
+      for (const g of st.blades) { if (g.fy < top || g.fy > bot) continue;
+        kick(g, amt * Math.sin((g.pang || 0) * Math.PI / 180) * dir, now);
+        g.t0 = now + (dir > 0 ? bot - g.fy : g.fy - top) * .35; } }
+    dispatchEvent(new CustomEvent("grass-gust", { detail: { amt: amt / 6, dir } }));
+  }, { passive: true });
   let last = null, queued = null;
   addEventListener("pointermove", e => {
     if (e.pointerType === "touch" || reduce()) return;

@@ -554,25 +554,38 @@
   const easeOut = t => { let lo = 0, hi = 1; for (let i = 0; i < 20; i++) { const u = (lo + hi) / 2, x = 3 * u * u * (1 - u) * .58 + u * u * u; if (x < t) lo = u; else hi = u; }
     const u = (lo + hi) / 2; return 3 * u * u * (1 - u) + u * u * u; };
   const SW_AT = [0, .2, .5, .75, 1], SW_V = [0, 11, -5, 2, 0];
+  // a new sway that arrives while a leaf still swings starts from the angle it's at (the old swing fades out over the new
+  // one's first push), and until the new one reaches it the old one carries on, so a leaf never snaps back to rest
+  function swayD(w, now) {
+    const t = (now - w.t0) / w.dur; if (t < 0) return w.prev ? swayD(w.prev, now) : w.c0; if (t >= 1) return 0;
+    const p = easeOut(t); let i = 1; while (p > SW_AT[i]) i++;
+    const f = (p - SW_AT[i - 1]) / (SW_AT[i] - SW_AT[i - 1]), s = i === 1 ? f : 1;
+    return (SW_V[i - 1] + (SW_V[i] - SW_V[i - 1]) * f) * w.amp + w.c0 * (1 - s);
+  }
   function swayFrame() {
     const now = performance.now();
     for (const [b, w] of sways) {
-      const t = (now - w.t0) / w.dur; if (t < 0) continue;
-      if (t >= 1) { b.style.transform = w.base; sways.delete(b); continue; }
-      const p = easeOut(t); let i = 1; while (p > SW_AT[i]) i++;
-      const f = (p - SW_AT[i - 1]) / (SW_AT[i] - SW_AT[i - 1]), d = (SW_V[i - 1] + (SW_V[i] - SW_V[i - 1]) * f) * w.amp;
+      if (now >= w.t0 && w.prev) { w.c0 = w.d; w.prev = null; }
+      if (now - w.t0 >= w.dur) { b.style.transform = w.base; sways.delete(b); continue; }
+      const d = w.d = swayD(w, now);
       b.style.transform = `${w.base} rotate(${d.toFixed(2)}deg)`;
     }
     swayFrame.raf = sways.size ? requestAnimationFrame(swayFrame) : 0;
   }
+  const swayNext = (b, amp, t0, dur) => { const prev = sways.get(b);
+    sways.set(b, { base: prev ? prev.base : b.style.transform, amp, t0, dur, c0: prev ? prev.d || 0 : 0, prev: prev || null, d: prev ? prev.d || 0 : 0 }); };
+  // a gust from scrolling sways all the name's leaves a little, a moment after the grass below
+  addEventListener("grass-gust", e => { const lay = nameEl.closest(".lay"); if (!lay || !lay._grown || reduceMotion()) return;
+    const r = lay.getBoundingClientRect(); if (r.bottom < 0 || r.top > innerHeight) return; const now = performance.now();
+    lay.querySelectorAll(":scope > .blade").forEach(b => swayNext(b, e.detail.dir * e.detail.amt * (.25 + Math.random() * .2), now + 120 + Math.random() * 160, 1100 + Math.random() * 400));
+    if (!swayFrame.raf) swayFrame.raf = requestAnimationFrame(swayFrame); });
   function swayAt(c, s, force) {
     const lay = nameEl.closest(".lay"); if (!lay || !lay._grown) return; // still growing in: its own loop is moving them
     const r = c.getBoundingClientRect(), now = performance.now();
     lay.querySelectorAll(":scope > .blade").forEach(b => {
       const br = b.getBoundingClientRect(), bx = br.left + br.width / 2;
       if (bx < r.left - 14 || bx > r.right + 14) return;
-      const k = (.6 + Math.random() * .5) * force, prev = sways.get(b);
-      sways.set(b, { base: prev ? prev.base : b.style.transform, amp: s * k, t0: now + Math.random() * 80, dur: 1000 + Math.random() * 400 });
+      swayNext(b, s * (.6 + Math.random() * .5) * force, now + Math.random() * 80, 1000 + Math.random() * 400);
     });
     if (!swayFrame.raf && sways.size) swayFrame.raf = requestAnimationFrame(swayFrame);
   }
@@ -661,8 +674,23 @@
     // rebuild the letter's layers, and the leaves over it blinked
     const a = Math.abs(R.th * k), op = Math.min(1, a / 4).toFixed(3);
     if (op !== R.op) { R.op = op; for (const n of R.wrap.children) if (n !== R.top) { n.style.display = ""; n.style.opacity = op; } }
-    const e = k >= 0 ? R.hi : R.lo, px = (R.ux * e).toFixed(2), py = (R.uy * e).toFixed(2);
-    R.sh.style.transform = R.wrap.style.transform = `perspective(600px) translate3d(${px}px, ${py}px, ${-R.D}px) rotate3d(${(-R.uy).toFixed(3)}, ${R.ux.toFixed(3)}, 0, ${(Math.abs(R.th * k) < .02 ? .02 : R.th * k).toFixed(2)}deg) translate3d(${-px}px, ${-py}px, ${R.D}px)`;
+    const A = R.th * k, e = k >= 0 ? R.hi : R.lo, px = (R.ux * e).toFixed(2), py = (R.uy * e).toFixed(2);
+    R.sh.style.transform = R.wrap.style.transform = `perspective(600px) translate3d(${px}px, ${py}px, ${-R.D}px) rotate3d(${(-R.uy).toFixed(3)}, ${R.ux.toFixed(3)}, 0, ${(Math.abs(A) < .02 ? .02 : A).toFixed(2)}deg) translate3d(${-px}px, ${-py}px, ${R.D}px)`;
+  }
+  // the tile's tilt as one 2D vector: the direction it leans toward times the angle. A push that arrives mid-rock (sweeping
+  // back and forth over a letter) blends from the lean the tile has into the new one, so it never snaps to a new axis,
+  // a flipped lean or a new pivot edge
+  function lean(R, ax, ay) {
+    const a = Math.hypot(ax, ay);
+    if (a > 1e-3) { R.ux = ax / a; R.uy = ay / a; let hi = 0; for (const [x, y] of R.hull) { const d = x * R.ux + y * R.uy; if (d > hi) hi = d; } R.hi = hi; }
+    R.th = 1; R.ax = ax; R.ay = ay; tilt(R, a);
+  }
+  // the ink's convex outline: the tile can only pivot on it, and it's a few dozen points instead of thousands
+  function hullOf(P) {
+    const p = P.slice().sort((a, b) => a[0] - b[0] || a[1] - b[1]), cr = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]), lo = [], up = [];
+    for (const q of p) { while (lo.length > 1 && cr(lo[lo.length - 2], lo[lo.length - 1], q) <= 0) lo.pop(); lo.push(q); }
+    for (let i = p.length - 1; i >= 0; i--) { const q = p[i]; while (up.length > 1 && cr(up[up.length - 2], up[up.length - 1], q) <= 0) up.pop(); up.push(q); }
+    return lo.slice(0, -1).concat(up.slice(0, -1));
   }
   // the name's letters get their tiles while the page is idle, one per idle moment
   function mountTiles(wrap) {
@@ -682,19 +710,17 @@
     // the swings die away smoothly: the last ones are small but not tiny, so it doesn't buzz on its way to rest
     const KS = [[0, 0], [.14, 1], [.38, -.5], [.62, .22], [.84, -.07], [1, 0]];
     const wob = t => { for (let i = 1; i < KS.length; i++) if (t <= KS[i][0]) { const [t0, a0] = KS[i - 1], [t1, a1] = KS[i], u = (t - t0) / (t1 - t0); return a0 + (a1 - a0) * (i === 1 ? 1 - (1 - u) * (1 - u) : u * u * (3 - 2 * u)); } return 0; };
-    const now0 = performance.now(), start = R.k ? R.k * (R.th || th) / th : 0; // a new push carries on from wherever the tile is
-    let lo = 0, hi = 0; for (const [x, y] of R.ink) { const d = x * ux + y * uy; if (d < lo) lo = d; if (d > hi) hi = d; }
-    Object.assign(R, { ux, uy, th, t0: now0, dur: 1200 + Math.min(500, sp * 250), start, lo, hi });
+    if (!R.hull) R.hull = hullOf(R.ink);
+    Object.assign(R, { nx: ux * th, ny: uy * th, cx: R.ax || 0, cy: R.ay || 0, t0: performance.now(), dur: 1200 + Math.min(500, sp * 250) });
     c._spinning = true;
     if (!R.raf) { lift(R);
       const step = () => {
         const t = (performance.now() - R.t0) / R.dur;
-        if (t >= 1) { R.raf = 0; R.k = 0; lie(R); c._spinning = false; return; }
-        let k = wob(t); if (t < KS[1][0]) k = R.start + k * (1 - R.start); // blend in from the carried-over tilt
-        R.k = k;
-        // pivot on the bottom of the leading edge while the far edge is up, on the trailing edge while the near edge is up,
-        // so the tile's underside never dips into the ground
-        tilt(R, k);
+        if (t >= 1) { R.raf = 0; R.k = R.ax = R.ay = 0; R.th = 1; tilt(R, 0); c._spinning = false; return; }
+        // while the new push rises, the lean the tile already had fades out; the pivot is always the edge it leans toward
+        // (a lean that passes through flat swaps edges at zero angle, where the swap can't be seen)
+        const w = wob(t), f = t < KS[1][0] ? w : 1, ax = R.cx * (1 - f) + R.nx * w, ay = R.cy * (1 - f) + R.ny * w;
+        R.k = Math.hypot(ax, ay); lean(R, ax, ay);
         R.raf = requestAnimationFrame(step);
       };
       R.raf = requestAnimationFrame(step);
