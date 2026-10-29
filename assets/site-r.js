@@ -566,7 +566,7 @@
     swayFrame.raf = sways.size ? requestAnimationFrame(swayFrame) : 0;
   }
   function swayAt(c, s, force) {
-    const lay = nameEl.closest(".lay"); if (!lay) return;
+    const lay = nameEl.closest(".lay"); if (!lay || !lay._grown) return; // still growing in: its own loop is moving them
     const r = c.getBoundingClientRect(), now = performance.now();
     lay.querySelectorAll(":scope > .blade").forEach(b => {
       const br = b.getBoundingClientRect(), bx = br.left + br.width / 2;

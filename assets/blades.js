@@ -195,15 +195,26 @@
       paintStrip(st); }
     if (growing.size) growFrame.raf = requestAnimationFrame(growFrame); else lastFrame = null;
   }
-  // the name's sprigs grow with CSS animations (which also wait for the page to draw); if the name is redressed while they
-  // grow, the new ones pick up where the old ones were
+  // the name's sprigs grow the same way, each from its own root, on their own frame-paced clock (on a busy phone,
+  // timed animations had finished before the page could draw, so the sprigs just appeared); the clock waits for the ground
+  // to show, and a redress mid-growth carries on from where it was
+  const bez = (x1, y1, x2, y2) => t => { let lo = 0, hi = 1, u = t; for (let i = 0; i < 24; i++) { u = (lo + hi) / 2; const x = 3 * u * (1 - u) * (1 - u) * x1 + 3 * u * u * (1 - u) * x2 + u * u * u; if (x < t) lo = u; else hi = u; }
+    return 3 * u * (1 - u) * (1 - u) * y1 + 3 * u * u * (1 - u) * y2 + u * u * u; };
+  const nameEase = bez(.2, .7, .3, 1);
   function growName(lay) {
-    const prev = lay._growAnim; if (prev && prev.playState === "finished") return;
-    const d0 = prev ? -(prev.currentTime || 0) : lag(lay) + 200; let first = null;
-    lay.querySelectorAll(":scope > .blade").forEach((b, i) => { if (!b.animate) return; const t = b.style.transform, h = parseFloat(b.style.height) / 2;
-      const kf = still() ? [{ opacity: 0 }, { opacity: 1 }] : [{ opacity: 0, transform: `${t} translateY(${h}px) scale(.12) translateY(${-h}px)` }, { opacity: 1, offset: .35 }, { opacity: 1, transform: t }];
-      const a = b.animate(kf, { duration: still() ? 500 : 1000, delay: (prev ? prev.effect.getTiming().delay : 0) + d0 + (i % 9) * 40, easing: EASE, fill: "backwards" }); if (!first) first = a; });
-    if (first) lay._growAnim = first;
+    if (lay._grown) return;
+    const quiet = still(), bl = [...lay.querySelectorAll(":scope > .blade")].map((b, i) => ({ b, t: b.style.transform, h: parseFloat(b.style.height) / 2, d: (i % 9) * 40 }));
+    if (lay._gv == null) { lay._gv = 0; lay._g0 = lag(lay) + 200; }
+    const dur = quiet ? 500 : 1000, end = lay._g0 + 8 * 40 + dur;
+    const pose = () => { for (const o of bl) { const u = Math.min(1, Math.max(0, (lay._gv - lay._g0 - o.d) / dur)), p = quiet ? u : nameEase(u);
+      o.b.style.opacity = quiet ? p : Math.min(1, p / .35); if (!quiet) o.b.style.transform = `${o.t} translateY(${o.h}px) scale(${(.12 + .88 * p).toFixed(4)}) translateY(${-o.h}px)`; } };
+    pose(); cancelAnimationFrame(lay._graf); let last = null;
+    const frame = () => {
+      if (!bl[0] || !bl[0].b.isConnected) return; // redressed: the new sprigs carry on from lay._gv
+      const n = performance.now(); if (last != null && document.documentElement.classList.contains("ground-in")) lay._gv += Math.min(34, n - last); last = n;
+      if (lay._gv >= end) { for (const o of bl) { o.b.style.opacity = ""; o.b.style.transform = o.t; } lay._grown = true; return; }
+      pose(); lay._graf = requestAnimationFrame(frame); };
+    lay._graf = requestAnimationFrame(frame);
   }
   // a strip's share of its piece's shadow: the soft box-shadows exactly as CSS casts them, kept off the piece itself with a
   // feathered edge (a sprig leaning over the edge lifts off the ground, so the shade fades onto it instead of stopping on
