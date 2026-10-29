@@ -1,6 +1,8 @@
 // Scatters real forest-floor pieces (fern fronds, fallen leaves, needles, twigs, moss sprigs): a few on the ground, and one or two tucked under or over each card's edge.
 (async () => {
-  const all = await (await fetch("assets/forest/index.json?v=2")).json();
+  // where the site's root is, so the pages in subfolders (case studies, games) find the same files
+  const ROOT = new URL("..", document.currentScript.src).href;
+  const all = (await (await fetch(ROOT + "assets/forest/index.json?v=2")).json()).map(s => ({ ...s, src: ROOT + s.src }));
   const of = k => all.filter(s => k.includes(s.kind));
   let seed = 31; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
   const pick = a => a[Math.floor(rnd() * a.length)];

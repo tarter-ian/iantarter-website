@@ -1,7 +1,9 @@
 // Lays real grass blade sprites over the edges of every .lay element so the pieces look like they sit in the lawn.
 (async () => {
+  // where the site's root is, so the pages in subfolders (case studies, games) find the same files
+  const ROOT = new URL("..", document.currentScript.src).href;
   // real moss sprigs (photographed cut-outs, regraded to the ground's colours), the same kind of moss the ground is made of
-  const sprites = (await (await fetch("assets/blades/index.json?v=4")).json()).filter(s => s.kind === "sprig");
+  const sprites = (await (await fetch(ROOT + "assets/blades/index.json?v=4")).json()).filter(s => s.kind === "sprig").map(s => ({ ...s, src: ROOT + s.src }));
   const blades = sprites, clumps = sprites, moss = sprites, slim = sprites.filter(s => s.w > 100 * s.h / 360); // the name gets the leafy ones
   let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
   const pick = a => a[Math.floor(rnd() * a.length)];
@@ -51,7 +53,7 @@
   const load = src => new Promise(r => { const i = new Image(); i.onload = () => r(i); i.onerror = () => r(null); i.src = src; });
   // the strand maps only matter where a cursor can stir the moss, so touch screens skip downloading them
   const stir = matchMedia("(hover: hover)").matches;
-  const [MOSS, SHADE, SUN, FRONDS, BARE] = await Promise.all(["assets/tex/moss-quiet-2k.webp", "assets/tex/canopy-shade-L.webp", "assets/tex/canopy-sun-2.webp", stir && "assets/tex/moss-fronds.webp", stir && "assets/tex/moss-bare.webp?v=2"].map(u => u ? load(u) : null));
+  const [MOSS, SHADE, SUN, FRONDS, BARE] = await Promise.all([ROOT + "assets/tex/moss-quiet-2k.webp", ROOT + "assets/tex/canopy-shade-L.webp", ROOT + "assets/tex/canopy-sun-2.webp", stir && ROOT + "assets/tex/moss-fronds.webp", stir && ROOT + "assets/tex/moss-bare.webp?v=2"].map(u => u ? load(u) : null));
   const imgs = new Map(); const sprite = sp => imgs.get(sp.src) || (imgs.set(sp.src, load(sp.src)), imgs.get(sp.src));
   await Promise.all(sprites.map(sprite)); for (const sp of sprites) sp.img = await sprite(sp);
   let PW = 1, PH = 1;
@@ -381,7 +383,7 @@
       const kind = el.matches(".hand a") ? (el.classList.contains("r") ? "handR" : "hand") : "card", [shadeSrc, paperSrc, paperW, paperBlend, bg, sheen] = BAKE[kind];
       const W = el.offsetWidth, H = el.offsetHeight, o = { x: parseFloat(el.style.getPropertyValue("--ox")) || 0, y: parseFloat(el.style.getPropertyValue("--oy")) || 0 }, key = [W, H, o.x, o.y, PW, PH, dpr].join();
       if (!W || !H || el._bakeKey === key) continue;
-      const [sun, shade, paper] = await Promise.all([tex("assets/tex/canopy-sun-2.webp"), tex("assets/" + shadeSrc), tex("assets/" + paperSrc)]);
+      const [sun, shade, paper] = await Promise.all([tex(ROOT + "assets/tex/canopy-sun-2.webp"), tex(ROOT + "assets/" + shadeSrc), tex(ROOT + "assets/" + paperSrc)]);
       if (!sun || !shade || !paper || gen !== bakeGen) return;
       const cv = document.createElement("canvas"); cv.width = Math.ceil(W * dpr); cv.height = Math.ceil(H * dpr);
       const x = cv.getContext("2d"); x.scale(dpr, dpr);
@@ -412,7 +414,7 @@
   // ground is then the moss, that map and the sun flecks: three layers to draw instead of seven.
   async function bakeGround(gen) {
     const sc = scene(), key = [PW, PH].join(); if (!PW || !PH || sc._bakeKey === key) return;
-    const [shade, moss] = await Promise.all([tex("assets/tex/canopy-shade-L.webp"), tex("assets/tex/moss-quiet-2k.webp")]); if (!shade || !moss || gen !== bakeGen) return;
+    const [shade, moss] = await Promise.all([tex(ROOT + "assets/tex/canopy-shade-L.webp"), tex(ROOT + "assets/tex/moss-quiet-2k.webp")]); if (!shade || !moss || gen !== bakeGen) return;
     const k = .5, cv = document.createElement("canvas"); cv.width = Math.ceil(PW * k); cv.height = Math.ceil(PH * k); const x = cv.getContext("2d"); x.scale(k, k);
     const fill = (st, mode) => { x.globalCompositeOperation = mode; x.fillStyle = st; x.fillRect(0, 0, PW, PH); };
     fill("#fff", "source-over");
@@ -426,7 +428,7 @@
     const u1 = URL.createObjectURL(b1), u2 = sc._mossUrl || URL.createObjectURL(b2);
     await Promise.all([u1, u2].map(u => { const im = new Image(); im.src = u; return im.decode().catch(() => {}); })); if (gen !== bakeGen) return;
     const old = sc._lightUrl; sc._lightUrl = u1; sc._mossUrl = u2; sc._bakeKey = key;
-    Object.assign(sc.style, { backgroundImage: `url("assets/tex/canopy-sun-2.webp"), url("${u1}"), url("${u2}")`, backgroundSize: `1600px, ${PW}px ${PH}px, 900px`,
+    Object.assign(sc.style, { backgroundImage: `url("${ROOT}assets/tex/canopy-sun-2.webp"), url("${u1}"), url("${u2}")`, backgroundSize: `1600px, ${PW}px ${PH}px, 900px`,
       backgroundPosition: "-180px -120px, 0 0, 0 0", backgroundRepeat: "repeat, no-repeat, repeat", backgroundBlendMode: "soft-light, multiply, normal" });
     if (old) URL.revokeObjectURL(old);
   }
