@@ -8,19 +8,21 @@
   // an element's unrotated top-left corner, relative to the scene
   const offset = el => { const root = el.closest(".x-i").getBoundingClientRect(), r = el.getBoundingClientRect();
     return { x: r.left + r.width / 2 - el.offsetWidth / 2 - root.left, y: r.top + r.height / 2 - el.offsetHeight / 2 - root.top }; };
-  function put(el, ox, oy, sp, x, y, len, ang) {
-    const sw = sp.w * len / sp.h, b = document.createElement("i"); b.className = "blade"; b.setAttribute("aria-hidden", "true");
+  function put(el, ox, oy, sp, x, y, len, ang, reuse) {
+    const sw = sp.w * len / sp.h, b = reuse || document.createElement("i"); b.className = "blade"; b.setAttribute("aria-hidden", "true");
     const left = x - sw / 2, top = y - len;
     Object.assign(b.style, { width: sw + "px", height: len + "px", left: left + "px", top: top + "px", transform: `rotate(${ang}deg)` });
     b.style.setProperty("--m", `url("${new URL(sp.src, location.href).href}")`); b.style.setProperty("--sp", `url("${new URL(sp.src, location.href).href}")`);
     b.style.setProperty("--ox", (ox + left) + "px"); b.style.setProperty("--oy", (oy + top) + "px");
-    el.appendChild(b); return b;
+    if (!reuse) el.appendChild(b); return b;
   }
   // The name's letters lie in the grass: blades grow up around each letter's outline and lean in over its edges.
   // Edge points come from the letter's own pixels; each blade roots just outside and points along the inward normal.
   function dressName(lay) {
     const cvs = lay.querySelectorAll(".fill-cv > canvas:not(.alt):not(.spin-cv):not(.rock-shadow)"); if (!cvs.length) return false;
-    lay.querySelectorAll(":scope > .blade").forEach(b => b.remove());
+    // a second dressing (the layout often settles again once the fonts arrive) moves the sprigs already there instead of
+    // swapping them for new ones, which Safari showed as the sprigs blinking out and back
+    const old = [...lay.querySelectorAll(":scope > .blade")];
     const root = lay.closest(".x-i").getBoundingClientRect(), lr = lay.getBoundingClientRect(), ox = lr.left - root.left, oy = lr.top - root.top;
     cvs.forEach(cv => {
       const r = cv.getBoundingClientRect(), W = cv.width, H = cv.height, k = r.width / W;
@@ -36,9 +38,10 @@
         const px = r.left - lr.left + x * k - nx * out, py = r.top - lr.top + y * k - ny * out;
         const ang = Math.atan2(nx, -ny) * 180 / Math.PI + (rnd() - .5) * 50;
         // root at (px, py): put() places the blade's foot at x, y + 0 when top = y - len, so pass the root as the foot
-        put(lay, ox, oy, pick(slim), px, py, len, ang);
+        put(lay, ox, oy, pick(slim), px, py, len, ang, old.shift());
       }
     });
+    old.forEach(b => b.remove());
     return true;
   }
   // ---------- Painting grass on canvas ----------
@@ -212,7 +215,7 @@
     const frame = () => {
       if (!bl[0] || !bl[0].b.isConnected) return; // redressed: the new sprigs carry on from lay._gv
       const n = performance.now(); if (last != null && document.documentElement.classList.contains("ground-in")) lay._gv += Math.min(34, n - last); last = n;
-      if (lay._gv >= end) { for (const o of bl) { o.b.style.opacity = ""; o.b.style.transform = o.t; } lay._grown = true; return; }
+      if (lay._gv >= end) { for (const o of bl) { o.b.style.opacity = "1"; o.b.style.transform = o.t; } lay._grown = true; return; }
       pose(); lay._graf = requestAnimationFrame(frame); };
     lay._graf = requestAnimationFrame(frame);
   }
