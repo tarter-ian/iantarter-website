@@ -19,7 +19,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..800&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&family=Rampart+One&display=swap">
 <link rel="stylesheet" href="assets/site.css?v=20261013u">
-<link rel="stylesheet" href="assets/dir-i.css?v=20261030sit">
+<link rel="stylesheet" href="assets/dir-i.css?v=20261030sit2">
 <!-- the ground fetched first, so it is usually there for the first frame -->
 <link rel="preload" as="image" href="assets/tex/moss-quiet-2k.webp" fetchpriority="high">
 <link rel="preload" as="image" href="assets/tex/canopy-shade-L.webp" fetchpriority="high">
@@ -110,8 +110,9 @@
    <button class="s-btn primary" type="submit">Send message</button>
    <p class="s-form-note" role="status"></p>
   </div></form></section>
- <section class="i-field" aria-label="A clearing"><button class="i-rock no-grass" type="button" aria-pressed="false"><img class="rock-img" src="assets/img/rock.webp" alt="A rock"><span class="i-sit">Sit</span></button></section>
+ <section class="i-field" aria-label="A clearing"><button class="i-rock lay lay-rock no-grass" type="button" aria-pressed="false" aria-label="Sit on the rock" data-outline="0.997,0.510 0.995,0.544 0.963,0.574 0.937,0.601 0.926,0.631 0.912,0.660 0.893,0.687 0.866,0.709 0.839,0.731 0.814,0.754 0.788,0.777 0.763,0.802 0.743,0.837 0.714,0.865 0.678,0.887 0.637,0.905 0.599,0.937 0.554,0.974 0.503,1.000 0.450,0.982 0.403,0.953 0.359,0.931 0.319,0.905 0.281,0.882 0.247,0.857 0.217,0.830 0.188,0.804 0.158,0.780 0.135,0.752 0.112,0.724 0.086,0.699 0.059,0.672 0.034,0.644 0.010,0.613 0.008,0.578 0.021,0.543 0.038,0.510 0.063,0.480 0.082,0.452 0.105,0.426 0.122,0.401 0.137,0.376 0.157,0.353 0.176,0.330 0.195,0.307 0.216,0.285 0.230,0.255 0.244,0.220 0.247,0.163 0.278,0.132 0.316,0.107 0.358,0.085 0.397,0.039 0.446,0.003 0.503,0.014 0.555,0.043 0.602,0.069 0.645,0.092 0.683,0.121 0.715,0.152 0.745,0.180 0.773,0.207 0.798,0.233 0.821,0.260 0.845,0.285 0.873,0.306 0.898,0.331 0.923,0.356 0.948,0.383 0.974,0.411 0.986,0.443 0.993,0.476"><img class="rock-img" src="assets/img/rock.webp" alt=""></button></section>
 </main>
+<div class="i-dusk" aria-hidden="true"></div><div class="i-dusk i-glow" aria-hidden="true"></div>
 </div><script>(() => { // each piece learns where it lies before the page is first drawn, so its light is right from the start
   // (until blades.js did this, every card was lit as if it were the whole page: a dark rim that then changed)
   const sc = document.querySelector(".x-i"); if (!sc) return; const R = sc.getBoundingClientRect();
@@ -119,4 +120,4 @@
   document.querySelectorAll(".card, .hand a").forEach(el => { const r = el.getBoundingClientRect();
     el.style.setProperty("--ox", (r.left + r.width / 2 - el.offsetWidth / 2 - R.left) + "px"); el.style.setProperty("--oy", (r.top + r.height / 2 - el.offsetHeight / 2 - R.top) + "px"); }); })();</script><script>(() => { const done = () => document.documentElement.classList.add("ground-in");
   window.__floor.groundP.then(() => { const F = window.__floor || {}; if (document.prerendering || !F.drawn || F.panned) { document.documentElement.classList.add("ground-now"); done(); } else requestAnimationFrame(done); });
-  setTimeout(done, 5000); })();</script><script src="assets/site-r.js?v=20261030c" defer></script><script src="assets/blades.js?v=20261030t" defer></script><script src="assets/forest.js?v=20261030f" defer></script></body></html>
+  setTimeout(done, 5000); })();</script><script src="assets/site-r.js?v=20261030c" defer></script><script src="assets/blades.js?v=20261030u" defer></script><script src="assets/forest.js?v=20261030f" defer></script></body></html>

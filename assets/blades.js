@@ -162,7 +162,8 @@
       const u = Math.min(1, Math.max(0, (now - gr.t0 - g.gd) / GROW)); return u <= 0 ? null : [g.ang, Math.min(1, u * 4), .12 + .88 * (1 - Math.pow(1 - u, 3))]; };
     // the blades' shadows fall only on the piece (on the ground they'd show as dark smudges), and move with their blades
     if (!st.shape) { const el = st.el; st.shape = [el.offsetWidth, el.offsetHeight, parseFloat(getComputedStyle(el).borderTopLeftRadius) || 0]; }
-    const [w, h, rad] = st.shape; sx.save(); sx.beginPath(); sx.roundRect ? sx.roundRect(0, 0, w, h, rad) : sx.rect(0, 0, w, h); sx.clip();
+    const [w, h, rad] = st.shape, poly = st.el._poly; sx.save(); sx.beginPath();
+    if (poly) { poly.forEach(([x, y], i) => i ? sx.lineTo(x, y) : sx.moveTo(x, y)); sx.closePath(); } else if (sx.roundRect) sx.roundRect(0, 0, w, h, rad); else sx.rect(0, 0, w, h); sx.clip();
     for (const g of st.blades) { if (!near(g)) continue; const P = pose(g); if (P) drawShadow(sx, g, g.x, g.y, P[0], P[1], P[2]); }
     sx.restore();
     // a bending blade is drawn right here in its own strip, so it stays under whatever lies on top of its piece
@@ -351,6 +352,24 @@
     list.push({ el, edge, sp, x, y, w: sw, len, ang, px: ox + x - sw / 2, py: oy + y - len });
   }
   let noGrass = [];
+  // The rock isn't a box: its sprigs root just outside its real outline (traced from the picture, as fractions of its size,
+  // in data-outline) and lean in over it, grouped by which way that stretch of edge faces
+  function rockSprigs(el, list, ox, oy) {
+    const w = el.offsetWidth, h = el.offsetHeight, P = el.dataset.outline.trim().split(/\s+/).map(q => q.split(",").map(Number)).map(([x, y]) => [x * w, y * h]);
+    el._poly = P; let run = 0;
+    for (let i = 0; i < P.length; i++) {
+      const [ax, ay] = P[i], [bx, by] = P[(i + 1) % P.length], seg = Math.hypot(bx - ax, by - ay); if (!seg) continue;
+      const nx = (by - ay) / seg, ny = -(bx - ax) / seg; // outward, for an outline running clockwise on screen
+      for (run += seg; run > 13; run -= 13) {
+        const t = 1 - (run - 13) / seg, x0 = ax + (bx - ax) * t, y0 = ay + (by - ay) * t;
+        const clump = rnd() < .45, len = (clump ? 30 + rnd() * 22 : 26 + rnd() * 26) * K(), sp = pick(rnd() < .3 ? moss : clump ? clumps : blades);
+        const jit = (rnd() - .5) * 70, intrude = 5 + rnd() * 10, out = len * Math.abs(Math.cos(jit * Math.PI / 180)) - intrude;
+        const x = x0 + nx * out, y = y0 + ny * out, sw = sp.w * len / sp.h, ang = Math.atan2(-nx, ny) * 180 / Math.PI + jit;
+        const edge = Math.abs(nx) > Math.abs(ny) ? (nx < 0 ? "r2" : "r3") : (ny < 0 ? "r0" : "r1");
+        list.push({ el, edge, sp, x, y, w: sw, len, ang, px: ox + x - sw / 2, py: oy + y - len });
+      }
+    }
+  }
   const small = () => innerWidth < 700, K = () => small() ? .7 : 1;
   function dress(el) {
     // grass that has already shown stays up until its replacement is painted, so a relayout never leaves a piece bare
@@ -359,10 +378,11 @@
     if (!el._shown) olds.forEach(b => b.remove()); else el._olds = olds;
     for (const st of [...strips]) if (st.el === el) { strips.delete(st); growing.delete(st); }
     const { x: ox, y: oy } = offset(el), list = [];
-    const name = el.classList.contains("lay-name"), tab = !!el.closest(".hand");
+    const name = el.classList.contains("lay-name"), tab = !!el.closest(".hand"), rock = el.classList.contains("lay-rock");
     // menu cards are tucked under the top edge, so only their bottom edge lies in the grass
-    const edges = name || tab ? ["bottom"] : ["top", "bottom", "left", "right"];
-    for (const edge of edges) {
+    const edges = rock ? ["r0", "r1", "r2", "r3"] : name || tab ? ["bottom"] : ["top", "bottom", "left", "right"];
+    if (rock) rockSprigs(el, list, ox, oy);
+    else for (const edge of edges) {
       const span = edge === "top" || edge === "bottom" ? el.offsetWidth : el.offsetHeight;
       const n = Math.max(3, Math.round(span / (name ? 14 : small() ? 24 : 15) * (0.7 + rnd() * 0.6)));
       for (let i = 0; i < n; i++) {
@@ -764,11 +784,10 @@
   // ---------- Sitting on the rock ----------
   // the clearing at the bottom has a rock; sitting on it lets a breeze run through the grass, rising and falling slowly,
   // until you get up (the rock again, Esc, or scrolling away)
-  const breeze = t => { t /= 1000; return .42 + .16 * Math.sin(t * .37) + .1 * Math.sin(t * 1.13 + 1.7); };
+  const breeze = t => { t /= 1000; return .62 + .2 * Math.sin(t * .37) + .12 * Math.sin(t * 1.13 + 1.7); };
   function sit(on) {
     const rock = document.querySelector(".i-rock"); if (!rock || !!wind.sit === on) return;
-    wind.sit = on; rock.setAttribute("aria-pressed", on); document.documentElement.classList.toggle("sitting", on);
-    const tag = rock.querySelector(".i-sit"); if (tag) tag.textContent = on ? "Stand up" : "Sit";
+    wind.sit = on; rock.setAttribute("aria-pressed", on); rock.setAttribute("aria-label", on ? "Stand up" : "Sit on the rock"); document.documentElement.classList.toggle("sitting", on);
     if (on) { rock.closest(".i-field").scrollIntoView({ behavior: reduce() ? "auto" : "smooth", block: "end" }); sit.t = performance.now(); }
     if (on && !reduce() && !wind.raf) { wind.t = performance.now(); wrec.length = 0; wrec.push([wind.t - 7000, 0]); wind.raf = requestAnimationFrame(windFrame); }
   }
@@ -776,7 +795,7 @@
   addEventListener("keydown", e => { if (e.key === "Escape") sit(false); });
   // getting up by scrolling: once the walk to the rock has settled, leaving the clearing stands you up
   addEventListener("scroll", () => { if (!wind.sit || performance.now() - sit.t < 1500) return;
-    const f = document.querySelector(".i-field").getBoundingClientRect(); if (f.top > innerHeight * .45) sit(false); }, { passive: true });
+    const r = document.querySelector(".i-rock").getBoundingClientRect(), c = (r.top + r.bottom) / 2; if (c < 0 || c > innerHeight) sit(false); }, { passive: true });
   function windFrame() {
     const now = performance.now(), dt = Math.min(.034, (now - wind.t) / 1000); wind.t = now;
     if (now - wind.ev > 90) wind.aim = wind.sit ? breeze(now) : 0; // scrolling has stopped (sitting on the rock, a breeze keeps up)
@@ -790,6 +809,8 @@
     const top = recordWind(now, dir * wind.e), calm = !wind.aim && top < .004;
     windW = calm ? 0 : wdir * Math.max(top, .004); // nonzero while any gust is still crossing the window
     wind.ph += 3 * dt; // the gusts travel at about 250px a second
+    // sitting, the gusts lean the grass further (Ian: "a more intense ripple"); it eases there and back so nothing jumps
+    wind.amp = (wind.amp || 0) + ((wind.sit ? 1 : 0) - (wind.amp || 0)) * Math.min(1, dt * .8);
     // while the page is still scrolling nothing leans: re-tilting every edge each frame made the browser redraw the cards
     // all through the scroll (frames went from about 17ms to over half a second, and fast scrolls flashed bare ground), and
     // the lean can't be seen while the page moves anyway (Ian). The gusts it gathered roll through once scrolling stops.
@@ -811,7 +832,7 @@
       const on = !calm && seen[i];
       if (on) { if (!windSt.has(st)) { windSt.add(st); const ox = (st.edge === "left" ? 0 : wd[i]) - st.x0;
           for (const q of pair(st)) for (const n of [q.img, q.cv]) n.style.transformOrigin = `${ox}px 50%`; }
-        const r = rs[i], ex = r.left + (st.edge === "left" ? 0 : r.width), ey = r.top + st.y0 + st.H / DPR / 2, k = (st.edge === "left" ? 1 : -1) * envAt(ex, ey) * 12 * gust(r.left + (st.edge === "left" ? 0 : r.width) + scrollX - sr.x, r.top + st.y0 + st.H / DPR / 2 + scrollY - sr.y), tf = `skewY(${k.toFixed(2)}deg)`; st.skew = [+k.toFixed(2), (st.edge === "left" ? 0 : wd[i]) || st.skew && st.skew[1] || 0]; for (const q of pair(st)) q.img.style.transform = q.cv.style.transform = tf; }
+        const r = rs[i], ex = r.left + (st.edge === "left" ? 0 : r.width), ey = r.top + st.y0 + st.H / DPR / 2, k = (st.edge === "left" ? 1 : -1) * envAt(ex, ey) * (12 + 8 * wind.amp) * gust(r.left + (st.edge === "left" ? 0 : r.width) + scrollX - sr.x, r.top + st.y0 + st.H / DPR / 2 + scrollY - sr.y), tf = `skewY(${k.toFixed(2)}deg)`; st.skew = [+k.toFixed(2), (st.edge === "left" ? 0 : wd[i]) || st.skew && st.skew[1] || 0]; for (const q of pair(st)) q.img.style.transform = q.cv.style.transform = tf; }
       else if (windSt.has(st)) { windSt.delete(st); st.skew = null; for (const q of pair(st)) q.img.style.transform = q.cv.style.transform = ""; } }
     if (SW && !swayFrame.raf) swayFrame.raf = requestAnimationFrame(swayFrame);
     wind.raf = calm ? 0 : requestAnimationFrame(windFrame);
@@ -964,7 +985,7 @@
       l = Math.min(l, x); t = Math.min(t, y); r = Math.max(r, x); b = Math.max(b, y); });
     // the scroll's pull moves every strand in view, so then the whole window is drawn
     if (windW) { l = t = -1e4; r = b = 1e4; }
-    gl.uniform3f(SW.uW, wdir, 6, wind.ph);
+    gl.uniform3f(SW.uW, wdir, 6 + 6 * (wind.amp || 0), wind.ph);
     if (windW) { const sr = sceneRect(); gl.uniform4f(SW.uV, scrollX - sr.x, scrollY - sr.y, innerWidth, innerHeight);
       for (let i = 0; i < WH; i++) SW.eb[i] = Math.max(1, Math.min(255, Math.round(whist[i] * 127) + 128));
       gl.activeTexture(gl.TEXTURE6); gl.bindTexture(gl.TEXTURE_2D, SW.et); gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, WH, 1, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, SW.eb); } gl.uniform1f(SW.uN, ks.length); gl.uniform1f(SW.uR, SW.d || DPR);
