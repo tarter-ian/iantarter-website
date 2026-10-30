@@ -185,7 +185,7 @@
   // Only grass in view grows (the rest is ready before it's scrolled to), and each strip's sprigs are painted a few at a
   // time ahead of their turn, so a growing frame only places finished pictures.
   const inView = el => { const r = el.getBoundingClientRect(); return r.bottom > -80 && r.top < innerHeight + 80; };
-  const prep = [];
+  const prep = []; let lastScroll = -1e9; addEventListener("scroll", () => { lastScroll = performance.now(); }, { passive: true });
   // a page built ahead of a click (Chrome's prerender) draws no frames until it is shown, so its painting runs on timers
   const soon = f => document.prerendering ? setTimeout(f, 0) : requestAnimationFrame(f);
   function prepare(st, then) { st.ready = false; if (then) prep.push([st, 0, then]); else prep.unshift([st, 0]); /* growing grass first */ if (!prepare.raf) prepare.raf = soon(prepFrame); }
@@ -194,12 +194,17 @@
     // sprigs took seconds to start; Ian: "they take quite a bit of time to load"). After that the growing is played by
     // the compositor, so only brushing needs the frames kept light (at 5ms a frame the grass further down the page was
     // still bare when Ian scrolled to it)
-    prepare.raf = 0; const end = performance.now() + (!grassGo ? 40 : active.size ? 5 : 14);
+    prepare.raf = 0;
+    // While the page scrolls only grass that's coming into view is painted, a little a frame; the rest waits until the
+    // scroll has stopped (painting ahead mid-scroll was most of what slowed scrolling down)
+    const scrolling = performance.now() - lastScroll < 300;
+    const end = performance.now() + (!grassGo ? 40 : scrolling ? 4 : active.size ? 5 : 14);
     while (prep.length && performance.now() < end) { const job = prep[0], [st] = job;
+      if (scrolling && strips.has(st) && !growing.has(st)) break;
       if (!strips.has(st)) { prep.shift(); continue; }
       const g = st.blades[job[1]++]; if (g) { bladeImage(g); softShadow(g); }
       if (job[1] >= st.blades.length) { prep.shift(); st.ready = true; job[2] && job[2](st); } }
-    if (prep.length) prepare.raf = soon(prepFrame);
+    if (prep.length) prepare.raf = scrolling && !growing.has(prep[0][0]) ? setTimeout(() => { prepare.raf = soon(prepFrame); }, 150) : soon(prepFrame);
   }
   const EDGE = { top: 0, left: 80, right: 120, bottom: 160 };
   // grass below the first screen waits, blank, until its piece scrolls into view, then grows there
