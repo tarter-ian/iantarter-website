@@ -984,7 +984,9 @@
   let mouseAt = null;
   window.addEventListener("pointermove", e => { mouseAt = e.pointerType === "touch" ? null : [e.clientX, e.clientY]; nameMove(e); }, { passive: true });
   document.addEventListener("pointerleave", () => { mouseAt = null; });
-  addEventListener("scroll", () => { if (!mouseAt) return; const e = { clientX: mouseAt[0], clientY: mouseAt[1], timeStamp: performance.now() }; track(e.clientX, e.clientY); nameMove(e); }, { passive: true });
+  // the page scrolling under a resting cursor doesn't rustle the letters (it made the browser lay the page out again on
+  // every scroll event; Ian's profile): a swipe starts fresh with the next real pointer move
+  addEventListener("scroll", () => { trail.length = 0; }, { passive: true });
   function nameMove(e) {
     const pv = lastPt, prev = pv && { x: pv.x - scrollX, y: pv.y - scrollY, t: pv.t }; lastPt = { x: e.clientX + scrollX, y: e.clientY + scrollY, t: e.timeStamp || performance.now() };
     const cur = { x: e.clientX, y: e.clientY, t: lastPt.t };
