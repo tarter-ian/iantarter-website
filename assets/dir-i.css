@@ -380,8 +380,8 @@ body:has(.x-i) { background: #4a5233; }
    fades away, so the texture comes up softly instead of popping in (the cards and menu sit above the veil) */
 .x-i { background-color: rgb(87, 95, 70); }
 html, body { background-color: rgb(87, 95, 70); }
-.x-i::after { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: rgb(87, 95, 70); transition: opacity 1.1s ease; }
-html.ground-in .x-i::after { opacity: 0; visibility: hidden; transition: opacity 1.1s ease, visibility 0s 1.1s; }
+.x-i::after { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: rgb(87, 95, 70); transition: opacity .25s ease; }
+html.ground-in .x-i::after { opacity: 0; visibility: hidden; transition: opacity .25s ease, visibility 0s .25s; } /* (Ian: the slow fade-in was too slow on his phone) */
 /* a page shown already built (laid out ahead of the click) has nothing to fade in */
 html.ground-now .x-i::after { transition: none; }
 /* the wallet keeps its desktop size on wider two-column cards, so it never hangs down over the game's title */
