@@ -246,19 +246,22 @@
     Object.assign(sh.style, { left: 0, top: 0, width: w + "px", height: h + "px", overflow: "hidden", borderRadius: rad + "px" }); Object.assign(fx.style, { left: 0, top: 0, width: 0, height: 0 });
     const first = pair(st)[0]; first.img.before(sh); first.img.before(fx);
     for (const s of pair(st)) s.cv.style.visibility = "hidden";
-    let left = 0; const done = () => { if (--left <= 0) st.fxDone = true; };
+    let left = 0; const an = st.fxAn = [], done = () => { if (--left <= 0) st.fxDone = true; };
     const put = (box, c, x, y, cw, ch, ox, oy, g) => {
       c.className = ""; Object.assign(c.style, { position: "absolute", left: x + "px", top: y + "px", width: cw + "px", height: ch + "px", transformOrigin: `${ox}px ${oy}px`, opacity: 0 }); box.appendChild(c);
       const r = `rotate(${g.ang}deg)`, o = { delay: g.gd, fill: "both" }; left += 2;
-      c.animate([{ transform: `${r} scale(.12)` }, { transform: r }], { ...o, duration: GROW, easing: "cubic-bezier(.33, 1, .68, 1)" }).finished.then(done, done);
-      c.animate([{ opacity: 0 }, { opacity: 1 }], { ...o, duration: GROW / 4 }).finished.then(done, done); };
+      for (const a of [c.animate([{ transform: `${r} scale(.12)` }, { transform: r }], { ...o, duration: GROW, easing: "cubic-bezier(.33, 1, .68, 1)" }),
+        c.animate([{ opacity: 0 }, { opacity: 1 }], { ...o, duration: GROW / 4 })]) { an.push(a); a.finished.then(done, done); } };
     for (const g of st.blades) { const c = softShadow(g); put(sh, c, g.x + .6 - g.w / 2 - SP, g.y + 1.6 - g.len - SP, g.w + 2 * SP, g.len + 2 * SP, g.w / 2 + SP, g.len + SP, g); }
     for (const g of st.blades) put(fx, bladeImage(g), g.x - g.w / 2, g.y - g.len, g.w, g.len, g.w / 2, g.len, g);
     st.fx = [sh, fx]; if (!left) st.fxDone = true;
   }
   function endFx(st) {
     for (const s of pair(st)) s.cv.style.visibility = "";
-    if (st.fx) { for (const box of st.fx) { for (const c of [...box.children]) { c.getAnimations().forEach(a => a.cancel()); c.removeAttribute("style"); c.remove(); } box.remove(); } st.fx = null; }
+    // (the animations are cancelled from the list kept when they were made: asking each element for its animations cost
+    // seconds while a scroll brought new grass into view)
+    if (st.fxAn) { st.fxAn.forEach(a => a.cancel()); st.fxAn = null; }
+    if (st.fx) { for (const box of st.fx) { for (const c of [...box.children]) { c.removeAttribute("style"); c.remove(); } box.remove(); } st.fx = null; }
   }
   // the name's sprigs grow the same way, each from its own root, on their own frame-paced clock (on a busy phone,
   // timed animations had finished before the page could draw, so the sprigs just appeared); the clock waits for the ground
@@ -757,6 +760,15 @@
     const top = recordWind(now, dir * wind.e), calm = !wind.aim && top < .004;
     windW = calm ? 0 : wdir * Math.max(top, .004); // nonzero while any gust is still crossing the window
     wind.ph += 3 * dt; // the gusts travel at about 250px a second
+    // while the page is still scrolling nothing leans: re-tilting every edge each frame made the browser redraw the cards
+    // all through the scroll (frames went from about 17ms to over half a second, and fast scrolls flashed bare ground), and
+    // the lean can't be seen while the page moves anyway (Ian). The gusts it gathered roll through once scrolling stops.
+    if (!calm && now - wind.ev < 250) {
+      if (!wind.hush) { wind.hush = true; dispatchEvent(new CustomEvent("grass-wind", { detail: { w: 0, dir: wdir, env: envAt, gn, ph: wind.ph, sx: 0, sy: 0 } }));
+        for (const st of windSt) { st.skew = null; for (const q of pair(st)) q.img.style.transform = q.cv.style.transform = ""; } windSt.clear(); }
+      windW = 0; wind.raf = requestAnimationFrame(windFrame); return;
+    }
+    wind.hush = false;
     // the sprigs along a piece's sides lie across the wind, so they lean with the gust passing them: their strip is skewed
     // about the line their roots are on (a transform only, nothing is repainted); sprigs along the top and bottom point
     // along the wind and hardly bend
@@ -783,8 +795,10 @@
   }, { passive: true });
   // scrolling under a resting cursor moves the page past it, so it brushes the grass just as dragging over the same stretch would
   document.addEventListener("pointerleave", () => { mouseAt = null; });
-  addEventListener("scroll", () => { if (!mouseAt || reduce()) return;
-    queued = { x: mouseAt[0] + scrollX, y: mouseAt[1] + scrollY, t: performance.now() }; if (!brush.raf) brush.raf = requestAnimationFrame(brush); }, { passive: true });
+  // the page scrolling under a still cursor doesn't brush the grass: it can't be seen while the page moves, and stirring
+  // the moss on every scroll frame was most of what slowed scrolling (Ian: cut it while scrolling). The next brush starts
+  // where the cursor is then, not from where it was before the scroll.
+  addEventListener("scroll", () => { last = null; queued = null; }, { passive: true });
   const bend = (dx, dy, x, y, p, vx, vy, sp) => {
     const d = Math.hypot(x - p.x, y - p.y); if (d > R) return 0;
     // like a finger drawn through real grass: blades on its path are combed flat the way it's moving, and blades off to the
