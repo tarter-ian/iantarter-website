@@ -20,6 +20,12 @@
   }
   // The name's letters lie in the grass: blades grow up around each letter's outline and lean in over its edges.
   // Edge points come from the letter's own pixels; each blade roots just outside and points along the inward normal.
+  // the letters' pixels are read through one reusable canvas kept on the CPU (reading the letters' own canvases made the
+  // browser warn, and pull each one back from the GPU)
+  let pxc = null;
+  const readPx = (cv, W, H) => { if (!pxc) pxc = document.createElement("canvas").getContext("2d", { willReadFrequently: true });
+    if (pxc.canvas.width < W) pxc.canvas.width = W; if (pxc.canvas.height < H) pxc.canvas.height = H;
+    pxc.clearRect(0, 0, W, H); pxc.drawImage(cv, 0, 0); return pxc.getImageData(0, 0, W, H).data; };
   function dressName(lay) {
     const cvs = lay.querySelectorAll(".fill-cv > canvas:not(.alt):not(.spin-cv):not(.rock-shadow)"); if (!cvs.length) return false;
     // a second dressing (the layout often settles again once the fonts arrive) moves the sprigs already there instead of
@@ -28,7 +34,7 @@
     const root = lay.closest(".x-i").getBoundingClientRect(), lr = lay.getBoundingClientRect(), ox = lr.left - root.left, oy = lr.top - root.top;
     cvs.forEach(cv => {
       const r = cv.getBoundingClientRect(), W = cv.width, H = cv.height, k = r.width / W;
-      const a = cv.getContext("2d").getImageData(0, 0, W, H).data, A = (x, y) => x < 0 || y < 0 || x >= W || y >= H ? 0 : a[(y * W + x) * 4 + 3];
+      const a = readPx(cv, W, H), A = (x, y) => x < 0 || y < 0 || x >= W || y >= H ? 0 : a[(y * W + x) * 4 + 3];
       const pts = [];
       for (let y = 1; y < H - 1; y += 2) for (let x = 1; x < W - 1; x += 2) {
         if (A(x, y) < 128) continue; const gx = A(x + 1, y) - A(x - 1, y), gy = A(x, y + 1) - A(x, y - 1);
