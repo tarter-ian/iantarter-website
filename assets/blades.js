@@ -150,10 +150,10 @@
     // the blades' shadows fall only on the piece (on the ground they'd show as dark smudges), and move with their blades
     if (!st.shape) { const el = st.el; st.shape = [el.offsetWidth, el.offsetHeight, parseFloat(getComputedStyle(el).borderTopLeftRadius) || 0]; }
     const [w, h, rad] = st.shape; sx.save(); sx.beginPath(); sx.roundRect ? sx.roundRect(0, 0, w, h, rad) : sx.rect(0, 0, w, h); sx.clip();
-    for (const g of st.blades) { if (g.gpu || !near(g)) continue; const P = pose(g); if (P) drawShadow(sx, g, g.x, g.y, P[0], P[1], P[2]); }
+    for (const g of st.blades) { if (!near(g)) continue; const P = pose(g); if (P) drawShadow(sx, g, g.x, g.y, P[0], P[1], P[2]); }
     sx.restore();
     // a bending blade is drawn right here in its own strip, so it stays under whatever lies on top of its piece
-    for (const g of st.blades) { if (g.gpu || !near(g)) continue; const P = pose(g); if (P) drawBlade(ctx, g, g.x, g.y, P[0], P[1], P[2]); }
+    for (const g of st.blades) { if (!near(g)) continue; const P = pose(g); if (P) drawBlade(ctx, g, g.x, g.y, P[0], P[1], P[2]); }
     // the piece's own shadow doesn't fall on them: they lean up over its edge, above it
     for (const c of cxs) c.restore();
   }
@@ -376,8 +376,8 @@
       if (cut) { // the edge's shadow layers go in front of its first sprig layer, in order
         const first = shadowsFirst.get(edge); if (first) el.insertBefore(timg, first); else el.appendChild(timg); }
       el.appendChild(img); if (cut && !shadowsFirst.has(edge)) shadowsFirst.set(edge, img);
-      const st = { el, edge, cv, img, ctx: cv.getContext("2d", { willReadFrequently: true }), x0, y0, blades: bl, W: cv.width, H: cv.height }; bl.forEach(g => g.st = st);
-      if (cut) st.twin = { cv: tcv, img: timg, ctx: tcv.getContext("2d", { willReadFrequently: true }) };
+      const st = { el, edge, cv, img, ctx: cv.getContext("2d"), x0, y0, blades: bl, W: cv.width, H: cv.height }; bl.forEach(g => g.st = st);
+      if (cut) st.twin = { cv: tcv, img: timg, ctx: tcv.getContext("2d") };
       // the fresh canvas shows at once (a relayout swaps old grass for new in the same frame) and hands over to its image
       strips.add(st); if (grow(st)) continue;
       // grass out of view is painted a little at a time once the visible grass is done
@@ -544,7 +544,8 @@
     const gl = cv.getContext("webgl", { premultipliedAlpha: true, alpha: true, antialias: false, depth: true }); if (!gl) return null;
     const VSs = `attribute vec2 p;attribute vec2 uv;attribute vec2 lc;attribute vec4 pc;attribute float z;uniform vec2 vs;varying vec2 v,l;varying vec4 c;
       void main(){v=uv;l=lc;c=pc;gl_Position=vec4(p.x/vs.x*2.-1.,1.-p.y/vs.y*2.,z,1.);}`;
-    const FSs = `precision mediump float;varying vec2 v,l;varying vec4 c;uniform sampler2D A;uniform float occ;
+    // (highp: at mediump, which real graphics cards honour, a spot in the big atlas can be off by a texel)
+    const FSs = `precision highp float;varying vec2 v,l;varying vec4 c;uniform sampler2D A;uniform float occ;
       void main(){if(occ>.5){gl_FragColor=vec4(0.);return;}
       if(c.w>.5){vec2 q=abs(l-c.xy*.5)-(c.xy*.5-vec2(c.z));if(length(max(q,0.))+min(max(q.x,q.y),0.)>c.z)discard;}
       gl_FragColor=texture2D(A,v);}`;
@@ -556,19 +557,23 @@
     { const a = gl.getAttribLocation(pr, "z"); gl.enableVertexAttribArray(a); gl.vertexAttribPointer(a, 1, gl.FLOAT, false, ST + 4, ST); }
     const uVs = gl.getUniformLocation(pr, "vs"), uOcc = gl.getUniformLocation(pr, "occ");
     // one atlas for every lifted sprig's picture and its shadow, filled shelf by shelf as sprigs are first bent
-    const AW = 2048, tex = gl.createTexture(); gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, tex);
+    const AW = Math.min(4096, gl.getParameter(gl.MAX_TEXTURE_SIZE)), tex = gl.createTexture(); gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, tex);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, AW, AW, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
     for (const [k, v] of [[gl.TEXTURE_MIN_FILTER, gl.LINEAR], [gl.TEXTURE_MAG_FILTER, gl.LINEAR], [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]]) gl.texParameteri(gl.TEXTURE_2D, k, v);
     gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
-    let sx = 0, sy = 0, sh2 = 0, slots = new Map();
+    // when it's full it starts over, and the frame being built is built again (a sprig placed before the restart would
+    // point at a wiped spot and blink out for a frame)
+    let sx = 0, sy = 0, sh2 = 0, slots = new Map(), full = false;
     const slot = c => { let s = slots.get(c); if (s) return s; const w = c.width + 2, h = c.height + 2;
-      if (sx + w > AW) { sx = 0; sy += sh2; sh2 = 0; } if (sy + h > AW) { sx = sy = sh2 = 0; slots = new Map(); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, AW, AW, 0, gl.RGBA, gl.UNSIGNED_BYTE, null); }
+      if (sx + w > AW) { sx = 0; sy += sh2; sh2 = 0; } if (sy + h > AW) { full = true; window.__glResets = (window.__glResets || 0) + 1; sx = sy = sh2 = 0; slots = new Map(); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, AW, AW, 0, gl.RGBA, gl.UNSIGNED_BYTE, null); }
       gl.texSubImage2D(gl.TEXTURE_2D, 0, sx + 1, sy + 1, gl.RGBA, gl.UNSIGNED_BYTE, c);
       s = [(sx + 1) / AW, (sy + 1) / AW, (sx + 1 + c.width) / AW, (sy + 1 + c.height) / AW]; slots.set(c, s); sx += w; sh2 = Math.max(sh2, h); return s; };
     gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA); gl.enable(gl.DEPTH_TEST); gl.depthFunc(gl.LESS);
     let pieces = [], shown = false; document.body.appendChild(cv);
     // each piece's map from its own coordinates to the page (three probe points), and its place in the stacking
     function index() {
+      drop();
+      for (const f of fbos.values()) { gl.deleteTexture(f.tex); gl.deleteFramebuffer(f.fb); } fbos.clear();
       const els = new Set([...strips].map(st => st.el)); document.querySelectorAll(".x-i .card, .x-i .lay, .x-i .hand a").forEach(e => els.add(e));
       const order = [...document.querySelectorAll("*")], at = new Map(order.map((e, i) => [e, i]));
       const zk = e => { const k = []; for (let n = e; n && !n.classList.contains("x-i"); n = n.parentElement) { const z = parseInt(getComputedStyle(n).zIndex); k.unshift(isNaN(z) ? 0 : z); } return k; };
@@ -582,36 +587,85 @@
       pieces.sort(cmp); pieces.forEach((e, i) => e._rank = i);
     }
     const Z = r => 1 - (r + 1) / (pieces.length + 3);
-    function draw(list) {
+    // A brushed piece goes onto this layer whole, every sprig along all its sides in the order its strips paint them (a
+    // single sprig lifted out would jump over its neighbours, and back under them when it landed), and its strips are
+    // hidden. It goes back to its strips, repainted as they are now, in the same frame the layer stops drawing it.
+    const up = new Map();
+    // this layer is fixed and redrawn by the page, so it would trail a scroll by a frame: while the page scrolls, the
+    // lifted pieces go back to their strips (which scroll with their pieces) and bend there
+    let scrolled = -1e9;
+    addEventListener("scroll", () => { scrolled = performance.now(); if (up.size) { drop(); draw(); } }, { passive: true });
+    function drop() { for (const sts of up.values()) for (const s of sts) { s.up = false; paintStrip(s); for (const q of pair(s)) q.cv.style.visibility = ""; } up.clear(); }
+    function lift(st) {
+      const el = st.el; if (up.has(el)) return true; if (!el._M || performance.now() - scrolled < 250) return false;
+      const sts = [...strips].filter(s => s.el === el); if (sts.some(s => s.gr || !s.cv.parentNode)) return false;
+      for (const s of sts) { s.up = true; for (const q of pair(s)) q.cv.style.visibility = "hidden"; }
+      up.set(el, sts); return true;
+    }
+    function land() {
+      for (const [el, sts] of up) { if (sts.some(s => s.blades.some(g => g.moving))) continue;
+        for (const s of sts) { s.up = false; paintStrip(s); for (const q of pair(s)) q.cv.style.visibility = ""; }
+        up.delete(el); }
+    }
+    // each lifted strip is painted into its own texture first, on the same pixel grid as its canvas, and that texture is
+    // then laid where the canvas lies; so a sprig is resampled the same two times it is on the page, and lifting a piece
+    // or setting it back down changes nothing you can see
+    const fbos = new Map();
+    const target = (k, st) => { let f = fbos.get(k); if (f && f.W === st.W && f.H === st.H) return f;
+      if (f) { gl.deleteTexture(f.tex); gl.deleteFramebuffer(f.fb); }
+      const t = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, t); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, st.W, st.H, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+      for (const [k, v] of [[gl.TEXTURE_MIN_FILTER, gl.LINEAR], [gl.TEXTURE_MAG_FILTER, gl.LINEAR], [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]]) gl.texParameteri(gl.TEXTURE_2D, k, v);
+      const fb = gl.createFramebuffer(); gl.bindFramebuffer(gl.FRAMEBUFFER, fb); gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, t, 0);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null); gl.bindTexture(gl.TEXTURE_2D, tex);
+      f = { tex: t, fb, W: st.W, H: st.H }; fbos.set(k, f); return f; };
+    const per = 11, send = v => { gl.bindBuffer(gl.ARRAY_BUFFER, buf); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(v), gl.STREAM_DRAW); };
+    function draw() {
+      land(); const list = [...up.keys()];
       const W = innerWidth, H = innerHeight, D = Math.min(2, devicePixelRatio || 1);
       if (!list.length) { if (shown) { gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT); shown = false; } return; }
       if (cv.width !== Math.round(W * D) || cv.height !== Math.round(H * D)) { cv.width = Math.round(W * D); cv.height = Math.round(H * D); }
-      gl.viewport(0, 0, cv.width, cv.height); gl.uniform2f(uVs, W, H); gl.clearColor(0, 0, 0, 0); gl.clearDepth(1); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-      const v = [], ox = scrollX, oy = scrollY;
-      const vert = (M, x, y, u, w, pc, z) => v.push(M[0] * x + M[2] * y + M[4] - ox, M[1] * x + M[3] * y + M[5] - oy, u, w, x, y, pc[0], pc[1], pc[2], pc[3], z);
-      const quad = (M, c, uvs, pc, z) => { const [a, b, cc, d] = c, [u0, v0, u1, v1] = uvs;
-        for (const [q, u, w] of [[a, u0, v0], [b, u1, v0], [d, u0, v1], [b, u1, v0], [cc, u1, v1], [d, u0, v1]]) vert(M, q[0], q[1], u, w, pc, z); };
-      // the pieces on top, into the depth only
-      for (const e of pieces) { const [w, h] = e._sh; quad(e._M, [[0, 0], [w, 0], [w, h], [0, h]], [0, 0, 0, 0], [0, 0, 0, 0], Z(e._rank)); }
+      const vert = (v, M, ox, oy, x, y, u, w, pc, z) => v.push(M[0] * x + M[2] * y + M[4] - ox, M[1] * x + M[3] * y + M[5] - oy, u, w, x, y, pc[0], pc[1], pc[2], pc[3], z);
+      const quad = (v, M, ox, oy, c, uvs, pc, z) => { const [a, b, cc, d] = c, [u0, v0, u1, v1] = uvs;
+        for (const [q, u, w] of [[a, u0, v0], [b, u1, v0], [d, u0, v1], [b, u1, v0], [cc, u1, v1], [d, u0, v1]]) vert(v, M, ox, oy, q[0], q[1], u, w, pc, z); };
+      // 1. each strip as its canvas would show it: every sprig's shadow (cut to the piece), then every sprig, in its order
+      const corners = (x, y, a, l, t, r, b) => { const c = Math.cos(a), s = Math.sin(a); return [[l, t], [r, t], [r, b], [l, b]].map(([px, py]) => [x + px * c - py * s, y + px * s + py * c]); };
+      const ang = g => (g.moving ? g.ang + g.bend : g.ang) * Math.PI / 180, I = [1, 0, 0, 1, 0, 0];
+      // (a strip with a twin keeps its shadows there, a layer laid under all its edge's sprigs, so it gets its own texture)
+      const sts = list.flatMap(e => up.get(e)); let layers = [], tries = 0;
+      do { full = false; layers = [];
+        for (const st of sts) { const sh = [...st.el._sh, 1], m = [], d = st.twin ? [] : m;
+          for (const g of st.blades) quad(d, I, st.x0, st.y0, corners(g.x + .6, g.y + 1.6, ang(g), -g.w / 2 - SP, -g.len - SP, g.w / 2 + SP, SP), slot(softShadow(g)), sh, 0);
+          for (const g of st.blades) quad(m, I, st.x0, st.y0, corners(g.x, g.y, ang(g), -g.w / 2, -g.len, g.w / 2, 0), slot(bladeImage(g)), [0, 0, 0, 0], 0);
+          if (st.twin) layers.push({ st, k: st.twin, v: d, under: true }); layers.push({ st, k: st, v: m }); }
+      } while (full && ++tries < 2);
+      layers.sort((a, b) => (b.under || 0) - (a.under || 0));
+      gl.disable(gl.DEPTH_TEST); gl.uniform1f(uOcc, 0); gl.clearColor(0, 0, 0, 0);
+      for (const L of layers) { const f = L.f = target(L.k, L.st); gl.bindFramebuffer(gl.FRAMEBUFFER, f.fb); gl.viewport(0, 0, f.W, f.H); gl.uniform2f(uVs, f.W / DPR, f.H / DPR);
+        gl.clear(gl.COLOR_BUFFER_BIT); send(L.v); gl.drawArrays(gl.TRIANGLES, 0, L.v.length / per); }
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null); gl.enable(gl.DEPTH_TEST);
+      // 2. the page: the pieces into the depth only (so whatever lies on a lifted piece stays on top), then the strips
+      gl.viewport(0, 0, cv.width, cv.height); gl.uniform2f(uVs, W, H); gl.clearDepth(1); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+      const v = [], ox = scrollX, oy = scrollY, none = [0, 0, 0, 0];
+      for (const e of pieces) { const [w, h] = e._sh; quad(v, e._M, ox, oy, [[0, 0], [w, 0], [w, h], [0, h]], none, none, Z(e._rank)); }
       // the open word grid sits over everything
       const open = document.querySelector(".s-egg-pop:not([hidden])");
       if (open && open.offsetWidth) { const b = open.getBoundingClientRect();
-        quad([1, 0, 0, 1, b.left + ox, b.top + oy], [[0, 0], [b.width, 0], [b.width, b.height], [0, b.height]], [0, 0, 0, 0], [0, 0, 0, 0], Z(pieces.length + 1)); }
+        quad(v, [1, 0, 0, 1, b.left + ox, b.top + oy], ox, oy, [[0, 0], [b.width, 0], [b.width, b.height], [0, b.height]], none, none, Z(pieces.length + 1)); }
       const n0 = v.length;
-      // the sprigs' shadows (cut to their piece), then the sprigs, each turned about its foot exactly as in its strip
-      const corners = (g, x, y, a, l, t, r, b, sk) => { const c = Math.cos(a), s = Math.sin(a);
-        return [[l, t], [r, t], [r, b], [l, b]].map(([px, py]) => { let X = x + px * c - py * s, Y = y + px * s + py * c; if (sk) Y += Math.tan(sk[0] * Math.PI / 180) * (X - g.st.x0 - sk[1]); return [X, Y]; }); };
-      for (const g of list) { const e = g.st.el, a = (g.ang + g.bend) * Math.PI / 180, sk = g.st.skew;
-        quad(e._M, corners(g, g.x + .6, g.y + 1.6, a, -g.w / 2 - SP, -g.len - SP, g.w / 2 + SP, SP, sk), slot(softShadow(g)), [...e._sh, 1], Z(e._rank + .5)); }
-      for (const g of list) { const e = g.st.el, a = (g.ang + g.bend) * Math.PI / 180, sk = g.st.skew;
-        quad(e._M, corners(g, g.x, g.y, a, -g.w / 2, -g.len, g.w / 2, 0, sk), slot(bladeImage(g)), [0, 0, 0, 0], Z(e._rank + .5)); }
-      gl.bindBuffer(gl.ARRAY_BUFFER, buf); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(v), gl.STREAM_DRAW);
-      const per = 11;
+      // a strip leaning in the wind is skewed about the line its roots are on, as its CSS transform does
+      for (const { st } of layers) { const l = st.x0, t = st.y0, r = l + st.W / DPR, b = t + st.H / DPR, k = st.skew;
+        const c = [[l, t], [r, t], [r, b], [l, b]].map(([x, y]) => [x, k ? y + Math.tan(k[0] * Math.PI / 180) * (x - k[1]) : y]);
+        // a canvas on an unturned piece is put on whole screen pixels, as the browser does, so it isn't resampled
+        let M = st.el._M; if (!k && Math.abs(M[1]) < 1e-4 && Math.abs(M[2]) < 1e-4) { const X = (M[0] * l + M[4] - ox) * D, Y = (M[3] * t + M[5] - oy) * D;
+          M = [M[0], 0, 0, M[3], M[4] + (Math.round(X) - X) / D, M[5] + (Math.round(Y) - Y) / D]; }
+        quad(v, M, ox, oy, c, [0, 1, 1, 0], none, Z(st.el._rank + .5)); }
+      send(v);
       gl.colorMask(false, false, false, false); gl.depthMask(true); gl.uniform1f(uOcc, 1); gl.drawArrays(gl.TRIANGLES, 0, n0 / per);
-      gl.colorMask(true, true, true, true); gl.depthMask(false); gl.uniform1f(uOcc, 0); gl.drawArrays(gl.TRIANGLES, n0 / per, (v.length - n0) / per);
-      shown = true;
+      gl.colorMask(true, true, true, true); gl.depthMask(false); gl.uniform1f(uOcc, 0);
+      layers.forEach((L, i) => { gl.bindTexture(gl.TEXTURE_2D, L.f.tex); gl.drawArrays(gl.TRIANGLES, n0 / per + i * 6, 6); });
+      gl.bindTexture(gl.TEXTURE_2D, tex); shown = true;
     }
-    return { index, draw };
+    return { index, draw, lift };
   }
   const active = new Set();
   // wobble: out to amt, then eased back to rest
@@ -625,7 +679,7 @@
     const c0 = g.moving ? g.bend || 0 : 0;
     g.prev = g.moving ? { t0: g.t0, dur: g.dur, amt: g.amt, c0: g.c0 || 0, prev: null } : null; g.c0 = c0;
     g.moving = true; g.t0 = now; g.dur = 900 + Math.random() * 300; g.amt = amt; g.bt = now; g.bend = g.bend || 0;
-    if (!active.has(g)) { active.add(g); if (GL && g.st && g.st.el._M) { g.gpu = g.enter = true; } else if (g.st) { thaw(g.st); paintStrip(g.st); } }
+    if (!active.has(g)) { active.add(g); if (g.st && !(GL && GL.lift(g.st))) { thaw(g.st); paintStrip(g.st); } }
     if (!frame.raf) frame.raf = requestAnimationFrame(frame);
   }
   function frame() {
@@ -635,11 +689,12 @@
       const t = (now - g.t0) / g.dur;
       if (t < 0) { if (g.prev) { g.bend = bendAt(g.prev, now); dirt(g); } continue; } // a gust that hasn't reached this blade yet
       if (g.prev) { g.c0 = g.bend || 0; g.prev = null; } // it starts from where the old swing has got to
-      if (t >= 1) { active.delete(g); g.moving = false; g.bend = 0; if (g.gpu) { g.gpu = false; dirt(g); continue; } if (g.st) touched.add(g.st); dirt(g); continue; }
-      g.bend = bendAt(g, now); if (g.gpu) { if (g.enter) { g.enter = false; thaw(g.st); dirt(g); } } else dirt(g);
+      if (t >= 1) { active.delete(g); g.moving = false; g.bend = 0; if (g.st && !g.st.up) touched.add(g.st); dirt(g); continue; }
+      g.bend = bendAt(g, now); dirt(g);
     }
-    live.forEach((gs, st) => paintStrip(st, gs));
-    if (GL) GL.draw([...active].filter(g => g.gpu));
+    // a piece whose sprigs are all on the GPU layer isn't repainted at all; its strips come back once they're all still
+    live.forEach((gs, st) => { if (!st.up) paintStrip(st, gs); });
+    if (GL) GL.draw();
     // a strip goes back to being an image once its blades have been still for a moment (not on every settle, so brushing back
     // and forth doesn't keep re-encoding it)
     touched.forEach(st => { clearTimeout(st.ft);
