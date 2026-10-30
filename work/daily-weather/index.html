@@ -19,11 +19,29 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@300..800&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&family=Rampart+One&display=swap">
 <link rel="stylesheet" href="../../assets/site.css?v=20261013u">
-<link rel="stylesheet" href="../../assets/dir-i.css?v=20261029n">
+<link rel="stylesheet" href="../../assets/dir-i.css?v=20261030a">
 <link rel="stylesheet" href="../../assets/case-i.css?v=20261029m">
+<script type="speculationrules">{"prerender": [{"where": {"and": [{"href_matches": "/*"}, {"not": {"href_matches": "*.pdf"}}]}, "eagerness": "moderate"}]}</script>
 <script>(() => { // where each page lies on the forest floor (homepage 0, games to the left, case studies to the right), so a link pans the right way
   const X = p => (p = p.replace(/index\.html$/, ""), /daily-weather\/$/.test(p) ? -2 : /projects\/$/.test(p) ? -1 : /exact-sports\/$/.test(p) ? 1 : /embodied-cognition\/$/.test(p) ? 2 : /birds-lab\/$/.test(p) ? 3 : 0);
-  addEventListener("pagereveal", e => { const t = e.viewTransition, a = window.navigation && navigation.activation; if (!t) return;
+  // The floor runs on from page to page: each page knows where the last one lay (its spot on the floor and how far down it
+  // was scrolled) and lays its own light and moss on from there, one screen width over, so the canopy shade and the moss
+  // carry straight across the seam while the view pans.
+  const here = X(location.pathname), F = window.__floor = { x: 0, y: 0 }, de = document.documentElement;
+  requestAnimationFrame(() => { F.drawn = true; });
+  let back = false; const last = () => { try { return JSON.parse(sessionStorage.getItem("floor")); } catch (e) { return null; } };
+  const lay = (s, top) => { if (!s) return; F.x = s.x + Math.sign(here - s.X) * innerWidth; F.y = s.y - top; };
+  const set = () => { de.style.setProperty("--wx", F.x + "px"); de.style.setProperty("--wy", F.y + "px"); };
+  lay(last(), 0); set();
+  let q = 0; const save = () => { clearTimeout(q); q = 0; try { sessionStorage.setItem("floor", JSON.stringify({ X: here, x: F.x, y: F.y + scrollY })); } catch (e) {} };
+  addEventListener("scroll", () => { if (!q) q = setTimeout(save, 120); }, { passive: true });
+  addEventListener("pageswap", save);
+  addEventListener("pageshow", e => { back = e.persisted; });
+  addEventListener("pagereveal", e => {
+    // (a page kept from before, coming back, keeps where it lay: moving its light now would show)
+    if (!back) { const x = F.x, y = F.y; lay(last(), scrollY); if (x !== F.x || Math.abs(y - F.y) > .5) { set(); dispatchEvent(new Event("floor-moved")); } }
+    save();
+    const t = e.viewTransition, a = window.navigation && navigation.activation; if (!t) return;
     const d = a && a.from && a.entry ? X(new URL(a.entry.url).pathname) - X(new URL(a.from.url).pathname) : 0;
     if (!d) t.skipTransition(); else t.types.add(d > 0 ? "pan-right" : "pan-left"); });
 })();</script>
@@ -117,7 +135,7 @@
 
 </div>
 <script>(() => { const done = () => document.documentElement.classList.add("ground-in");
-  Promise.all(["../../assets/tex/moss-quiet-2k.webp", "../../assets/tex/canopy-shade-L.webp", "../../assets/tex/canopy-sun-2.webp"].map(u => { const i = new Image(); i.src = u; return i.decode().catch(() => {}); })).then(() => requestAnimationFrame(done));
-  setTimeout(done, 5000); })();</script><script src="../../assets/blades.js?v=20261029m" defer></script><script src="../../assets/forest.js?v=20261029m" defer></script>
+  Promise.all(["../../assets/tex/moss-quiet-2k.webp", "../../assets/tex/canopy-shade-L.webp", "../../assets/tex/canopy-sun-2.webp"].map(u => { const i = new Image(); i.src = u; return i.decode().catch(() => {}); })).then(() => { if (document.prerendering || !(window.__floor || {}).drawn) { document.documentElement.classList.add("ground-now"); done(); } else requestAnimationFrame(done); });
+  setTimeout(done, 5000); })();</script><script src="../../assets/blades.js?v=20261030a" defer></script><script src="../../assets/forest.js?v=20261029m" defer></script>
 </body>
 </html>

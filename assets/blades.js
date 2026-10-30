@@ -58,12 +58,14 @@
   await Promise.all(sprites.map(sprite)); for (const sp of sprites) sp.img = await sprite(sp);
   let PW = 1, PH = 1;
   const scene = () => document.querySelector(".x-i");
+  // where this page lies on the forest floor (set in each page's head, so the light and moss run on from the last page)
+  const FX = () => (window.__floor || {}).x || 0, FY = () => (window.__floor || {}).y || 0;
   const pat = (ctx, img, px, py, size, ox = 0, oy = 0) => { const p = ctx.createPattern(img, "repeat"); p.setTransform(new DOMMatrix().translate(ox - px, oy - py).scale(size / img.width)); return p; };
   // fill a w x h box whose top-left sits at (px, py) in the scene with exactly what the ground looks like there (see dir-i.css)
   // with a base image, that image takes the moss's place and gets the same light, cut to its own shape
   function paintGround(ctx, px, py, w, h, base, bare) {
     ctx.save(); ctx.globalCompositeOperation = "source-over";
-    if (base) ctx.drawImage(base, 0, 0, w, h); else if (MOSS) { ctx.fillStyle = pat(ctx, MOSS, px, py, 900); ctx.fillRect(0, 0, w, h); }
+    if (base) ctx.drawImage(base, 0, 0, w, h); else if (MOSS) { ctx.fillStyle = pat(ctx, MOSS, px + FX(), py + FY(), 900); ctx.fillRect(0, 0, w, h); }
     ctx.fillStyle = "rgba(22,28,12,.2)"; ctx.fillRect(0, 0, w, h);
     if (!bare) { // a blade's own shading, darker at its root; the open ground has none
       const tint = ctx.createLinearGradient(0, h, 0, 0); tint.addColorStop(0, "rgba(0,0,0,.12)"); tint.addColorStop(.7, "rgba(255,250,210,.04)"); tint.addColorStop(1, "rgba(255,250,210,.08)");
@@ -75,8 +77,8 @@
     { ctx.save(); const rx = 1.4 * PW, ry = PH; ctx.translate(.25 * PW - px, .15 * PH - py); ctx.scale(rx / ry, 1);
       const g = ctx.createRadialGradient(0, 0, 0, 0, 0, ry); g.addColorStop(0, "rgba(255,255,255,0)"); g.addColorStop(.55, "rgba(255,255,255,0)"); g.addColorStop(1, "rgba(40,48,30,.27)");
       ctx.fillStyle = g; ctx.fillRect(-(.25 * PW - px) * ry / rx, -(.15 * PH - py), w * ry / rx, h); ctx.restore(); }
-    if (SHADE) { ctx.fillStyle = pat(ctx, SHADE, px, py, 1600, -180, -120); ctx.fillRect(0, 0, w, h); }
-    if (SUN) { ctx.globalCompositeOperation = "soft-light"; ctx.fillStyle = pat(ctx, SUN, px, py, 1600, -180, -120); ctx.fillRect(0, 0, w, h); }
+    if (SHADE) { ctx.fillStyle = pat(ctx, SHADE, px + FX(), py + FY(), 1600, -180, -120); ctx.fillRect(0, 0, w, h); }
+    if (SUN) { ctx.globalCompositeOperation = "soft-light"; ctx.fillStyle = pat(ctx, SUN, px + FX(), py + FY(), 1600, -180, -120); ctx.fillRect(0, 0, w, h); }
     if (base) { ctx.globalCompositeOperation = "destination-in"; ctx.drawImage(base, 0, 0, w, h); }
     ctx.restore();
   }
@@ -166,14 +168,16 @@
   // time ahead of their turn, so a growing frame only places finished pictures.
   const inView = el => { const r = el.getBoundingClientRect(); return r.bottom > -80 && r.top < innerHeight + 80; };
   const prep = [];
-  function prepare(st, then) { st.ready = false; if (then) prep.push([st, 0, then]); else prep.unshift([st, 0]); /* growing grass first */ if (!prepare.raf) prepare.raf = requestAnimationFrame(prepFrame); }
+  // a page built ahead of a click (Chrome's prerender) draws no frames until it is shown, so its painting runs on timers
+  const soon = f => document.prerendering ? setTimeout(f, 0) : requestAnimationFrame(f);
+  function prepare(st, then) { st.ready = false; if (then) prep.push([st, 0, then]); else prep.unshift([st, 0]); /* growing grass first */ if (!prepare.raf) prepare.raf = soon(prepFrame); }
   function prepFrame() {
     prepare.raf = 0; const end = performance.now() + 5;
     while (prep.length && performance.now() < end) { const job = prep[0], [st] = job;
       if (!strips.has(st)) { prep.shift(); continue; }
       const g = st.blades[job[1]++]; if (g) { bladeImage(g); softShadow(g); }
       if (job[1] >= st.blades.length) { prep.shift(); st.ready = true; job[2] && job[2](st); } }
-    if (prep.length) prepare.raf = requestAnimationFrame(prepFrame);
+    if (prep.length) prepare.raf = soon(prepFrame);
   }
   const EDGE = { top: 0, left: 80, right: 120, bottom: 160 };
   // grass below the first screen waits, blank, until its piece scrolls into view, then grows there
@@ -183,14 +187,14 @@
     for (const st of strips) if (st.el === el && st.wait) { if (at[st.edge] === "wait") at[st.edge] = vt + 60; st.wait = false; grow(st); }
     // grass out of view is painted ahead of time; any not painted yet when its piece comes into view grows in there instead
     for (const st of strips) if (st.el === el && st.pending) { const j = prep.findIndex(q => q[0] === st); if (j >= 0) prep.splice(j, 1);
-      // grass that has shown before is finished right away; grass never seen yet grows in here
-      if (el._shown && el._shown[st.edge]) { for (const g of st.blades) { bladeImage(g); softShadow(g); } st.ready = true; putUp(st); continue; }
+      // grass not painted yet when its piece comes into view is finished right away
+      if (true) { for (const g of st.blades) { bladeImage(g); softShadow(g); } st.ready = true; putUp(st); continue; }
       st.pending = false; if (--el._pend <= 0) dropOld(el); at[st.edge] = vt + 60; grow(st); } } });
   function grow(st) {
     const k = st.edge, at = st.el._growAt || (st.el._growAt = {}), now = vt;
-    // everything on screen grows at once (Ian: simultaneous), not top of the page first or one edge after another
-    // and grass out of view is simply there when it's scrolled to (Ian: it can be instant if not visible)
-    if (at[k] == null) at[k] = inView(st.el) || still() ? now + 120 : -1e9;
+    // the grass is simply there, already grown (Ian: "I want the grass to already be loaded"); the growing below is kept
+    // for nothing now but would come back by giving at[k] a start time
+    if (at[k] == null) at[k] = -1e9;
     if (at[k] === "wait") { st.wait = true; prepare(st); seen.observe(st.el); return true; }
     const t0 = at[k], dur = GROW + 500; if (now > t0 + dur) return false;
     if (still()) { for (const s of pair(st)) s.img.animate && s.img.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 500, delay: t0 - now, fill: "backwards" }); return false; }
@@ -221,6 +225,8 @@
     if (lay._grown) return;
     const quiet = still(), bl = [...lay.querySelectorAll(":scope > .blade")].map((b, i) => ({ b, t: b.style.transform, h: parseFloat(b.style.height) / 2, d: (i % 9) * 15 }));
     if (lay._gv == null) { lay._gv = 0; lay._g0 = 0; }
+    // the name's sprigs are there from the start too
+    for (const o of bl) { o.b.style.opacity = "1"; o.b.style.transform = o.t; } lay._grown = true; return;
     const dur = quiet ? 500 : 1000, end = lay._g0 + 8 * 15 + dur;
     const pose = () => { for (const o of bl) { const u = Math.min(1, Math.max(0, (lay._gv - lay._g0 - o.d) / dur)), p = quiet ? u : nameEase(u);
       o.b.style.opacity = quiet ? p : Math.min(1, p / .35); if (!quiet) o.b.style.transform = `${o.t} translateY(${o.h}px) scale(${(.12 + .88 * p).toFixed(4)}) translateY(${-o.h}px)`; } };
@@ -381,7 +387,7 @@
     for (const el of els) {
       if (gen !== bakeGen) return;
       const kind = el.matches(".hand a") ? (el.classList.contains("r") ? "handR" : "hand") : "card", [shadeSrc, paperSrc, paperW, paperBlend, bg, sheen] = BAKE[kind];
-      const W = el.offsetWidth, H = el.offsetHeight, o = { x: parseFloat(el.style.getPropertyValue("--ox")) || 0, y: parseFloat(el.style.getPropertyValue("--oy")) || 0 }, key = [W, H, o.x, o.y, PW, PH, dpr].join();
+      const W = el.offsetWidth, H = el.offsetHeight, o = { x: parseFloat(el.style.getPropertyValue("--ox")) || 0, y: parseFloat(el.style.getPropertyValue("--oy")) || 0 }, key = [W, H, o.x, o.y, PW, PH, dpr, FX(), FY()].join();
       if (!W || !H || el._bakeKey === key) continue;
       const [sun, shade, paper] = await Promise.all([tex(ROOT + "assets/tex/canopy-sun-2.webp"), tex(ROOT + "assets/" + shadeSrc), tex(ROOT + "assets/" + paperSrc)]);
       if (!sun || !shade || !paper || gen !== bakeGen) return;
@@ -399,21 +405,21 @@
       { x.save(); x.translate(-o.x + PW * .25, -o.y + PH * .15); x.scale(PW * 1.4, PH); const g = x.createRadialGradient(0, 0, 0, 0, 0, 1);
         g.addColorStop(.55, "rgba(40,48,30,0)"); g.addColorStop(1, "rgba(40,48,30,.27)"); x.globalCompositeOperation = "multiply"; x.fillStyle = g;
         x.fillRect((o.x - PW * .25) / (PW * 1.4), (o.y - PH * .15) / PH, W / (PW * 1.4), H / PH); x.restore(); }
-      tile(shade, 1600, -180 - o.x, -120 - o.y, "multiply"); tile(sun, 1600, -180 - o.x, -120 - o.y, "soft-light");
+      tile(shade, 1600, -180 - o.x - FX(), -120 - o.y - FY(), "multiply"); tile(sun, 1600, -180 - o.x - FX(), -120 - o.y - FY(), "soft-light");
       const blob = await new Promise(r => cv.toBlob(r)); cv.width = 0; if (!blob || gen !== bakeGen) return;
       const url = URL.createObjectURL(blob), im = new Image(); im.src = url; await im.decode().catch(() => {});
       if (gen !== bakeGen) { URL.revokeObjectURL(url); return; }
       const old = el._bakeUrl; el._bakeUrl = url; el._bakeKey = key;
       Object.assign(el.style, { backgroundImage: `url("${url}")`, backgroundSize: "100% 100%", backgroundPosition: "0 0", backgroundRepeat: "no-repeat", backgroundBlendMode: "normal", backgroundOrigin: "border-box" });
       if (old) URL.revokeObjectURL(old);
-      await new Promise(r => (window.requestIdleCallback || setTimeout)(r));
+      await new Promise(r => (!document.prerendering && window.requestIdleCallback || setTimeout)(r));
     }
   }
   // The ground: the canopy shade and the page-wide falloff only darken (multiply), so they are folded into one soft map
   // for the whole page (drawn at half size; it has no fine detail), and the moss gets its 20% shade mixed in once. The
   // ground is then the moss, that map and the sun flecks: three layers to draw instead of seven.
   async function bakeGround(gen) {
-    const sc = scene(), key = [PW, PH].join(); if (!PW || !PH || sc._bakeKey === key) return;
+    const sc = scene(), fx = FX(), fy = FY(), key = [PW, PH, fx, fy].join(); if (!PW || !PH || sc._bakeKey === key) return;
     const [shade, moss] = await Promise.all([tex(ROOT + "assets/tex/canopy-shade-L.webp"), tex(ROOT + "assets/tex/moss-quiet-2k.webp")]); if (!shade || !moss || gen !== bakeGen) return;
     const k = .5, cv = document.createElement("canvas"); cv.width = Math.ceil(PW * k); cv.height = Math.ceil(PH * k); const x = cv.getContext("2d"); x.scale(k, k);
     const fill = (st, mode) => { x.globalCompositeOperation = mode; x.fillStyle = st; x.fillRect(0, 0, PW, PH); };
@@ -421,7 +427,7 @@
     { const g = lin(x, 150, PW, PH, 0, 0); g.addColorStop(0, "rgb(255,253,249)"); g.addColorStop(.55, "rgb(246,246,239)"); g.addColorStop(1, "rgb(232,234,223)"); fill(g, "multiply"); }
     { x.save(); x.translate(PW * .25, PH * .15); x.scale(PW * 1.4, PH); const g = x.createRadialGradient(0, 0, 0, 0, 0, 1);
       g.addColorStop(.55, "rgba(40,48,30,0)"); g.addColorStop(1, "rgba(40,48,30,.27)"); x.globalCompositeOperation = "multiply"; x.fillStyle = g; x.fillRect(-.25 / 1.4, -.15, 1 / 1.4, 1); x.restore(); }
-    { const pt = x.createPattern(shade, "repeat"); pt.setTransform(new DOMMatrix().translate(-180, -120).scale(1600 / shade.width)); fill(pt, "multiply"); }
+    { const pt = x.createPattern(shade, "repeat"); pt.setTransform(new DOMMatrix().translate(-180 - fx, -120 - fy).scale(1600 / shade.width)); fill(pt, "multiply"); }
     const m = document.createElement("canvas"); m.width = moss.width; m.height = moss.height; const mx = m.getContext("2d"); mx.drawImage(moss, 0, 0); mx.fillStyle = "rgba(22,28,12,.2)"; mx.fillRect(0, 0, m.width, m.height);
     const [b1, b2] = await Promise.all([new Promise(r => cv.toBlob(r)), sc._mossUrl ? null : new Promise(r => m.toBlob(r, "image/webp", 1))]); cv.width = m.width = 0;
     if (!b1 || gen !== bakeGen) return;
@@ -429,7 +435,7 @@
     await Promise.all([u1, u2].map(u => { const im = new Image(); im.src = u; return im.decode().catch(() => {}); })); if (gen !== bakeGen) return;
     const old = sc._lightUrl; sc._lightUrl = u1; sc._mossUrl = u2; sc._bakeKey = key;
     Object.assign(sc.style, { backgroundImage: `url("${ROOT}assets/tex/canopy-sun-2.webp"), url("${u1}"), url("${u2}")`, backgroundSize: `1600px, ${PW}px ${PH}px, 900px`,
-      backgroundPosition: "-180px -120px, 0 0, 0 0", backgroundRepeat: "repeat, no-repeat, repeat", backgroundBlendMode: "soft-light, multiply, normal" });
+      backgroundPosition: `${-180 - fx}px ${-120 - fy}px, 0 0, ${-fx}px ${-fy}px`, backgroundRepeat: "repeat, no-repeat, repeat", backgroundBlendMode: "soft-light, multiply, normal" });
     if (old) URL.revokeObjectURL(old);
   }
   // a CSS linear-gradient at angle a over a w x h box whose top-left is at (bx, by)
@@ -445,8 +451,13 @@
     seed = 7; relight(); all(); setTimeout(index, 50); dispatchEvent(new Event("scene-layout"));
   }
   // while the window is being resized the grass is redone every tenth of a second, so it keeps fitting its pieces
+  // the page learnt where it lies only as it was shown (it was scrolled since it was laid out ahead): the grass and the
+  // light are redone in place, the old grass staying up until the new is painted
+  addEventListener("floor-moved", () => { sizes = ""; relayout(); });
   let rt = 0; const ro = new ResizeObserver(() => { if (!rt) rt = setTimeout(() => { rt = 0; relayout(); }, 100); });
   ro.observe(scene()); document.querySelectorAll(".lay").forEach(el => ro.observe(el));
+  // laid out now rather than on the observer's first call, which a page built ahead of a click doesn't get until it's shown
+  relayout();
 
   // ---------- The cursor brushes through the grass ----------
   // Blades near the cursor bend the way it moves (harder when it's closer and faster), then spring back with a couple of
@@ -628,7 +639,7 @@
   // (multiplied) and the sun flecks (soft-light), worked out per pixel. An approximation went visibly off in strong sun.
   // The strands move in whole screen pixels: sampling the moss between pixels blurred it, and with the whole window
   // leaning on a scroll that read as the ground going soft.
-  const FS = `precision highp float;varying vec2 v;uniform sampler2D T,M,H,B,U,L,E;uniform vec4 K[${MAXK}],V;uniform vec2 S,O,P;uniform vec3 Wd;uniform float NK,R;
+  const FS = `precision highp float;varying vec2 v;uniform sampler2D T,M,H,B,U,L,E;uniform vec4 K[${MAXK}],V;uniform vec2 S,O,P,F;uniform vec3 Wd;uniform float NK,R;
     float ss(float x){return x*x*(3.-2.*x);}
     float h2(vec2 c){return fract(sin(c.x*127.1+c.y*311.7)*43758.5453);}
     float gn(vec2 g){g=vec2(g.x,g.y-Wd.x*Wd.z*40.)/420.;vec2 i=floor(g),f=g-i,u=f*f*(3.-2.*f);float a=h2(i),b=h2(i+vec2(1.,0.)),c=h2(i+vec2(0.,1.)),e=h2(i+1.);
@@ -641,14 +652,14 @@
       vec2 dr=vec2(.5,.8660254);float t=clamp(dot(g-P*.5,dr)/(abs(P.x*dr.x)+abs(P.y*dr.y))+.5,0.,1.);
       c*=(t<.55?mix(vec3(255.,253.,249.),vec3(246.,246.,239.),t/.55):mix(vec3(246.,246.,239.),vec3(232.,234.,223.),(t-.55)/.45))/255.;
       float r=length((g-vec2(.25,.15)*P)/(vec2(1.4,1.)*P));c=mix(c,c*vec3(40.,48.,30.)/255.,clamp((r-.55)/.45,0.,1.)*.27);
-      vec2 cu=(g+vec2(180.,120.))/1600.;vec4 h=texture2D(H,cu);c=mix(c,c*h.rgb,h.a);
+      vec2 cu=(g+F+vec2(180.,120.))/1600.;vec4 h=texture2D(H,cu);c=mix(c,c*h.rgb,h.a);
       vec4 u=texture2D(U,cu);return mix(c,soft(c,u.rgb),u.a);}
     void main(){vec2 p=vec2(v.x,1.-v.y)*S;vec2 d=vec2(0.);
       for(int i=0;i<${MAXK};i++){if(float(i)>=NK)break;vec4 k=K[i];vec2 a=p-k.xy;float r=length(a)/${SR}.;if(r<1.){float f=1.-r,am=length(k.zw);vec2 m=k.zw/(am+.001),w=m+(a-m*dot(a,m))/${SR}.*1.5;d+=w/(length(w)+.001)*am*f*f*(3.-2.*f);}}
       vec2 gp=O+p,sc=gp-V.xy;float u=fract((Wd.z-Wd.x*(gp.y*.0121+gp.x*.0035))/6.2831853),wd=Wd.x>0.?sc.y+sc.x*.2893:V.w-sc.y+(V.z-sc.x)*.2893;
       float ew=(texture2D(E,vec2((max(wd,0.)/${WV}.*${WHZ}.+.5)/${WH}.,.5)).r*255.-128.)/127.;d.y+=Wd.y*ew*(u<.48?wb(u/.48)*gn(gp):0.);d*=1.-smoothstep(.05,.55,texture2D(L,gp/P).a);
-      vec4 m0=texture2D(M,(O+p)/900.);float a=(m0.g-.5)*1.2,c=cos(a),s=sin(a);d=vec2(c*d.x-s*d.y,s*d.x+c*d.y)*(.45+.55*m0.g);
-      vec2 sn=floor(d*R+.5)/R,q=p-sn,uq=(O+q)/900.,up=(O+p)/900.;float al=step(.001,length(sn)),mp=texture2D(M,up).r,mq=texture2D(M,uq).r;
+      vec4 m0=texture2D(M,(O+F+p)/900.);float a=(m0.g-.5)*1.2,c=cos(a),s=sin(a);d=vec2(c*d.x-s*d.y,s*d.x+c*d.y)*(.45+.55*m0.g);
+      vec2 sn=floor(d*R+.5)/R,q=p-sn,uq=(O+F+q)/900.,up=(O+F+p)/900.;float al=step(.001,length(sn)),mp=texture2D(M,up).r,mq=texture2D(M,uq).r;
       vec3 under=mix(texture2D(T,up).rgb,texture2D(B,up).rgb,clamp((mp-mq)/(1.001-mq),0.,1.));
       vec3 col=lit(mix(under,texture2D(T,uq).rgb,mq),O+p);al*=smoothstep(.08,.35,max(mp,mq));gl_FragColor=vec4(col*al,al);}`;
   // the canopy maps are 1600px; WebGL1 only tiles power-of-two textures, so they go up as 1024px copies (they're soft)
@@ -675,7 +686,7 @@
     gl.activeTexture(gl.TEXTURE6); const et = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, et);
     for (const [k, v] of [[gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE], [gl.TEXTURE_MIN_FILTER, gl.LINEAR], [gl.TEXTURE_MAG_FILTER, gl.LINEAR]]) gl.texParameteri(gl.TEXTURE_2D, k, v);
     scene().prepend(cv);
-    return { et, eb: new Uint8Array(WH), uV: gl.getUniformLocation(pr, "V"), cv, gl, uK: gl.getUniformLocation(pr, "K"), uO: gl.getUniformLocation(pr, "O"), uS: gl.getUniformLocation(pr, "S"), uP: gl.getUniformLocation(pr, "P"), uW: gl.getUniformLocation(pr, "Wd"), uN: gl.getUniformLocation(pr, "NK"), uR: gl.getUniformLocation(pr, "R"), K: new Float32Array(MAXK * 4), at: null };
+    return { et, eb: new Uint8Array(WH), uV: gl.getUniformLocation(pr, "V"), cv, gl, uK: gl.getUniformLocation(pr, "K"), uO: gl.getUniformLocation(pr, "O"), uF: gl.getUniformLocation(pr, "F"), uS: gl.getUniformLocation(pr, "S"), uP: gl.getUniformLocation(pr, "P"), uW: gl.getUniformLocation(pr, "Wd"), uN: gl.getUniformLocation(pr, "NK"), uR: gl.getUniformLocation(pr, "R"), K: new Float32Array(MAXK * 4), at: null };
   }
   // (the pieces' shadows are not in the light map: the layer lies under the pieces, so their own CSS shadows already fall
   // on the stirred strands, and adding them here darkened strands near a card twice)
@@ -707,7 +718,7 @@
     const { cv, gl } = SW, cw = Math.round(W * sd), ch = Math.round(H * sd); SW.d = sd;
     if (cv.width !== cw || cv.height !== ch) { cv.width = cw; cv.height = ch; cv.style.width = W + "px"; cv.style.height = H + "px"; }
     cv.style.left = x + "px"; cv.style.top = y + "px";
-    gl.uniform2f(SW.uP, PW, PH); gl.uniform2f(SW.uO, x, y); gl.uniform2f(SW.uS, W, H); SW.x = x; SW.y = y;
+    gl.uniform2f(SW.uP, PW, PH); gl.uniform2f(SW.uO, x, y); gl.uniform2f(SW.uF, FX(), FY()); gl.uniform2f(SW.uS, W, H); SW.x = x; SW.y = y;
   }
   function swayFrame() {
     swayFrame.raf = 0; const now = performance.now();
