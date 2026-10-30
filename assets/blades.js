@@ -187,14 +187,14 @@
     for (const st of strips) if (st.el === el && st.wait) { if (at[st.edge] === "wait") at[st.edge] = vt + 60; st.wait = false; grow(st); }
     // grass out of view is painted ahead of time; any not painted yet when its piece comes into view grows in there instead
     for (const st of strips) if (st.el === el && st.pending) { const j = prep.findIndex(q => q[0] === st); if (j >= 0) prep.splice(j, 1);
-      // grass not painted yet when its piece comes into view is finished right away
-      if (true) { for (const g of st.blades) { bladeImage(g); softShadow(g); } st.ready = true; putUp(st); continue; }
+      // grass that has shown before is finished right away; grass never seen yet grows in here
+      if (el._shown && el._shown[st.edge]) { for (const g of st.blades) { bladeImage(g); softShadow(g); } st.ready = true; putUp(st); continue; }
       st.pending = false; if (--el._pend <= 0) dropOld(el); at[st.edge] = vt + 60; grow(st); } } });
   function grow(st) {
     const k = st.edge, at = st.el._growAt || (st.el._growAt = {}), now = vt;
-    // the grass is simply there, already grown (Ian: "I want the grass to already be loaded"); the growing below is kept
-    // for nothing now but would come back by giving at[k] a start time
-    if (at[k] == null) at[k] = -1e9;
+    // everything on screen grows at once (Ian: simultaneous), not top of the page first or one edge after another
+    // and grass out of view is simply there when it's scrolled to (Ian: it can be instant if not visible)
+    if (at[k] == null) at[k] = inView(st.el) || still() ? now + 120 : -1e9;
     if (at[k] === "wait") { st.wait = true; prepare(st); seen.observe(st.el); return true; }
     const t0 = at[k], dur = GROW + 500; if (now > t0 + dur) return false;
     if (still()) { for (const s of pair(st)) s.img.animate && s.img.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 500, delay: t0 - now, fill: "backwards" }); return false; }
@@ -225,8 +225,6 @@
     if (lay._grown) return;
     const quiet = still(), bl = [...lay.querySelectorAll(":scope > .blade")].map((b, i) => ({ b, t: b.style.transform, h: parseFloat(b.style.height) / 2, d: (i % 9) * 15 }));
     if (lay._gv == null) { lay._gv = 0; lay._g0 = 0; }
-    // the name's sprigs are there from the start too
-    for (const o of bl) { o.b.style.opacity = "1"; o.b.style.transform = o.t; } lay._grown = true; return;
     const dur = quiet ? 500 : 1000, end = lay._g0 + 8 * 15 + dur;
     const pose = () => { for (const o of bl) { const u = Math.min(1, Math.max(0, (lay._gv - lay._g0 - o.d) / dur)), p = quiet ? u : nameEase(u);
       o.b.style.opacity = quiet ? p : Math.min(1, p / .35); if (!quiet) o.b.style.transform = `${o.t} translateY(${o.h}px) scale(${(.12 + .88 * p).toFixed(4)}) translateY(${-o.h}px)`; } };
