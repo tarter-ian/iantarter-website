@@ -157,6 +157,12 @@
   // a strip grows as a live canvas: every sprig rises from its own root, scaling up whole (not squashed), each a little
   // after the last; the sprigs' shadows on the card come in with them. Then it turns back into an image as usual.
   const GROW = 950, growing = new Set();
+  // work nobody sees right away (the cursor's map of the blades, the baked light, the stirrable moss) waits until the grass
+  // has grown in, so it doesn't hold up the grass's first frames (Ian: "they take quite a bit of time to load")
+  let settled = false; const waiting = new Set();
+  const later = f => { if (settled) setTimeout(f, 50); else waiting.add(f); };
+  const settle = () => { if (settled) return; settled = true; for (const f of waiting) setTimeout(f, 50); waiting.clear(); };
+  setTimeout(settle, 6000);
   // when the grass is redone mid-growth (the page often settles its layout once more just after loading), the new grass
   // carries on from the same start, so the growing isn't cut short and nothing flicks on
   // Growth runs on its own clock, which only moves while frames are actually drawn (at most a frame's worth per frame):
@@ -172,7 +178,9 @@
   const soon = f => document.prerendering ? setTimeout(f, 0) : requestAnimationFrame(f);
   function prepare(st, then) { st.ready = false; if (then) prep.push([st, 0, then]); else prep.unshift([st, 0]); /* growing grass first */ if (!prepare.raf) prepare.raf = soon(prepFrame); }
   function prepFrame() {
-    prepare.raf = 0; const end = performance.now() + 5;
+    // until the grass starts growing nothing is moving, so the first paint-ahead takes bigger bites (at 5ms a frame the
+    // sprigs took seconds to start; Ian: "they take quite a bit of time to load")
+    prepare.raf = 0; const end = performance.now() + (grassGo ? 5 : 40);
     while (prep.length && performance.now() < end) { const job = prep[0], [st] = job;
       if (!strips.has(st)) { prep.shift(); continue; }
       const g = st.blades[job[1]++]; if (g) { bladeImage(g); softShadow(g); }
@@ -210,10 +218,34 @@
     for (const st of growing) {
       if (!st.begun && now >= st.gr.t0 && held) { st.gr.t0 = st.el._growAt[st.edge] = now; continue; }
       if (now < st.gr.t0) continue;
-      if (!st.begun) { st.begun = true; if (!grassGo) { grassGo = true; dispatchEvent(new Event("grass-go")); } }
-      if (now > st.gr.t0 + st.gr.dur) { st.gr = null; growing.delete(st); paintStrip(st); st.live = false; freeze(st); shown(st); continue; }
-      paintStrip(st); }
-    if (growing.size) growFrame.raf = requestAnimationFrame(growFrame); else lastFrame = null;
+      if (!st.begun) { st.begun = true; if (!grassGo) { grassGo = true; dispatchEvent(new Event("grass-go")); } growFx(st); }
+      if (now > st.gr.t0 + st.gr.dur && st.fxDone) { st.gr = null; growing.delete(st); paintStrip(st); endFx(st); st.live = false; freeze(st); shown(st); } }
+    if (growing.size) growFrame.raf = requestAnimationFrame(growFrame); else { lastFrame = null; if (grassGo) settle(); }
+  }
+  // The growing itself is played by the browser's compositor, not drawn frame by frame: each sprig (and its shadow) is put
+  // up as its own little picture and scaled up from its root by a CSS animation, which stays smooth while the page is busy
+  // loading (Ian: the growing was jittery). The real strip is painted underneath, hidden, and takes over in the same frame
+  // the stand-ins are removed; at full size they are the same pictures in the same places.
+  function growFx(st) {
+    const el = st.el, [w, h, rad] = st.shape || (st.shape = [el.offsetWidth, el.offsetHeight, parseFloat(getComputedStyle(el).borderTopLeftRadius) || 0]);
+    const sh = document.createElement("div"), fx = document.createElement("div");
+    sh.className = fx.className = "blade-strip grow-fx"; sh.setAttribute("aria-hidden", "true"); fx.setAttribute("aria-hidden", "true");
+    Object.assign(sh.style, { left: 0, top: 0, width: w + "px", height: h + "px", overflow: "hidden", borderRadius: rad + "px" }); Object.assign(fx.style, { left: 0, top: 0, width: 0, height: 0 });
+    const first = pair(st)[0]; first.img.before(sh); first.img.before(fx);
+    for (const s of pair(st)) s.cv.style.visibility = "hidden";
+    let left = 0; const done = () => { if (--left <= 0) st.fxDone = true; };
+    const put = (box, c, x, y, cw, ch, ox, oy, g) => {
+      c.className = ""; Object.assign(c.style, { position: "absolute", left: x + "px", top: y + "px", width: cw + "px", height: ch + "px", transformOrigin: `${ox}px ${oy}px`, opacity: 0 }); box.appendChild(c);
+      const r = `rotate(${g.ang}deg)`, o = { delay: g.gd, fill: "both" }; left += 2;
+      c.animate([{ transform: `${r} scale(.12)` }, { transform: r }], { ...o, duration: GROW, easing: "cubic-bezier(.33, 1, .68, 1)" }).finished.then(done, done);
+      c.animate([{ opacity: 0 }, { opacity: 1 }], { ...o, duration: GROW / 4 }).finished.then(done, done); };
+    for (const g of st.blades) { const c = softShadow(g); put(sh, c, g.x + .6 - g.w / 2 - SP, g.y + 1.6 - g.len - SP, g.w + 2 * SP, g.len + 2 * SP, g.w / 2 + SP, g.len + SP, g); }
+    for (const g of st.blades) put(fx, bladeImage(g), g.x - g.w / 2, g.y - g.len, g.w, g.len, g.w / 2, g.len, g);
+    st.fx = [sh, fx]; if (!left) st.fxDone = true;
+  }
+  function endFx(st) {
+    for (const s of pair(st)) s.cv.style.visibility = "";
+    if (st.fx) { for (const box of st.fx) { for (const c of [...box.children]) { c.getAnimations().forEach(a => a.cancel()); c.removeAttribute("style"); c.remove(); } box.remove(); } st.fx = null; }
   }
   // the name's sprigs grow the same way, each from its own root, on their own frame-paced clock (on a busy phone,
   // timed animations had finished before the page could draw, so the sprigs just appeared); the clock waits for the ground
@@ -223,18 +255,15 @@
   const nameEase = bez(.2, .7, .3, 1);
   function growName(lay) {
     if (lay._grown) return;
-    const quiet = still(), bl = [...lay.querySelectorAll(":scope > .blade")].map((b, i) => ({ b, t: b.style.transform, h: parseFloat(b.style.height) / 2, d: (i % 9) * 15 }));
-    if (lay._gv == null) { lay._gv = 0; lay._g0 = 0; }
-    const dur = quiet ? 500 : 1000, end = lay._g0 + 8 * 15 + dur;
-    const pose = () => { for (const o of bl) { const u = Math.min(1, Math.max(0, (lay._gv - lay._g0 - o.d) / dur)), p = quiet ? u : nameEase(u);
-      o.b.style.opacity = quiet ? p : Math.min(1, p / .35); if (!quiet) o.b.style.transform = `${o.t} translateY(${o.h}px) scale(${(.12 + .88 * p).toFixed(4)}) translateY(${-o.h}px)`; } };
-    pose(); cancelAnimationFrame(lay._graf); let last = null;
-    const frame = () => {
-      if (!bl[0] || !bl[0].b.isConnected) return; // redressed: the new sprigs carry on from lay._gv
-      const n = performance.now(); if (last != null && document.documentElement.classList.contains("ground-in") && (grassGo || n > 4000)) lay._gv += Math.min(34, n - last); last = n;
-      if (lay._gv >= end) { for (const o of bl) { o.b.style.opacity = "1"; o.b.style.transform = o.t; } lay._grown = true; return; }
-      pose(); lay._graf = requestAnimationFrame(frame); };
-    lay._graf = requestAnimationFrame(frame);
+    // played by the compositor too, once the cards' grass starts (each sprig hidden until then)
+    const quiet = still(), bl = [...lay.querySelectorAll(":scope > .blade")];
+    if (lay._gstart) return; for (const b of bl) b.style.opacity = "0";
+    const go = () => { if (lay._gstart) return; lay._gstart = true;
+      const dur = quiet ? 500 : 1000, bs = [...lay.querySelectorAll(":scope > .blade")]; let left = bs.length;
+      bs.forEach((b, i) => { const t = b.style.transform, hh = parseFloat(b.style.height) / 2, o = { delay: (i % 9) * 15, fill: "backwards" }; b.style.opacity = "1";
+        if (!quiet) b.animate([{ transform: `${t} translateY(${hh}px) scale(.12) translateY(${-hh}px)` }, { transform: t }], { ...o, duration: dur, easing: "cubic-bezier(.2, .7, .3, 1)" });
+        const a = b.animate([{ opacity: 0 }, { opacity: 1 }], { ...o, duration: quiet ? dur : dur * .3 }); a.finished.then(() => { if (--left <= 0) lay._grown = true; }, () => {}); }); };
+    if (grassGo) go(); else { addEventListener("grass-go", go, { once: true }); setTimeout(go, 4000); }
   }
   // a strip's share of its piece's shadow: the soft box-shadows exactly as CSS casts them, kept off the piece itself with a
   // feathered edge (a sprig leaning over the edge lifts off the ground, so the shade fades onto it instead of stopping on
@@ -441,12 +470,12 @@
     const r = a * Math.PI / 180, dx = Math.sin(r), dy = -Math.cos(r), L = Math.abs(w * dx) + Math.abs(h * dy), cx = bx + w / 2, cy = by + h / 2;
     return x.createLinearGradient(cx - dx * L / 2, cy - dy * L / 2, cx + dx * L / 2, cy + dy * L / 2);
   }
-  addEventListener("scene-layout", () => setTimeout(bakeLight, 300));
+  addEventListener("scene-layout", () => later(() => setTimeout(bakeLight, 300)));
   let sizes = "";
   function relayout() {
     const now = [...document.querySelectorAll(".x-i, .lay")].map(e => e.offsetWidth + "x" + e.offsetHeight).join() + innerWidth;
     if (now === sizes) return; sizes = now;
-    seed = 7; relight(); all(); setTimeout(index, 50); dispatchEvent(new Event("scene-layout"));
+    seed = 7; relight(); all(); later(index); dispatchEvent(new Event("scene-layout"));
   }
   // while the window is being resized the grass is redone every tenth of a second, so it keeps fitting its pieces
   // the page learnt where it lies only as it was shown (it was scrolled since it was laid out ahead): the grass and the
@@ -743,7 +772,7 @@
   }
   // the layer (and its one-time texture uploads) is made while the page is idle, not on the first sweep
   // (within a second and a half at most: a busy page can go many seconds without an idle moment, and the moss stayed still)
-  (window.requestIdleCallback || setTimeout)(() => { if (reduce() || matchMedia("(hover: none)").matches) return; SW = makeSway(); pinUnderLitter(); }, { timeout: 1500 });
+  later(() => (window.requestIdleCallback || setTimeout)(() => { if (reduce() || matchMedia("(hover: none)").matches) return; SW = makeSway(); pinUnderLitter(); }, { timeout: 1500 }));
   let lastSway = null;
   function sway(p, vx, vy, sp, now) {
     if (!SW || (lastSway && Math.hypot(p.x - lastSway.x, p.y - lastSway.y) < 20)) return; lastSway = p;

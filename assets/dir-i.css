@@ -530,11 +530,13 @@ body > p[role="status"] { top: 0; left: 0; }
 @view-transition { navigation: auto; }
 @media (prefers-reduced-motion: reduce) { @view-transition { navigation: none; } }
 ::view-transition-group(root) { animation-duration: 1.5s; }
-html:active-view-transition-type(pan-right)::view-transition-old(root) { animation: pan-to-left 1.5s cubic-bezier(.3, 0, .3, 1) both; }
+/* each page slides by its own width without the scrollbar, and the page whose right edge meets the other one has its
+   scrollbar cut off, so no flat strip shows at the join (--sbw: the scrollbar's width, set in each page's head) */
+html:active-view-transition-type(pan-right)::view-transition-old(root) { animation: pan-to-left 1.5s cubic-bezier(.3, 0, .3, 1) both; clip-path: inset(0 var(--sbw, 0px) 0 0); }
 html:active-view-transition-type(pan-right)::view-transition-new(root) { animation: pan-from-right 1.5s cubic-bezier(.3, 0, .3, 1) both; }
 html:active-view-transition-type(pan-left)::view-transition-old(root) { animation: pan-to-right 1.5s cubic-bezier(.3, 0, .3, 1) both; }
-html:active-view-transition-type(pan-left)::view-transition-new(root) { animation: pan-from-left 1.5s cubic-bezier(.3, 0, .3, 1) both; }
-@keyframes pan-to-left { to { transform: translateX(-100vw); } }
-@keyframes pan-from-right { from { transform: translateX(100vw); } }
-@keyframes pan-to-right { to { transform: translateX(100vw); } }
-@keyframes pan-from-left { from { transform: translateX(-100vw); } }
+html:active-view-transition-type(pan-left)::view-transition-new(root) { animation: pan-from-left 1.5s cubic-bezier(.3, 0, .3, 1) both; clip-path: inset(0 var(--sbw, 0px) 0 0); }
+@keyframes pan-to-left { to { transform: translateX(calc(var(--sbw, 0px) - 100%)); } }
+@keyframes pan-from-right { from { transform: translateX(calc(100% - var(--sbw, 0px))); } }
+@keyframes pan-to-right { to { transform: translateX(calc(100% - var(--sbw, 0px))); } }
+@keyframes pan-from-left { from { transform: translateX(calc(var(--sbw, 0px) - 100%)); } }
