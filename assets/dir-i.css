@@ -527,11 +527,11 @@ body > p[role="status"] { top: 0; left: 0; }
    others just load the page). The direction is set by the little script in each page's head. */
 @view-transition { navigation: auto; }
 @media (prefers-reduced-motion: reduce) { @view-transition { navigation: none; } }
-::view-transition-group(root) { animation-duration: 1.2s; }
-html:active-view-transition-type(pan-right)::view-transition-old(root) { animation: pan-to-left 1.2s cubic-bezier(.5, 0, .1, 1) both; }
-html:active-view-transition-type(pan-right)::view-transition-new(root) { animation: pan-from-right 1.2s cubic-bezier(.5, 0, .1, 1) both; }
-html:active-view-transition-type(pan-left)::view-transition-old(root) { animation: pan-to-right 1.2s cubic-bezier(.5, 0, .1, 1) both; }
-html:active-view-transition-type(pan-left)::view-transition-new(root) { animation: pan-from-left 1.2s cubic-bezier(.5, 0, .1, 1) both; }
+::view-transition-group(root) { animation-duration: 1.5s; }
+html:active-view-transition-type(pan-right)::view-transition-old(root) { animation: pan-to-left 1.5s cubic-bezier(.3, 0, .3, 1) both; }
+html:active-view-transition-type(pan-right)::view-transition-new(root) { animation: pan-from-right 1.5s cubic-bezier(.3, 0, .3, 1) both; }
+html:active-view-transition-type(pan-left)::view-transition-old(root) { animation: pan-to-right 1.5s cubic-bezier(.3, 0, .3, 1) both; }
+html:active-view-transition-type(pan-left)::view-transition-new(root) { animation: pan-from-left 1.5s cubic-bezier(.3, 0, .3, 1) both; }
 @keyframes pan-to-left { to { transform: translateX(-100vw); } }
 @keyframes pan-from-right { from { transform: translateX(100vw); } }
 @keyframes pan-to-right { to { transform: translateX(100vw); } }
