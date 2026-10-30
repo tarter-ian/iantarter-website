@@ -19,7 +19,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@300..800&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&family=Rampart+One&display=swap">
 <link rel="stylesheet" href="../../assets/site.css?v=20261013u">
-<link rel="stylesheet" href="../../assets/dir-i.css?v=20261030a">
+<link rel="stylesheet" href="../../assets/dir-i.css?v=20261030b">
 <link rel="stylesheet" href="../../assets/case-i.css?v=20261029m">
 <script type="speculationrules">{"prerender": [{"where": {"and": [{"href_matches": "/*"}, {"not": {"href_matches": "*.pdf"}}]}, "eagerness": "moderate"}]}</script>
 <script>(() => { // where each page lies on the forest floor (homepage 0, games to the left, case studies to the right), so a link pans the right way
@@ -42,6 +42,10 @@
     if (!back) { const x = F.x, y = F.y; lay(last(), scrollY); if (x !== F.x || Math.abs(y - F.y) > .5) { set(); dispatchEvent(new Event("floor-moved")); } }
     save();
     const t = e.viewTransition, a = window.navigation && navigation.activation; if (!t) return;
+    // the pan waits (half a second at most) until this page's ground and grass are in, so it never slides in bare or hazy
+    F.panned = true;
+    t.ready.then(() => { if (F.ready) return; const an = document.getAnimations().filter(n => n.effect && /view-transition/.test(n.effect.pseudoElement || ""));
+      an.forEach(n => n.pause()); const go = () => { F.go = null; an.forEach(n => n.play()); }; F.go = go; setTimeout(go, 500); }).catch(() => {});
     const d = a && a.from && a.entry ? X(new URL(a.entry.url).pathname) - X(new URL(a.from.url).pathname) : 0;
     if (!d) t.skipTransition(); else t.types.add(d > 0 ? "pan-right" : "pan-left"); });
 })();</script>
@@ -112,7 +116,9 @@
 
 </div>
 <script>(() => { const done = () => document.documentElement.classList.add("ground-in");
-  Promise.all(["../../assets/tex/moss-quiet-2k.webp", "../../assets/tex/canopy-shade-L.webp", "../../assets/tex/canopy-sun-2.webp"].map(u => { const i = new Image(); i.src = u; return i.decode().catch(() => {}); })).then(() => { if (document.prerendering || !(window.__floor || {}).drawn) { document.documentElement.classList.add("ground-now"); done(); } else requestAnimationFrame(done); });
+  Promise.all(["../../assets/tex/moss-quiet-2k.webp", "../../assets/tex/canopy-shade-L.webp", "../../assets/tex/canopy-sun-2.webp"].map(u => { const i = new Image(); i.src = u; return i.decode().catch(() => {}); })).then(() => { const F = window.__floor || {}; if (document.prerendering || !F.drawn || F.panned) { document.documentElement.classList.add("ground-now"); done(); } else requestAnimationFrame(done);
+    F.ground = true; if (F.grass) { F.ready = true; F.go && F.go(); } });
+  addEventListener("scene-layout", () => { const F = window.__floor || {}; F.grass = true; if (F.ground) { F.ready = true; requestAnimationFrame(() => F.go && F.go()); } }, { once: true });
   setTimeout(done, 5000); })();</script><script src="../../assets/blades.js?v=20261030a" defer></script><script src="../../assets/forest.js?v=20261029m" defer></script>
 </body>
 </html>
