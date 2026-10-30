@@ -1,0 +1,560 @@
+/* I: everything is a card, lying on a forest floor seen from above */
+.x-i { --ground: #3b4a2a; --linen: #f5f1e6; --ink: #171612; --muted: #5e5a4f; --accent: #c8402a; --frame: #2a2924;
+  --sh: 0 1px 1px rgba(8,10,0,.5), 2px 3px 5px rgba(8,10,0,.38), 8px 14px 24px rgba(8,10,0,.34);
+  position: relative; overflow: hidden; color: var(--ink); background-color: var(--ground);
+  background-image: radial-gradient(ellipse 50% 35% at 75% 20%, rgba(255,240,190,.08), transparent 70%), radial-gradient(ellipse 45% 30% at 15% 60%, rgba(0,0,0,.25), transparent 70%), url("tex/grass001_tile-1024.webp");
+  background-size: 1300px 1000px, 1200px 1000px, 460px; }
+body:has(.x-i) { background: #3b4a2a; }
+.i-light { position: absolute; inset: 0; pointer-events: none; z-index: 6; background: radial-gradient(ellipse 80% 55% at 20% 0%, rgba(255,236,190,.22), transparent 65%), radial-gradient(ellipse 130% 95% at 50% 40%, transparent 50%, rgba(4,6,0,.5)); mix-blend-mode: soft-light; }
+.i-nav { position: relative; z-index: 3; max-width: 1240px; margin: 0 auto; padding: 0 40px; display: flex; justify-content: flex-end; }
+.i-nav nav { display: flex; gap: 6px; }
+.i-nav a { font-family: var(--f-ui); font-weight: 600; font-size: 14px; color: var(--ink); text-decoration: none; padding: 18px 16px 9px; border-radius: 0 0 9px 9px; box-shadow: var(--sh); transform: translateY(-6px); transition: transform .2s ease; background: var(--linen) url("tex/linen.webp") center / 260px; background-blend-mode: multiply; }
+.i-nav a:hover { transform: none; } .i-nav a.r { background: var(--ink); color: #fff; }
+.i-scene { position: relative; z-index: 2; max-width: 1240px; margin: 0 auto; padding: 24px 40px 120px; }
+/* the card itself */
+.card { position: relative; border-radius: 16px; padding: 10px; box-shadow: var(--sh); }
+.card .cf { position: relative; height: 100%; box-sizing: border-box; border: 1.5px solid rgba(42,41,36,.55); border-radius: 9px; padding: 16px 18px 20px; display: flex; flex-direction: column; gap: 8px; }
+.card::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; box-shadow: inset 0 0 0 1px rgba(255,255,255,.5), inset 0 0 12px rgba(30,40,0,.2); z-index: 3; }
+.c-art { margin: -6px -8px 6px; border-radius: 6px; overflow: hidden; display: flex; align-items: flex-end; justify-content: center; gap: 10px; aspect-ratio: 4 / 3; }
+.card h3 { margin: 0; font-family: var(--f-heading); font-weight: 800; font-size: 22px; letter-spacing: -.02em; line-height: 1.1; text-wrap: balance; }
+.c-type { margin: 0; font-family: var(--f-ui); font-size: 12.5px; font-weight: 600; color: var(--muted); }
+.c-org { margin: 0; font-size: 14px; color: var(--muted); }
+.card .c-text { margin: 0; font-size: 15px; line-height: 1.5; }
+.card a:not(.s-btn) { margin-top: auto; font-family: var(--f-ui); font-weight: 700; color: var(--accent); }
+/* hero */
+.i-hero { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 26px 70px; padding: 26px 0 70px; background: none; min-height: 0; }
+.i-name { grid-column: 1; align-self: end; }
+.x-i .i-hero h1 { font-size: clamp(66px, 9.2vw, 136px); line-height: 1.05; margin: 0; white-space: nowrap; filter: drop-shadow(1px 2px 1px rgba(8,10,0,.55)) drop-shadow(6px 10px 9px rgba(8,10,0,.4)); }
+.c-intro { grid-column: 1; max-width: 600px; transform: rotate(-.8deg); }
+.c-intro .cf { padding: 24px 28px 26px; gap: 12px; }
+.c-pitch { margin: 0; font-family: var(--f-pitch); font-weight: 500; font-size: 24px; line-height: 1.32; letter-spacing: -.01em; }
+.x-i .s-actions { margin: 6px 0 0; }
+.c-me { grid-column: 2; grid-row: 1 / span 2; align-self: center; aspect-ratio: 5 / 7; transform: rotate(2.4deg); }
+.c-me .art-me { aspect-ratio: auto; flex: 1; background: #3d3f42; } .c-me .art-me img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 15%; }
+.c-me .cf { padding: 12px 14px 14px; } .c-me h3 { font-size: 21px; margin-top: 4px; }
+/* section labels: label-maker tape */
+.i-label { position: relative; z-index: 4; display: inline-block; margin: 0 0 22px; font-family: var(--f-ui); font-weight: 700; font-size: 16px; letter-spacing: .14em; text-transform: uppercase; color: #fff; background: #1d1d1b; padding: 7px 14px 6px; border-radius: 3px; box-shadow: 0 1px 1px rgba(0,0,0,.5), 2px 4px 6px rgba(0,0,0,.3); transform: rotate(-1deg); }
+.i-row { display: grid; gap: 28px; margin-bottom: 76px; align-items: start; }
+.i-cases { grid-template-columns: repeat(3, minmax(0,1fr)); }
+.case { aspect-ratio: 5 / 7; }
+.k1 { transform: rotate(-1.6deg); } .k2 { transform: rotate(.9deg) translateY(16px); } .k3 { transform: rotate(-.5deg) translateY(4px); }
+.art-exact { background: #dfe5dc; padding-top: 18px; } .art-exact img { width: 40%; border-radius: 10px 10px 0 0; box-shadow: 0 8px 18px rgba(0,0,0,.18); }
+.art-lab { background: #f8efcd; align-items: center; } .art-lab .s-diagram { width: 86%; margin: 0; }
+.art-birds { background: #ead9df; align-items: center; } .card .art-birds p { font-family: var(--f-heading); font-weight: 700; font-size: 28px; line-height: 1.1; text-align: center; margin: 0 20px; }
+.i-jobs { grid-template-columns: repeat(6, minmax(0,1fr)); gap: 18px; }
+.job { aspect-ratio: 5 / 7; } .job h3 { font-size: 19px; } .job .c-text { font-size: 14px; color: var(--muted); margin-top: auto; }
+.j1 { transform: rotate(-2deg); } .j2 { transform: rotate(1.2deg) translateY(10px); } .j3 { transform: rotate(-.6deg); } .j4 { transform: rotate(1.8deg) translateY(14px); } .j5 { transform: rotate(-1.2deg) translateY(4px); } .j6 { transform: rotate(.9deg) translateY(8px); }
+.i-games { grid-template-columns: repeat(4, minmax(0,1fr)); gap: 24px; }
+.game { aspect-ratio: 5 / 7; } .art-dw img { width: 100%; height: 100%; object-fit: cover; } .art-dw { align-items: stretch; }
+.g1 { transform: rotate(-1.4deg); } .g2 { transform: rotate(1deg) translateY(12px); } .g3 { transform: rotate(-.8deg); } .g4 { transform: rotate(1.6deg) translateY(8px); }
+.game:not(.g1) .cf { justify-content: flex-start; } .game:not(.g1) h3 { font-size: 26px; margin-top: 8px; }
+/* blades */
+.lay { position: relative; }
+.blade { position: absolute; pointer-events: none; transform-origin: 50% 100%; z-index: 4; filter: drop-shadow(.4px 1px .8px rgba(8,10,0,.35)); }
+@media (max-width: 1000px) { .i-jobs { grid-template-columns: repeat(3, minmax(0,1fr)); } .i-games { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+@media (max-width: 700px) {
+  .i-scene { padding: 16px 18px 80px; } .i-nav { padding: 0 12px; } .i-nav a:not(.r):not(:nth-child(4)) { display: none; }
+  .i-hero, .i-cases { grid-template-columns: minmax(0,1fr); }
+  .c-me { grid-column: 1; grid-row: auto; width: 72%; justify-self: center; }
+  .case, .game, .job { aspect-ratio: auto; } .k2, .k3, .j2, .j4, .g2, .g4 { translate: 0 0; }
+  .i-jobs, .i-games { grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+}
+/* playing-card stock: bright white, fine embossed linen, a faint gloss */
+.x-i { --linen: #fbfaf6; }
+.card { background-image: linear-gradient(125deg, rgba(255,255,255,.55) 0%, rgba(255,255,255,0) 38%, rgba(255,255,255,0) 62%, rgba(255,255,255,.25) 100%), linear-gradient(rgba(254,253,250,.84), rgba(254,253,250,.84)), url("tex/linen.webp"); background-size: auto, auto, 150px; border-radius: 18px; }
+/* blades cut from the ground: the sprite is a mask, the fill is the lawn plus the sprite's own light and dark */
+.blade { filter: none; -webkit-mask: var(--m) 0 0 / 100% 100%; mask: var(--m) 0 0 / 100% 100%;
+  background-image: var(--m), url("tex/grass001_tile-1024.webp"); background-size: 100% 100%, 460px; background-blend-mode: soft-light; }
+.blade-clip { position: absolute; inset: 0; border-radius: inherit; overflow: hidden; pointer-events: none; z-index: 3; }
+.lay-name > .blade-clip { display: none; }
+.blade-sh { position: absolute; transform-origin: 50% 100%; background: rgba(10,12,0,.28); -webkit-mask: var(--m) 0 0 / 100% 100%; mask: var(--m) 0 0 / 100% 100%; translate: .6px 1.6px; filter: blur(.9px); }
+.blade { background-image: linear-gradient(0deg, rgba(0,0,0,.18), rgba(255,250,210,.06) 70%, rgba(255,250,210,.12)), url("tex/grass001_tile-1024.webp"); background-size: 100% 100%, 460px; background-blend-mode: normal; }
+/* forest floor */
+.x-i { --ground: #4a5233; background-image: radial-gradient(ellipse 50% 35% at 75% 20%, rgba(255,240,190,.08), transparent 70%), radial-gradient(ellipse 45% 30% at 15% 60%, rgba(0,0,0,.22), transparent 70%), url("tex/moss-cool.webp"); background-size: 1300px 1000px, 1200px 1000px, 560px; }
+body:has(.x-i) { background: #4a5233; }
+.blade { background-image: linear-gradient(0deg, rgba(0,0,0,.14), rgba(255,250,210,.05) 70%, rgba(255,250,210,.1)), url("tex/moss-cool.webp"); background-size: 100% 100%, 560px; }
+.litter-ground { position: absolute; inset: 0; pointer-events: none; z-index: 1; overflow: hidden; }
+.litter { position: absolute; pointer-events: none; transform-origin: 50% 50%; }
+.litter.flat { filter: saturate(.7) brightness(.82) drop-shadow(0 1px 1px rgba(0,0,0,.35)); opacity: .9; }
+.litter.under { z-index: -1; filter: saturate(.8) brightness(.9) drop-shadow(0 1px 1.5px rgba(0,0,0,.35)); }
+.litter.over { z-index: 5; filter: saturate(.8) brightness(.92) drop-shadow(.5px 2px 2px rgba(0,0,0,.32)); }
+.x-i { --shade: linear-gradient(rgba(22,28,12,.38), rgba(22,28,12,.38)); background-image: radial-gradient(ellipse 50% 35% at 75% 20%, rgba(255,240,190,.08), transparent 70%), radial-gradient(ellipse 45% 30% at 15% 60%, rgba(0,0,0,.22), transparent 70%), var(--shade), url("tex/moss-cool.webp"); background-size: 1300px 1000px, 1200px 1000px, auto, 900px; }
+.blade { background-image: linear-gradient(0deg, rgba(0,0,0,.12), rgba(255,250,210,.04) 70%, rgba(255,250,210,.08)), var(--shade), url("tex/moss-cool.webp"); background-size: 100% 100%, auto, 900px; }
+.litter-under { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+.i-scene > :not(.litter-under) { position: relative; }
+/* one light for the whole scene: warm sun from the upper left through the canopy. The ground keeps only its base shade;
+   all light and shadow pools sit in .i-light, which covers the cards and the ground alike */
+.x-i { background-image: var(--shade), url("tex/moss-cool.webp"); background-size: auto, 900px;
+  --sh: 0 1px 1px rgba(10,14,4,.55), 3px 4px 6px rgba(10,14,4,.35), 14px 20px 30px rgba(10,14,4,.32); }
+.i-light { z-index: 7; mix-blend-mode: multiply; background:
+  radial-gradient(ellipse 900px 700px at 12% 2%, rgba(255,247,226,1), rgba(255,247,226,0) 70%),
+  radial-gradient(ellipse 700px 600px at 85% 38%, rgba(70,82,52,.55), rgba(70,82,52,0) 70%),
+  radial-gradient(ellipse 800px 700px at 20% 70%, rgba(60,72,44,.5), rgba(60,72,44,0) 70%),
+  radial-gradient(ellipse 140% 100% at 30% 20%, rgba(255,255,255,0) 45%, rgba(40,48,26,.75)),
+  linear-gradient(150deg, rgb(250,244,226) 0%, rgb(226,224,200) 45%, rgb(196,200,172) 100%); }
+.i-light::after { content: ""; position: absolute; inset: 0; mix-blend-mode: soft-light; background:
+  radial-gradient(ellipse 1000px 800px at 10% 0%, rgba(255,226,160,.7), rgba(255,226,160,0) 70%),
+  radial-gradient(ellipse 600px 500px at 70% 62%, rgba(255,230,170,.3), rgba(255,230,170,0) 70%); }
+/* card stock exposed like the ground: off-white, with a breath of green bounce light from the moss along the lower edges */
+.card { background-image: linear-gradient(125deg, rgba(255,255,255,.35) 0%, rgba(255,255,255,0) 40%, rgba(255,255,255,0) 65%, rgba(255,255,255,.12) 100%), linear-gradient(rgba(240,236,224,.8), rgba(240,236,224,.8)), url("tex/linen.webp");
+  box-shadow: var(--sh), inset 0 -10px 16px -10px rgba(70,96,30,.22), inset -8px 0 14px -10px rgba(70,96,30,.16), inset 0 1px 0 rgba(255,255,240,.6); }
+/* the name's letters are pieces lying on the floor too: same light, same cast shadow as the cards */
+.i-name .fill-cv canvas { filter: drop-shadow(1px 2px 1.5px rgba(10,14,4,.45)) drop-shadow(8px 12px 14px rgba(10,14,4,.3)); }
+.i-name > .blade { z-index: 9; }
+.i-name .fill-cv canvas { filter: drop-shadow(0 0 1px rgba(10,14,4,.6)) drop-shadow(3px 4px 3px rgba(10,14,4,.45)) drop-shadow(10px 14px 16px rgba(10,14,4,.3)); }
+/* physical objects: buttons are thick chipboard tokens, labels are strips of paper tape, menu tabs are card stock */
+.x-i .s-hero .s-btn, .x-i .s-btn { position: relative; border: 0; border-radius: 10px; padding: .78em 1.3em; color: #fff8ec;
+  background: #c8402a url("tex/paper006_tile-1024.webp") center / 220px; background-blend-mode: multiply;
+  --edge: #7f2414; --cast: rgba(10,14,4,.4);
+  box-shadow: inset 1px 1.5px 0 rgba(255,236,210,.45), inset -1px -1px 0 rgba(60,10,0,.25),
+    1px 1px 0 var(--edge), 2px 2px 0 var(--edge), 3px 3px 0 var(--edge), 4px 4px 0 var(--edge), 4px 5px 2px var(--cast), 9px 12px 14px var(--cast);
+  transform: translate(0, 0); transition: transform .14s ease, box-shadow .14s ease; }
+.x-i .s-btn:not(.primary) { background-color: #efe9da; color: var(--ink); --edge: #a69c84; }
+.x-i .s-hero .s-btn:hover, .site.x-i .s-btn:hover, .site.x-i .s-btn:focus-visible { /* .site.x-i: outranks site.css's lift-on-hover, which gave buttons outside the hero a hard black shadow */ transform: translate(-1px, -1px);
+  box-shadow: inset 1px 1.5px 0 rgba(255,236,210,.45), inset -1px -1px 0 rgba(60,10,0,.25), 1px 1px 0 var(--edge), 2px 2px 0 var(--edge), 3px 3px 0 var(--edge), 4px 4px 0 var(--edge), 5px 5px 0 var(--edge), 6px 7px 3px var(--cast), 12px 16px 18px var(--cast); }
+.x-i .s-hero .s-btn:active, .site.x-i .s-btn:active { transform: translate(3px, 3px);
+  box-shadow: inset 1px 1.5px 0 rgba(255,236,210,.35), inset -1px -1px 0 rgba(60,10,0,.25), 1px 1px 0 var(--edge), 2px 2px 1px var(--cast), 4px 5px 6px var(--cast); }
+.i-label { color: #2b2720; background: rgba(226,214,180,.9) url("tex/paper001_tile-1024.webp") center / 300px; background-blend-mode: multiply; border-radius: 0; padding: 8px 22px 7px;
+  clip-path: polygon(0 8%, 3% 0, 5% 12%, 8% 2%, 10% 0, 90% 0, 92% 6%, 95% 0, 97% 10%, 100% 4%, 98% 30%, 100% 55%, 97% 78%, 100% 100%, 94% 92%, 91% 100%, 88% 95%, 10% 100%, 7% 92%, 4% 100%, 2% 90%, 0 100%, 2% 70%, 0 45%, 3% 24%);
+  box-shadow: none; filter: drop-shadow(1px 2px 1.5px rgba(10,14,4,.35)); opacity: .97; }
+.i-label::after { content: ""; position: absolute; inset: 0; background: linear-gradient(100deg, rgba(255,255,255,.25), rgba(255,255,255,0) 40%, rgba(0,0,0,.05)); pointer-events: none; }
+.i-nav a { background: #f0ebdd url("tex/linen.webp") center / 150px; background-blend-mode: multiply;
+  box-shadow: inset 0 -1px 0 rgba(255,255,255,.5), 0 1px 0 #c9c1ad, 0 2px 0 #b5ac95, 0 3px 2px rgba(10,14,4,.4), 4px 9px 12px rgba(10,14,4,.3); }
+.i-nav a.r { background: #22211d url("tex/paper006_tile-1024.webp") center / 220px; background-blend-mode: multiply; color: #fff8ec;
+  box-shadow: 0 1px 0 #111, 0 2px 0 #0b0b0a, 0 3px 2px rgba(10,14,4,.45), 4px 9px 12px rgba(10,14,4,.3); }
+.x-i .s-btn:not(.primary) { background-image: url("tex/linen.webp"); background-size: 150px; background-color: #f1ecdf; }
+/* sunlight through a canopy: real leaf silhouettes, out of focus, cast cool shade; the gaps glow warm. Both layers sit over
+   the cards and the ground alike, so everything is lit by the same sun */
+.x-i { --shade: linear-gradient(rgba(22,28,12,.2), rgba(22,28,12,.2)); }
+.i-light { mix-blend-mode: multiply; background:
+  url("tex/canopy-shade-2.webp") -180px -120px / 1600px,
+  radial-gradient(ellipse 140% 100% at 25% 15%, rgba(255,255,255,0) 50%, rgba(40,48,30,.6)),
+  linear-gradient(150deg, rgb(255,250,236) 0%, rgb(236,232,212) 50%, rgb(208,210,186) 100%); }
+.i-light::after { mix-blend-mode: soft-light; background: url("tex/canopy-sun-2.webp") -180px -120px / 1600px; }
+.i-light::before { content: ""; position: absolute; inset: 0; mix-blend-mode: screen; opacity: .35; background: url("tex/canopy-sun-2.webp") -180px -120px / 1600px; }
+.x-i > .i-light { position: absolute; inset: 0; }
+.i-light { background: url("tex/canopy-shade-2.webp") -180px -120px / 1600px, radial-gradient(ellipse 140% 100% at 25% 15%, rgba(255,255,255,0) 55%, rgba(40,48,30,.35)), linear-gradient(150deg, rgb(255,252,242) 0%, rgb(244,240,224) 55%, rgb(224,224,204) 100%); opacity: .85; }
+.i-light::after, .i-light::before { display: none; }
+.x-i > .i-sun { position: absolute; inset: 0; z-index: 7; pointer-events: none; mix-blend-mode: soft-light; background: url("tex/canopy-sun-2.webp") -180px -120px / 1600px; }
+.i-name .fill-cv canvas { filter: drop-shadow(1px 1.5px .8px rgba(10,14,4,.55)) drop-shadow(4px 6px 5px rgba(10,14,4,.35)) drop-shadow(10px 14px 16px rgba(10,14,4,.22)); }
+.i-name .fill-cv > canvas { filter: drop-shadow(1px 1px 0 rgba(8,10,2,.5)) drop-shadow(3px 5px 2.5px rgba(8,10,2,.6)) drop-shadow(10px 15px 12px rgba(8,10,2,.42)); }
+.i-light { opacity: .78; }
+.i-name .fill-cv > canvas { filter: drop-shadow(1px 1px 0 rgba(6,8,2,.6)) drop-shadow(4px 6px 3px rgba(6,8,2,.75)) drop-shadow(14px 20px 16px rgba(6,8,2,.5)); }
+/* neutral card stock: the linen is desaturated and the stock is a cool white, so only the sunlight adds warmth */
+.x-i { --linen: #f6f6f3; }
+.card { background-color: #f6f6f3; background-image: linear-gradient(125deg, rgba(255,255,255,.35) 0%, rgba(255,255,255,0) 40%, rgba(255,255,255,0) 65%, rgba(255,255,255,.12) 100%), linear-gradient(rgba(248,248,246,.78), rgba(248,248,246,.78)), url("tex/linen-n.webp"); }
+.i-nav a:not(.r), .x-i .s-btn:not(.primary) { background-color: #f3f3ef; background-image: url("tex/linen-n.webp"); }
+.x-i .s-btn:not(.primary) { --edge: #a3a39b; }
+.i-light { background: url("tex/canopy-shade-2.webp") -180px -120px / 1600px, radial-gradient(ellipse 140% 100% at 25% 15%, rgba(255,255,255,0) 55%, rgba(40,48,30,.35)), linear-gradient(150deg, rgb(255,253,248) 0%, rgb(244,243,234) 55%, rgb(226,228,214) 100%); }
+/* The Daily Weather's wallet lies on its card as a real object: a thick vinyl wallet, turned a little, hanging over the card's top edge */
+.card .art-dw { overflow: visible; background: none; align-items: center; justify-content: center; position: relative; z-index: 6; }
+.art-dw img.wallet { width: 112%; height: auto; max-width: none; object-fit: fill; margin: 0 -6%; transform: translate(4px, -26px) rotate(-6deg);
+  filter: drop-shadow(.6px .8px 0 #0d1533) drop-shadow(1px 1.4px 0 #0b122c) drop-shadow(1px 1.4px 0 #091026) drop-shadow(3px 5px 3px rgba(6,8,2,.55)) drop-shadow(12px 18px 16px rgba(6,8,2,.38)); }
+/* no inner frame line: the cards are plain stock */
+.card .cf { border: 0; }
+/* experience and game cards size to their content instead of a fixed card shape, so there are no empty stretches */
+.job, .game:not(.g1) { aspect-ratio: auto; }
+.i-jobs, .i-games { align-items: start; }
+.job .c-text { margin-top: 10px; }
+/* the art panels become things lying on the card: a phone, a paper slip, a printed diagram */
+.card .c-art.art-exact, .card .c-art.art-lab, .card .c-art.art-birds { background: none; overflow: visible; align-items: center; justify-content: center; position: relative; z-index: 6; }
+.phone { width: 38%; aspect-ratio: 720 / 1565; padding: 5px; border-radius: 22px; background: linear-gradient(135deg, #3a3c40, #151619 55%, #0d0e10);
+  transform: rotate(8deg) translate(6px, 4px);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.14), inset 1px 1px 0 rgba(255,255,255,.25), 1px 1px 0 #0b0c0d, 2px 2px 0 #08090a, 3px 3px 0 #060607, 4px 6px 4px rgba(6,8,2,.5), 14px 20px 20px rgba(6,8,2,.35); position: relative; }
+.phone img { width: 100%; height: 100%; object-fit: cover; border-radius: 17px; display: block; box-shadow: none !important; }
+.phone::after { content: ""; position: absolute; inset: 5px; border-radius: 17px; pointer-events: none; background: linear-gradient(120deg, rgba(255,255,255,.22) 0%, rgba(255,255,255,0) 30%, rgba(255,255,255,0) 70%, rgba(255,255,255,.06)); }
+.slip { position: relative; background: #fbf3cf url("tex/paper001_tile-1024.webp") center / 300px; background-blend-mode: multiply; border-radius: 3px;
+  box-shadow: 1px 1px 0 rgba(0,0,0,.08), 2px 4px 3px rgba(6,8,2,.25), 8px 12px 14px rgba(6,8,2,.2); }
+.art-lab .s-diagram.slip { width: 92%; padding: 14px 10px; transform: rotate(-2.2deg); }
+.art-birds .slip { background-color: #efdfe4; padding: 26px 22px; margin: 0 6%; transform: rotate(1.8deg); }
+.case { aspect-ratio: auto; } .i-cases { align-items: start; }
+.case .c-art { aspect-ratio: auto; height: 250px; margin-bottom: 14px; }
+.phone { width: auto; height: 108%; }
+.case a:not(.s-btn) { margin-top: 12px; }
+@media (max-width: 700px) {
+  .i-jobs { grid-template-columns: minmax(0,1fr); gap: 16px; }
+  .job .cf { display: grid; grid-template-columns: 7.5em minmax(0,1fr); gap: 2px 14px; }
+  .job .c-type { grid-row: 1 / span 3; } .job .c-text { margin-top: 6px; }
+  .c-intro .s-actions { flex-wrap: nowrap; gap: 12px; } .x-i .c-intro .s-btn { padding: .72em 1em; }
+}
+@media (max-width: 700px) {
+  .job .cf { display: flex; } .i-jobs, .i-games { gap: 34px; } .i-cases { gap: 34px; }
+}
+@media (max-width: 700px) {
+  .i-games { grid-template-columns: minmax(0,1fr); } .game:not(.g1) h3 { font-size: 24px; }
+  .case .c-art { height: 200px; } .art-birds .slip { padding: 20px 18px; }
+  .g1 .art-dw img.wallet { width: 86%; margin: 0 auto; }
+}
+/* the EXACT phone at true scale: the game cards are standard playing cards (63.5 mm wide), so --mm is one millimetre;
+   an iPhone is 71.6 x 147.6 mm. It lies screen-up on the moss and the EXACT card rests on its corner. */
+.x-i { --mm: calc((min(100vw, 1240px) - 80px - 72px) / 4 / 63.5); }
+.i-cases { position: relative; padding-top: calc(var(--mm) * 58); }
+.floor-phone { position: absolute; z-index: 0; width: calc(var(--mm) * 71.6); height: calc(var(--mm) * 147.6); aspect-ratio: auto; padding: calc(var(--mm) * 1.6); border-radius: calc(var(--mm) * 10);
+  left: calc(var(--mm) * 34); top: calc(var(--mm) * -40); transform: rotate(74deg); transform-origin: 50% 50%; }
+.floor-phone img { border-radius: calc(var(--mm) * 8.6); }
+.floor-phone::after { inset: calc(var(--mm) * 1.6); border-radius: calc(var(--mm) * 8.6); }
+.i-cases > .card { position: relative; z-index: 1; }
+@media (max-width: 1000px) { .x-i { --mm: calc((100vw - 80px - 24px) / 2 / 63.5); } }
+@media (max-width: 700px) { .x-i { --mm: calc((100vw - 36px - 14px) / 2 / 63.5 * .8); } .i-cases { padding-top: calc(var(--mm) * 70); } .floor-phone { left: 50%; margin-left: calc(var(--mm) * -36); top: calc(var(--mm) * -36); transform: rotate(80deg); } }
+.floor-phone { left: calc(var(--mm) * 46); }
+.floor-phone > .blade-clip { inset: 0; border-radius: inherit; }
+/* EXACT: two instant-photo prints of the app's screens lying on the card (prints have no fixed size, so nothing to get wrong) */
+.i-cases { padding-top: 0; }
+.print { position: absolute; margin: 0; width: 40%; padding: 6px 6px 22px; background: #fbfbf8 url("tex/paper003_tile-1024.webp") center / 260px; background-blend-mode: multiply; border-radius: 2px;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.04), 1px 1px 0 rgba(0,0,0,.08), 2px 4px 3px rgba(6,8,2,.28), 8px 12px 14px rgba(6,8,2,.22); }
+.print img { display: block; width: 100%; aspect-ratio: 3 / 4; object-fit: cover; object-position: 50% 30%; border-radius: 0; box-shadow: none !important; }
+.art-exact .print { left: 12%; top: 4%; transform: rotate(-6deg); }
+.art-exact .print.p2 { left: auto; right: 10%; top: 9%; transform: rotate(5deg); }
+.art-exact .print.p2 img { object-position: 50% 12%; }
+.art-exact .print:not(.p2) img { object-position: 50% 62%; }
+.i-cases { padding-top: calc(var(--mm) * 58); }
+/* the phone, true to scale, lies upright at the start of the case studies row; the EXACT card overlaps its right edge */
+.i-cases { padding-top: 0; grid-template-columns: calc(var(--mm) * 71.6) repeat(3, minmax(0,1fr)); align-items: start; }
+.floor-phone { position: relative; left: auto; top: auto; margin-top: 18px; transform: rotate(-4deg); z-index: 0; }
+.i-cases > .k1 { margin-left: -34px; margin-top: 70px; }
+@media (max-width: 1000px) { .i-cases { grid-template-columns: calc(var(--mm) * 71.6) minmax(0,1fr); } .i-cases > .k2, .i-cases > .k3 { grid-column: span 1; } }
+@media (max-width: 700px) { .i-cases { grid-template-columns: minmax(0,1fr); } .floor-phone { margin: 0 auto -60px; left: 0; transform: rotate(-4deg); } .i-cases > .k1 { margin: 0; } }
+@media (min-width: 701px) {
+  .i-cases { align-items: stretch; } .floor-phone { align-self: start; }
+  .i-cases > .k1 { margin-left: -64px; margin-top: 90px; margin-bottom: -40px; }
+  .i-cases > .card .cf { height: 100%; } .i-cases > .card a:not(.s-btn) { margin-top: auto; padding-top: 12px; }
+}
+@media (min-width: 701px) {
+  .i-cases { align-items: start; } .i-cases > .card .cf { height: auto; }
+  .i-cases > .k1 { margin-top: 170px; margin-bottom: 0; } .i-cases > .k2 { margin-top: 24px; } .i-cases > .k3 { margin-top: 96px; }
+}
+/* the three case cards match: same size, same art height, links on one line */
+@media (min-width: 701px) {
+  .i-cases { align-items: stretch; } .floor-phone { align-self: start; }
+  .i-cases > .k1, .i-cases > .k2, .i-cases > .k3 { margin-top: 110px; margin-bottom: 0; }
+  .i-cases > .card .cf { height: 100%; } .i-cases > .card a:not(.s-btn) { margin-top: auto; padding-top: 12px; }
+}
+.card .c-art.art-stations { background: none; overflow: visible; align-items: center; justify-content: center; position: relative; z-index: 6; }
+.art-stations .slip { list-style: none; margin: 0; padding: 16px 20px; width: 78%; transform: rotate(-2deg); background-color: #e3ece0;
+  font-family: var(--f-heading); font-weight: 700; font-size: 17px; line-height: 1.25; }
+.art-stations .slip li { padding: 6px 0 6px 26px; position: relative; border-bottom: 1px dashed rgba(23,22,18,.25); }
+.art-stations .slip li:last-child { border: 0; }
+.art-stations .slip li::before { content: ""; position: absolute; left: 0; top: 50%; width: 14px; height: 14px; margin-top: -8px; border: 2px solid var(--ink); border-radius: 3px; }
+.art-stations .slip li::after { content: ""; position: absolute; left: 4px; top: 50%; width: 5px; height: 9px; margin-top: -7px; border: solid var(--accent); border-width: 0 2.5px 2.5px 0; transform: rotate(40deg); }
+@media (min-width: 1001px) {
+  .i-cases { grid-template-columns: calc(var(--mm) * 71.6 - 64px) repeat(3, minmax(0,1fr)); }
+  .i-cases > .k1 { margin-left: 0; } .floor-phone { width: calc(var(--mm) * 71.6); max-width: none; }
+}
+/* every row's cards match in size: experience and games stretch to one height; the wallet hangs off the top of its card so that card isn't taller */
+@media (min-width: 701px) {
+  .i-jobs, .i-games { align-items: stretch; } .job, .game { translate: 0 0 !important; } .g2, .g4 { transform: rotate(1deg); }
+  .i-jobs .cf, .i-games .cf { height: 100%; }
+  .g1 { aspect-ratio: auto; } .g1 .art-dw { aspect-ratio: auto; height: 90px; margin-bottom: 4px; } .g1 .art-dw img.wallet { transform: translate(4px, -50px) rotate(-6deg); }
+  .i-games { margin-top: 90px; }
+}
+/* MENU: a fanned hand of small cards lying in the top-right corner. Each card is a link; pointing at one slides it up out of the hand. */
+.i-nav { position: absolute; top: 0; right: 0; left: auto; max-width: none; padding: 0; z-index: 8; }
+.hand { position: relative; width: 330px; height: 190px; margin: 26px 34px 0 0; display: block; }
+.hand a { position: absolute; left: 50%; top: 18px; width: 78px; height: 110px; margin-left: -39px; padding: 0; border-radius: 7px; transform-origin: 50% 240%;
+  transform: rotate(calc((var(--i) - 2) * 11deg)); background: #f6f6f3 url("tex/linen-n.webp") center / 150px; background-blend-mode: multiply; color: var(--ink);
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.05), 1px 1px 0 #d4d4cc, 1.5px 1.5px 0 #c4c4bb, 2px 3px 2px rgba(6,8,2,.35), 6px 10px 12px rgba(6,8,2,.25);
+  transition: transform .22s cubic-bezier(.3,.7,.3,1); text-decoration: none; }
+.hand a span { position: absolute; left: 8px; top: 8px; font-family: var(--f-heading); font-weight: 700; font-size: 13px; line-height: 1; letter-spacing: -.01em; }
+.hand a::after { content: ""; position: absolute; right: 8px; bottom: 8px; width: 9px; height: 9px; border-radius: 50%; background: var(--accent); opacity: .85; }
+.hand a.r { background-color: #22211d; background-image: url("tex/paper006_tile-1024.webp"); background-size: 220px; color: #fff8ec; box-shadow: 1px 1px 0 #0d0d0c, 1.5px 1.5px 0 #090908, 2px 3px 2px rgba(6,8,2,.4), 6px 10px 12px rgba(6,8,2,.3); }
+.hand a.r::after { background: #fff8ec; }
+.hand a:hover, .hand a:focus-visible { transform: rotate(calc((var(--i) - 2) * 11deg)) translateY(-16px); outline: none; }
+.hand a:focus-visible span { text-decoration: underline; text-underline-offset: 3px; }
+
+/* OPEN LAYOUT: more open moss, asymmetric. The hero gets room to breathe; rows shift left and right instead of all filling the width. */
+.i-hero { padding: 120px 0 150px; grid-template-columns: minmax(0, 1fr) 300px; column-gap: 120px; }
+.c-intro { margin-top: 18px; margin-left: 6%; }
+.c-me { margin-top: 140px; }
+.i-row { margin-bottom: 150px; }
+@media (min-width: 1001px) {
+  #exp, .i-jobs { margin-left: 5%; } .i-jobs { grid-template-columns: repeat(6, minmax(0,1fr)); }
+  #games { margin-left: 0; } .i-games { margin-right: 12%; }
+}
+@media (max-width: 700px) { .hand { width: 230px; height: 140px; margin: 14px 4px 0 0; } .hand a { width: 58px; height: 82px; margin-left: -29px; top: 10px; } .hand a span { font-size: 10px; left: 6px; top: 6px; }
+  .i-hero { padding: 120px 0 80px; } .c-me { margin-top: 0; } .c-intro { margin-left: 0; } .i-row { margin-bottom: 90px; } }
+/* the label runs up the card's left edge, the part of each card a fanned hand leaves showing */
+.hand { width: 380px; height: 220px; }
+.hand a { width: 88px; height: 124px; margin-left: -44px; transform: rotate(calc((var(--i) - 2) * 13deg)); }
+.hand a:hover, .hand a:focus-visible { transform: rotate(calc((var(--i) - 2) * 13deg)) translateY(-18px); }
+.hand a span { left: 7px; top: 9px; writing-mode: vertical-rl; transform: rotate(180deg); transform-origin: center; font-size: 13.5px; height: 104px; display: flex; align-items: center; justify-content: flex-end; }
+.hand a::after { left: auto; right: 9px; top: 9px; bottom: auto; }
+.i-cases > .floor-phone { z-index: 2; }
+@media (max-width: 700px) { .hand { width: 250px; height: 150px; } .hand a { width: 62px; height: 88px; margin-left: -31px; } .hand a span { font-size: 10.5px; height: 72px; left: 5px; top: 7px; } }
+.i-cases > .floor-phone { z-index: 0; } .i-cases > .card { z-index: 1; }
+@media (max-width: 1000px) { .i-hero { column-gap: 40px; grid-template-columns: minmax(0, 1fr) 240px; } }
+@media (max-width: 700px) {
+  .i-hero { grid-template-columns: minmax(0, 1fr); column-gap: 0; }
+  .i-nav .hand a { display: block !important; }
+}
+/* hand v2: a loose spread rather than a tight fan, so each card shows its top-left corner and the name reads level */
+.hand { width: 470px; height: 190px; }
+.hand a { left: 0; margin-left: 0; width: 108px; height: 150px; top: 20px; transform-origin: 50% 100%;
+  translate: calc(var(--i) * 84px) calc(abs(var(--i) - 2) * 7px); transform: rotate(calc((var(--i) - 2) * 4deg)); }
+.hand a:hover, .hand a:focus-visible { transform: rotate(calc((var(--i) - 2) * 4deg)) translateY(-16px); }
+.hand a span { writing-mode: horizontal-tb; transform: none; height: auto; display: block; left: 10px; top: 11px; font-size: 14.5px; }
+.hand a::after { right: 10px; top: auto; bottom: 10px; }
+@media (max-width: 700px) {
+  .hand { width: 330px; height: 130px; margin-right: 6px; } .hand a { width: 74px; height: 104px; translate: calc(var(--i) * 62px) calc(abs(var(--i) - 2) * 5px); }
+  .hand a span { font-size: 11px; left: 7px; top: 8px; }
+}
+@media (max-width: 700px) { .hand { width: 316px; } .hand a { width: 70px; height: 98px; translate: calc(var(--i) * 58px) calc(abs(var(--i) - 2) * 5px); } .hand a::after { display: none; } } .hand a::after { display: none; }
+/* MENU v3: landscape cards lying in the grass, tucked under the top edge of the page so only their lower part shows.
+   Pointing at one pulls it a little further out. */
+.i-nav { top: 0; right: 40px; }
+.hand { width: 640px; height: 110px; margin: 0; }
+.hand a { top: -62px; left: 0; width: 132px; height: 120px; border-radius: 9px; transform-origin: 50% 0;
+  translate: calc(var(--i) * 128px) 0; transform: rotate(calc((var(--i) - 2) * 1.6deg + (var(--i) * 37 % 5 - 2) * .6deg)); }
+.hand a:hover, .hand a:focus-visible { transform: rotate(calc((var(--i) - 2) * 1.6deg + (var(--i) * 37 % 5 - 2) * .6deg)) translateY(12px); }
+.hand a span { left: 14px; top: auto; bottom: 14px; font-size: 16px; writing-mode: horizontal-tb; transform: none; height: auto; }
+.hand a > .blade, .hand a > .blade-clip { pointer-events: none; }
+@media (max-width: 700px) {
+  .i-nav { right: 8px; } .hand { width: 370px; height: 80px; }
+  .hand a { width: 76px; height: 96px; top: -58px; translate: calc(var(--i) * 74px) 0; } .hand a span { font-size: 11.5px; left: 8px; bottom: 9px; }
+}
+/* menu v3b: wider cards so labels never run under the next one; only the bottom edge is grassy */
+.hand { width: 700px; }
+.hand a { width: 144px; translate: calc(var(--i) * 140px) 0; }
+.hand a span { bottom: 20px; left: 16px; }
+@media (max-width: 700px) { .hand { width: 380px; } .hand a { width: 78px; translate: calc(var(--i) * 75px) 0; } .hand a span { bottom: 13px; left: 8px; } }
+@media (max-width: 700px) { .hand a span { font-size: 10.5px; left: 7px; letter-spacing: -.01em; } }
+/* quieter ground (Ian picked "middle"): same scan, mid-scale clutter toned down, not blurred */
+.x-i { background-image: var(--shade), url("tex/moss-quiet-a.webp"); }
+.blade { background-image: linear-gradient(0deg, rgba(0,0,0,.12), rgba(255,250,210,.04) 70%, rgba(255,250,210,.08)), var(--shade), url("tex/moss-quiet-a.webp"); }
+/* Light baked into each piece's own background instead of blend layers over the whole page (those made scrolling lag).
+   Every lit piece knows its offset in the scene (--ox, --oy, set by blades.js), so the canopy shade, the sun flecks and the
+   page-wide falloff line up across the ground, the cards, the menu and the grass blades. */
+.x-i { --ox: 0px; --oy: 0px; }
+.x-i, .card, .hand a, .blade {
+  --L-img: url("tex/canopy-sun-2.webp"), url("tex/canopy-shade-L.webp"),
+    radial-gradient(ellipse 140% 100% at 25% 15%, rgba(255,255,255,0) 55%, rgba(40,48,30,.27)),
+    linear-gradient(150deg, rgb(255,253,249) 0%, rgb(246,246,239) 55%, rgb(232,234,223) 100%);
+  --L-pos: calc(-180px - var(--ox) - var(--wx, 0px)) calc(-120px - var(--oy) - var(--wy, 0px)), calc(-180px - var(--ox) - var(--wx, 0px)) calc(-120px - var(--oy) - var(--wy, 0px)),
+    calc(0px - var(--ox)) calc(0px - var(--oy)), calc(0px - var(--ox)) calc(0px - var(--oy));
+  --L-size: 1600px, 1600px, var(--pw, 100%) var(--ph, 100%), var(--pw, 100%) var(--ph, 100%);
+  --L-blend: soft-light, multiply, multiply, multiply;
+}
+.x-i > .i-light, .x-i > .i-sun { display: none; }
+.x-i { background-image: var(--L-img), var(--shade), url("tex/moss-quiet-2k.webp");
+  background-size: var(--L-size), auto, 900px; background-position: var(--L-pos), 0 0, calc(0px - var(--wx, 0px)) calc(0px - var(--wy, 0px)); background-blend-mode: var(--L-blend), normal, normal; background-repeat: repeat; }
+.card { background-image: var(--L-img), linear-gradient(125deg, rgba(255,255,255,.35) 0%, rgba(255,255,255,0) 40%, rgba(255,255,255,0) 65%, rgba(255,255,255,.12) 100%), linear-gradient(rgba(248,248,246,.78), rgba(248,248,246,.78)), url("tex/linen-n.webp");
+  background-size: var(--L-size), auto, auto, 512px; background-position: var(--L-pos), 0 0, 0 0, 0 0; background-blend-mode: var(--L-blend), normal, normal, normal; background-repeat: repeat; }
+.hand a:not(.r) { background-image: var(--L-img), url("tex/linen-n.webp"); background-size: var(--L-size), 512px; background-position: var(--L-pos), 0 0; background-blend-mode: var(--L-blend), normal; }
+.hand a.r { background-image: var(--L-img), url("tex/paper006_tile-1024.webp"); background-size: var(--L-size), 220px; background-position: var(--L-pos), 0 0; background-blend-mode: var(--L-blend), multiply; }
+.blade { background-image: var(--L-img), linear-gradient(0deg, rgba(0,0,0,.12), rgba(255,250,210,.04) 70%, rgba(255,250,210,.08)), var(--shade), url("tex/moss-quiet-2k.webp");
+  background-size: var(--L-size), 100% 100%, auto, 900px; background-position: var(--L-pos), 0 0, 0 0, calc(0px - var(--ox) - var(--wx, 0px)) calc(0px - var(--oy) - var(--wy, 0px)); background-blend-mode: var(--L-blend), normal, normal, normal; background-repeat: repeat; }
+/* pieces that keep their own look sit a touch darker, as they did under the old light layer */
+.x-i .s-btn, .i-label { filter: brightness(.95); }
+.litter.flat { filter: saturate(.6) brightness(.68) drop-shadow(0 1px 1px rgba(0,0,0,.35)); }
+.litter.under { filter: saturate(.7) brightness(.76) drop-shadow(0 1px 1.5px rgba(0,0,0,.35)); }
+.litter.over { filter: saturate(.75) brightness(.8) drop-shadow(.5px 2px 2px rgba(0,0,0,.32)); }
+/* the letters' thickness is cast by the whole name, so it stays put while a letter twirls */
+.i-name .fill-cv > canvas { filter: none; }
+.i-name .fill-cv { filter: drop-shadow(1px 1px 0 rgba(6,8,2,.6)) drop-shadow(4px 6px 3px rgba(6,8,2,.75)) drop-shadow(14px 20px 16px rgba(6,8,2,.5)); }
+/* grass painted on canvas: a few strips per piece, and one canvas over the page for blades the cursor is bending */
+.blade-strip { position: absolute; pointer-events: none; z-index: 4; max-width: none; max-height: none; } /* the site-wide img max-width squeezed the resting strips */
+.i-name > .blade-strip { z-index: 9; }
+.brush-cv { position: fixed; left: 0; top: 0; pointer-events: none; z-index: 50; }
+/* menu cards sit a little apart */
+.hand { width: 740px; }
+.hand a { width: 132px; translate: calc(var(--i) * 146px) 0; }
+@media (max-width: 700px) { .hand { width: 380px; } .hand a { width: 70px; translate: calc(var(--i) * 76px) 0; } .hand a span { font-size: 10px; left: 6px; } }
+/* the letters cast their thickness again from each canvas; a rocking tile casts it from its bottom slice */
+.i-name .fill-cv { filter: none; }
+/* the letters lie flat on the ground, so their shadow hugs them: a dark contact line and a short soft spread, barely offset */
+.i-name .fill-cv > canvas, .rock-tile > canvas.rock-base { filter: drop-shadow(.5px .8px .5px rgba(6,8,2,.7)) drop-shadow(1.5px 2.5px 2px rgba(6,8,2,.6)) drop-shadow(3px 5px 7px rgba(6,8,2,.35)); }
+.i-name .rock-tile canvas { filter: none !important; }
+.i-name canvas.rock-shadow { filter: none !important; }
+/* a rocking letter's shadow: the same chain as a resting letter's (the letter itself is masked out in site-r.js) */
+.i-name .rock-shadow { filter: drop-shadow(1px 1px 0 rgba(6,8,2,.6)) drop-shadow(4px 6px 3px rgba(6,8,2,.75)) drop-shadow(14px 20px 16px rgba(6,8,2,.5)); }
+.i-name .rock-shadow canvas { filter: none !important; }
+
+/* the name's sprigs: the sprig's own photo under the same light as the ground, instead of a cut-out of the ground */
+.blade { background-image: var(--L-img), linear-gradient(0deg, rgba(0,0,0,.12), rgba(255,250,210,.04) 70%, rgba(255,250,210,.08)), var(--shade), var(--sp);
+  background-size: var(--L-size), 100% 100%, auto, 100% 100%; background-position: var(--L-pos), 0 0, 0 0, 0 0; background-repeat: repeat, repeat, repeat, repeat, repeat, repeat, no-repeat; }
+.i-name .rock-hold { filter: drop-shadow(1px 1px 0 rgba(6,8,2,.6)) drop-shadow(4px 6px 3px rgba(6,8,2,.75)) drop-shadow(14px 20px 16px rgba(6,8,2,.5)); }
+.i-name .rock-hold { filter: none; } .i-name canvas.rock-shadow { filter: none !important; }
+/* the hidden-words grid opens over everything: its card rises above the next card and all the grass while it is open */
+/* the intro card always sits above its neighbours (raising it only while the hidden-words grid was open reshuffled the grass) */
+.c-intro { z-index: 30; }
+/* Loading: until the moss and the canopy light are decoded, the ground is a veil of its own average colour, which then
+   fades away, so the texture comes up softly instead of popping in (the cards and menu sit above the veil) */
+.x-i { background-color: rgb(87, 95, 70); }
+html, body { background-color: rgb(87, 95, 70); }
+.x-i::after { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: rgb(87, 95, 70); transition: opacity .25s ease; }
+html.ground-in .x-i::after { opacity: 0; visibility: hidden; transition: opacity .25s ease, visibility 0s .25s; } /* (Ian: the slow fade-in was too slow on his phone) */
+/* no veil at all (Ian: like a traditional site where the pan isn't available): the ground simply shows as it loads */
+.x-i::after { content: none; }
+/* a page shown already built (laid out ahead of the click) has nothing to fade in */
+html.ground-now .x-i::after { transition: none; }
+/* the wallet keeps its desktop size on wider two-column cards, so it never hangs down over the game's title */
+@media (min-width: 701px) { .g1 .art-dw img.wallet { width: min(112%, 236px); margin: 0 -50%; } }
+/* the wallet at life size (about 98 x 66 mm, against the game cards' true 63.5 mm width): wider than its card, so it lies
+   across the card's top, its right edge near the card's, and hangs out over the moss to the left */
+.g1 .art-dw { overflow: visible; }
+.g1 .art-dw img.wallet { width: calc(var(--mm) * 98); max-width: none; margin: 0 0 0 calc(100% - var(--mm) * 98 + var(--mm) * 2); }
+@media (min-width: 701px) { .g1 .art-dw { height: calc(var(--mm) * 40); } .g1 .art-dw img.wallet { transform: translate(0, calc(var(--mm) * -30)) rotate(-6deg); }
+  .i-games { margin-top: calc(var(--mm) * 40); } }
+@media (min-width: 1001px) { .i-games { margin-right: 0; margin-left: 12%; } #games { margin-left: 12%; } }
+@media (min-width: 1001px) { .g1 .art-dw { height: calc(var(--mm) * 36); } }
+/* two columns: the cards are wider than real cards here, so the wallet keeps a fixed size */
+@media (min-width: 701px) and (max-width: 1000px) { .g1 .art-dw { height: 120px; } .g1 .art-dw img.wallet { width: 340px; margin-left: calc(100% - 332px); transform: translate(0, -110px) rotate(-6deg); } .i-games { margin-top: 120px; } }
+
+/* ABOUT: one wide linen card, set in from the left */
+.i-about { grid-template-columns: minmax(0, 700px); margin-left: 20%; } #about { margin-left: 20%; }
+.c-about { transform: rotate(.7deg); }
+.c-about .cf { padding: 26px 30px 28px; gap: 14px; }
+.c-about .c-text { font-size: 17px; line-height: 1.6; text-wrap: pretty; }
+
+/* SKILLS: a ruled 6 x 4 in index card at true size (152 x 102 mm), the skills printed on its lines */
+.i-skills { grid-template-columns: auto; justify-content: start; margin-left: 30%; } #skills { margin-left: 30%; }
+.index { --rule: calc(var(--mm) * 6.35); --head: calc(var(--mm) * 14);
+  width: calc(var(--mm) * 152); min-height: calc(var(--mm) * 102); box-sizing: border-box; padding: calc(var(--head) + 5px) calc(var(--mm) * 8) var(--rule) calc(var(--mm) * 8);
+  background-color: #fbfaf3;
+  background-image: linear-gradient(rgba(214,72,66,.6), rgba(214,72,66,.6)),
+    repeating-linear-gradient(to bottom, transparent 0 calc(var(--rule) - 1px), rgba(86,132,196,.38) calc(var(--rule) - 1px) var(--rule)),
+    linear-gradient(170deg, rgba(255,255,255,.5), rgba(236,232,218,.35));
+  background-size: 100% 1.2px, 100% calc(100% - var(--head) - var(--rule)), 100% 100%; background-position: 0 var(--head), 0 calc(var(--head) + 1.2px), 0 0;
+  background-repeat: no-repeat;
+  border-radius: 3px; transform: rotate(-1.2deg);
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.04), 0 1px 1px rgba(8,10,0,.45), 2px 4px 5px rgba(8,10,0,.32), 8px 14px 22px rgba(8,10,0,.3); }
+.index dl { margin: 0; font-size: 15px; line-height: var(--rule); }
+.index dl div + div { margin-top: var(--rule); }
+.index dt { display: inline; font-family: var(--f-ui); font-weight: 700; margin-right: .45em; }
+.index dd { display: inline; margin: 0; }
+
+/* SEE ALL GAMES: a strip of label tape, like the section labels, but a link */
+.i-more { margin: -96px 0 150px; text-align: right; }
+.i-more a { display: inline-block; font-family: var(--f-ui); font-weight: 700; font-size: 15px; letter-spacing: .04em; color: #2b2720; text-decoration: none;
+  background: rgba(226,214,180,.9) url("tex/paper001_tile-1024.webp") center / 300px; background-blend-mode: multiply; padding: 8px 20px 7px;
+  box-shadow: 0 1px 1px rgba(0,0,0,.5), 2px 4px 6px rgba(0,0,0,.3); transform: rotate(1.2deg); filter: brightness(.95); }
+.i-more a::after { content: " →"; }
+.i-more a:hover, .i-more a:focus-visible { text-decoration: underline; text-underline-offset: 3px; }
+
+/* CONTACT: a note with the links, and the message form on a second card beside it */
+.i-contact { grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 44px; max-width: 980px; margin-left: 8%; margin-bottom: 40px; } #contact { margin-left: 8%; }
+.c-contact { transform: rotate(-.9deg); } .c-contact .cf { padding: 24px 28px 26px; gap: 16px; }
+.c-contact .c-text { font-size: 17px; line-height: 1.55; }
+.c-links { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; font-size: 15px; }
+.c-links li { display: grid; grid-template-columns: 88px minmax(0, 1fr); align-items: baseline; }
+.c-links b { font-family: var(--f-ui); font-size: 12.5px; font-weight: 600; color: var(--muted); }
+.x-i .card .c-links a { margin: 0; overflow-wrap: anywhere; }
+.x-i .c-form { display: block; border: 0; box-shadow: var(--sh); transform: rotate(.8deg) translateY(26px); }
+.c-form .cf { padding: 22px 24px 24px; gap: 12px; }
+.c-form label { display: grid; gap: 5px; font-family: var(--f-ui); font-size: 12.5px; font-weight: 600; color: var(--muted); }
+.x-i .c-form input, .x-i .c-form select, .x-i .c-form textarea { font: inherit; font-family: var(--f-body, inherit); font-size: 15px; font-weight: 400; color: var(--ink);
+  background: rgba(255,255,255,.5); border: 1px solid rgba(42,41,36,.3); border-radius: 6px; padding: 9px 10px; width: 100%; box-sizing: border-box; box-shadow: inset 0 1px 2px rgba(30,40,0,.12); }
+.x-i .c-form textarea { min-height: 96px; resize: vertical; }
+.x-i .c-form input:focus-visible, .x-i .c-form select:focus-visible, .x-i .c-form textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.c-form .s-btn { justify-self: start; align-self: flex-start; margin-top: 4px; }
+
+@media (max-width: 1000px) { .i-about, #about { margin-left: 6%; } .i-skills, #skills { margin-left: 8%; } #contact { margin-left: 0; } .i-more { margin-top: -60px; } .i-contact { margin-left: 0; } }
+@media (max-width: 700px) {
+  .i-about, .i-skills, #about, #skills { margin-left: 0; } .i-about { grid-template-columns: minmax(0,1fr); }
+  .c-about .cf, .c-contact .cf { padding: 20px 20px 22px; } .c-about .c-text, .c-contact .c-text { font-size: 16px; }
+  .i-skills { grid-template-columns: minmax(0,1fr); }
+  .index { --rule: 26px; --head: 30px; width: auto; min-height: 0; padding: calc(var(--head) + 5px) 18px var(--rule); }
+  .index dl { font-size: 14.5px; }
+  .i-more { margin: -50px 0 90px; }
+  .i-contact { grid-template-columns: minmax(0,1fr); gap: 34px; } .x-i .c-form { transform: rotate(.6deg); }
+}
+/* the screen-reader announcer sat after the page and added a strip of empty page below it */
+body > p[role="status"] { top: 0; left: 0; }
+@media (max-width: 700px) { .g1 .art-dw img.wallet { width: 86%; margin: 0 auto; } }
+/* plain-spoken labels: sentence case on the tape (spaced-out capitals read as template), and no arrow on the one tape link */
+.x-i .i-label { text-transform: none; letter-spacing: .01em; font-size: 17px; }
+.i-more a::after { content: none; }
+/* the index card never runs off the page: it moves left as the window narrows, and shrinks (text reflowing on its lines) only when it must */
+@media (min-width: 701px) { .i-skills, #skills { margin-left: clamp(0px, calc(100% - var(--mm) * 152 - 40px), 30%); }
+  .index { width: min(calc(var(--mm) * 152), 100%); min-height: min(calc(var(--mm) * 102), 70vh); } }
+.c-me .c-name { margin: 4px 0 0; font-family: var(--f-heading); font-weight: 800; font-size: 21px; letter-spacing: -.02em; line-height: 1.1; }
+.x-i .i-more a { color: var(--accent); }
+/* text needs to stay readable in the shade: on cards the canopy shade is a little over half as deep as on the moss
+   (paper throws back more light than leaves anyway), and the grey text is darker */
+.x-i .card { --L-img: url("tex/canopy-sun-2.webp"), url("tex/canopy-shade-card.webp"),
+    radial-gradient(ellipse 140% 100% at 25% 15%, rgba(255,255,255,0) 55%, rgba(40,48,30,.27)),
+    linear-gradient(150deg, rgb(255,253,249) 0%, rgb(246,246,239) 55%, rgb(232,234,223) 100%); }
+.x-i { --muted: #47443b; }
+/* links: the same orange a shade deeper, at 19px bold, so they pass WCAG AA (3:1 for large text) on cards in shade and on tape */
+.x-i { --link: #b5371f; }
+.x-i .card a:not(.s-btn), .x-i .i-more a { color: var(--link); font-size: 19px; font-weight: 700; }
+.x-i .i-more a { background-color: rgba(240,233,210,.95); filter: none; }
+/* visible keyboard focus on the menu cards and on the name (a tab stop for typing hidden words) */
+.x-i .hand a:focus-visible { outline: 3px solid #f5f1e6; outline-offset: 2px; }
+.x-i .i-hero h1:focus-visible:not(.by-pointer) { outline: 3px solid #f5f1e6; outline-offset: 8px; border-radius: 8px; text-decoration: none; }
+/* the name's sprigs keep their own layer all the time: the browser drew them a little differently while they swayed than at
+   rest, so they flickered at the start and end of every sway */
+.i-name > .blade { will-change: transform; }
+/* Safari sorts a tipping 3D letter by depth against the leaves lying over it, and drew the raised edge in front of them; the
+   leaves sit well above the highest a letter can tip (no perspective above them, so nothing changes size) */
+.i-name > .blade, .i-name > .blade-strip { translate: 0 0 200px; }
+/* the letters keep one flat layer of their own, so their 3D tipping stays inside it and can't cut through the leaves */
+.i-name { isolation: isolate; } .i-name > .fill-cv { will-change: transform; }
+
+/* the scene keeps one layer of its own for good, so the moss layer under it showing and hiding, or sprigs being redrawn,
+   never makes the browser re-layer (and redraw) the whole page mid-scroll: that showed as bare green on a fast scroll */
+.x-i .i-scene { will-change: transform; }
+
+/* each contact link stays on one line (Ian), and the three links are laid out alike: label and link side by side while
+   the longest one (linkedin.com/in/ian-tarter) fits, otherwise every link sits under its label */
+.x-i .card .c-links a { white-space: nowrap; overflow-wrap: normal; }
+.c-links { container-type: inline-size; }
+.c-links li { grid-template-columns: 76px auto; }
+@container (max-width: 372px) { .c-links li { grid-template-columns: 1fr; row-gap: 2px; } }
+
+.site.x-i .s-egg-chip { position: relative; border: 0; border-radius: 10px; color: var(--ink); background: #f3f3ef url("tex/linen-n.webp") center / 150px; --edge: #a3a39b; --cast: rgba(10,14,4,.4);
+  box-shadow: inset 1px 1.5px 0 rgba(255,236,210,.45), inset -1px -1px 0 rgba(60,10,0,.25), 1px 1px 0 var(--edge), 2px 2px 0 var(--edge), 3px 3px 0 var(--edge), 4px 4px 0 var(--edge), 4px 5px 2px var(--cast), 9px 12px 14px var(--cast);
+  transition: transform .14s ease, box-shadow .14s ease; filter: brightness(.95); }
+.site.x-i .s-egg-chip:active { transform: translate(3px, 3px);
+  box-shadow: inset 1px 1.5px 0 rgba(255,236,210,.35), inset -1px -1px 0 rgba(60,10,0,.25), 1px 1px 0 var(--edge), 2px 2px 1px var(--cast), 4px 5px 6px var(--cast); }
+/* Buttons are thick tokens lying on the card, seen from straight above like everything else: no side walls show, only
+   a thin rim (light on the upper left, darker on the lower right) and the shadow they cast. Pointed at, a token grows
+   taller: its top comes closer, so it looks a little bigger, and its shadow reaches further from it. Pressed, it sinks.
+   The three states use the same list of layers, so one slides smoothly into the next. The hidden-words badge is the
+   same kind of token as "Email me" beside it. */
+.site.x-i .s-btn, .site.x-i .s-egg-chip { transform: none; transition: transform .16s ease, box-shadow .16s ease;
+  box-shadow: inset 1px 1px 0 rgba(255,240,220,.5), inset -1px -1.5px 0 rgba(40,20,0,.28), 0 0 0 .5px var(--edge), .5px 1px 1px rgba(10,14,4,.55), 3px 4px 3px var(--cast), 8px 11px 12px var(--cast); }
+.site.x-i .s-btn:hover, .site.x-i .s-btn:focus-visible, .site.x-i .s-egg-chip:hover, .site.x-i .s-egg-chip:focus-visible { transform: scale(1.02);
+  box-shadow: inset 1px 1px 0 rgba(255,240,220,.5), inset -1px -1.5px 0 rgba(40,20,0,.28), 0 0 0 .5px var(--edge), .75px 1.5px 1.5px rgba(10,14,4,.5), 4.5px 6px 4px var(--cast), 11px 15px 15px var(--cast); }
+.site.x-i .s-btn:active, .site.x-i .s-egg-chip:active { transform: scale(.992);
+  box-shadow: inset 1px 1px 0 rgba(255,240,220,.4), inset -1px -1.5px 0 rgba(40,20,0,.3), 0 0 0 .5px var(--edge), .5px .75px .75px rgba(10,14,4,.58), 2px 3px 2.5px var(--cast), 6px 8px 9px var(--cast); }
+@media (prefers-reduced-motion: reduce) { .site.x-i .s-btn, .site.x-i .s-egg-chip { transition: none; } }
+/* the hidden-words badge shares the button row: on a narrow card the buttons tighten up so all three fit */
+.x-i .s-actions.s-tight { gap: 7px; }
+.x-i .c-intro .s-actions.s-tight .s-btn { padding: .62em .5em; font-size: .9em; }
+.site.x-i .s-tight .s-egg-chip { padding: 0 6px; }
+@media (max-width: 400px) { .x-i .c-intro .cf { padding-left: 20px; padding-right: 20px; } }
+@media (max-width: 370px) { .x-i .c-intro .s-actions.s-tight .s-btn { font-size: .86em; } }
+/* The pages lie side by side on the forest floor: the games to the left of the homepage, the case studies to its right,
+   in the homepage's order. Following a link pans across to the next page (browsers with cross-page view transitions;
+   others just load the page). The direction is set by the little script in each page's head. */
+@view-transition { navigation: auto; }
+@media (prefers-reduced-motion: reduce) { @view-transition { navigation: none; } }
+::view-transition-group(root) { animation-duration: 1.5s; }
+/* each page slides by its own width without the scrollbar, and the page whose right edge meets the other one has its
+   scrollbar cut off, so no flat strip shows at the join (--sbw: the scrollbar's width, set in each page's head) */
+html:active-view-transition-type(pan-right)::view-transition-old(root) { animation: pan-to-left 1.5s cubic-bezier(.3, 0, .3, 1) both; clip-path: inset(0 var(--sbw, 0px) 0 0); }
+html:active-view-transition-type(pan-right)::view-transition-new(root) { animation: pan-from-right 1.5s cubic-bezier(.3, 0, .3, 1) both; }
+html:active-view-transition-type(pan-left)::view-transition-old(root) { animation: pan-to-right 1.5s cubic-bezier(.3, 0, .3, 1) both; }
+html:active-view-transition-type(pan-left)::view-transition-new(root) { animation: pan-from-left 1.5s cubic-bezier(.3, 0, .3, 1) both; clip-path: inset(0 var(--sbw, 0px) 0 0); }
+@keyframes pan-to-left { to { transform: translateX(calc(var(--sbw, 0px) - 100%)); } }
+@keyframes pan-from-right { from { transform: translateX(calc(100% - var(--sbw, 0px))); } }
+@keyframes pan-to-right { to { transform: translateX(calc(100% - var(--sbw, 0px))); } }
+@keyframes pan-from-left { from { transform: translateX(calc(var(--sbw, 0px) - 100%)); } }
+/* the clearing at the bottom: a long walk of open moss to a rock you can sit on; sitting lets a breeze run through the
+   grass. The light goes to sunset on the way down (one still layer that scrolls with the page, so it costs nothing to scroll) */
+.i-field { position: relative; height: max(240vh, 1700px); margin: 120px 0 -120px; } /* reaches the bottom of the page, through the scene's padding */
+.i-rock { position: absolute; left: 50%; bottom: 25vh; width: min(205px, 36vw); transform: translate(-50%, 50%) rotate(-6deg); /* its middle three quarters of the way down the last screen */ padding: 0; border: 0; background: none; cursor: pointer; z-index: 3; }
+.rock-img { display: block; width: 100%; height: auto; filter: drop-shadow(2px 3px 2px rgba(8,10,0,.5)) drop-shadow(10px 16px 16px rgba(8,10,0,.38)); }
+.i-rock:focus-visible { outline: 2px solid var(--accent); outline-offset: 6px; border-radius: 40%; }
+/* at sunset the low sun is warm and dim and the sky is blue: the moss in shade is lit only by the sky, so it goes darker
+   and cooler, and the patches the sun still reaches turn gold. So one layer cools and dims everything, and a second, cut
+   to the same canopy gaps as the daylight, brings the sun back warm, both fading in down the clearing */
+.x-i > .i-dusk { position: absolute; left: 0; right: 0; bottom: 0; height: calc(max(240vh, 1700px) + 60vh); z-index: 8; pointer-events: none;
+  background: linear-gradient(rgba(140,160,210,0), rgba(140,160,210,.42) 45%, rgba(120,138,200,.66) 85%, rgba(112,128,196,.72)); mix-blend-mode: multiply; }
+.x-i > .i-glow { mix-blend-mode: color-dodge; background: rgb(128,86,18);
+  -webkit-mask-image: linear-gradient(transparent 5%, rgba(0,0,0,.6) 50%, #000 90%), url("tex/dusk-sun.webp"); mask-image: linear-gradient(transparent 5%, rgba(0,0,0,.6) 50%, #000 90%), url("tex/dusk-sun.webp");
+  mask-size: 100% 100%, 1600px; mask-repeat: no-repeat, repeat; mask-composite: intersect; -webkit-mask-composite: source-in;
+  mask-position: 0 0, -180px calc(-120px - var(--ph, 0px) + max(240vh, 1700px) + 60vh); -webkit-mask-size: 100% 100%, 1600px; -webkit-mask-repeat: no-repeat, repeat;
+  -webkit-mask-position: 0 0, -180px calc(-120px - var(--ph, 0px) + max(240vh, 1700px) + 60vh); }
+/* on the narrowest phones the longest link (linkedin.com/in/ian-tarter) would reach the card's edge on one line */
+@container (max-width: 262px) { .x-i .card .c-links a { font-size: 13.5px; } }

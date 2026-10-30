@@ -1,0 +1,66 @@
+/* Case study and games pages on the forest floor: the page itself is one big sheet of linen card stock lying in the moss,
+   calmer than the homepage (it's for reading), with the same menu cards tucked under the top edge and a paper tape label
+   back to the case studies. Layered on site.css and dir-i.css. */
+.case-i .i-scene { max-width: 1040px; padding-top: 70px; }
+.case-i .c-back { margin: 0 0 44px 4%; text-decoration: none; }
+.case-i .c-back:hover, .case-i .c-back:focus-visible { text-decoration: underline; text-underline-offset: 3px; }
+.case-i .c-doc { transform: none; } /* a sheet this tall, turned even slightly, drifts sideways down the page */
+.case-i .c-doc > .cf { padding: clamp(28px, 6vw, 72px) clamp(22px, 6vw, 80px) clamp(36px, 6vw, 72px); display: block; }
+/* the old page's width wrappers now sit inside the sheet */
+.case-i .c-doc .s-inner { max-width: none; padding: 0; margin: 0; }
+.case-i .s-case-head { padding: 0 0 8px; }
+.case-i .s-case-meta { color: var(--muted); }
+.case-i .s-case-title { color: var(--ink); max-width: 18ch; font-size: clamp(34px, 5.4vw, 58px); }
+.case-i .s-case-lede { color: var(--ink); }
+.case-i .s-case-facts { border-top: 1.5px solid rgba(23,22,18,.8); }
+.case-i .s-case-facts dt { color: var(--muted); }
+.case-i .s-section .s-inner { grid-template-columns: minmax(0, 170px) minmax(0, 1fr); padding-block: 26px; border-top: 1px solid rgba(23,22,18,.14); }
+.case-i .s-section:first-of-type .s-inner { border-top: 0; }
+.case-i .s-label { color: var(--ink); font-size: 21px; }
+.case-i .s-body, .case-i .s-body p { color: var(--ink); }
+.case-i .s-body a, .case-i .s-case-head a:not(.c-back) { color: #b5371f; }
+.case-i .s-case-stats { border-color: rgba(23,22,18,.8); }
+/* screenshots are phones lying on the sheet, their shadows on the paper */
+.case-i .s-shot-row img { box-sizing: border-box; border: 5px solid #121315; border-radius: 22px; background: #121315;
+  filter: none; box-shadow: 0 0 0 .5px #3a3c40, .5px 1px 1px rgba(10,14,4,.45), 3px 5px 5px rgba(10,14,4,.3), 9px 14px 18px rgba(10,14,4,.22); }
+.case-i .c-doc .s-shots-hero { padding: 34px 0 10px; }
+.case-i .s-shots figcaption, .case-i figure figcaption { color: var(--muted); }
+/* pictures that aren't phones lie on the sheet as prints */
+.case-i .s-figure img, .case-i .s-case-hero img { box-shadow: .5px 1px 1px rgba(10,14,4,.4), 3px 5px 6px rgba(10,14,4,.22); border-radius: 2px; }
+.case-i .i-more { margin: 30px 0 0 6%; }
+@media (max-width: 700px) {
+  .case-i .i-scene { padding-top: 96px; }
+  .case-i .s-section .s-inner { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .case-i .s-case-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .case-i .s-shot-row img { border-width: 3px; border-radius: 14px; }
+}
+.case-i .s-more::after { content: none; }
+/* the games page: its heading on a card, then each group under a paper tape label with its games as cards in the moss */
+.games-i .c-head { max-width: 720px; margin-bottom: 70px; }
+.games-i .c-head > .cf { padding: 36px 40px 38px; display: grid; gap: 12px; }
+.games-i .i-label:not(.c-back) { margin: 0 0 24px 3%; }
+.games-i .g-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 30px 34px; align-items: start; margin: 0 0 80px; }
+.games-i .g-card > .cf, .games-i .g-note > .cf { padding: 22px 24px 24px; display: grid; gap: 10px; align-content: start; }
+.games-i .g-card:nth-child(3n+1) { transform: rotate(-.6deg); } .games-i .g-card:nth-child(3n+2) { transform: rotate(.4deg); margin-top: 14px; } .games-i .g-card:nth-child(3n) { transform: rotate(-.2deg); margin-top: 6px; }
+.games-i .g-card h3 { margin: 0; font-family: var(--f-heading); font-size: 22px; line-height: 1.15; color: var(--ink); }
+.games-i .g-card p, .games-i .g-note p, .games-i .g-note li { margin: 0; color: var(--ink); line-height: 1.5; }
+.games-i .g-card .meta { font-family: var(--f-ui); font-size: 14px; color: var(--muted); }
+.games-i .g-card .s-card-img { width: 100%; height: auto; display: block; border-radius: 2px; margin-bottom: 4px; box-shadow: .5px 1px 1px rgba(10,14,4,.4), 3px 5px 6px rgba(10,14,4,.22); }
+.games-i .g-card .s-quote { margin: 4px 0 0; padding-left: 12px; border-left: 2px solid #b5371f; }
+.games-i .g-card .s-quote p { font-style: italic; } .games-i .g-card cite { font-style: normal; font-size: 14px; }
+.games-i .g-card a, .games-i .g-note a { color: #b5371f; }
+.games-i .g-note { max-width: 640px; margin: 0 0 30px; transform: rotate(.3deg); }
+.games-i .g-grid + .g-note { margin-top: -40px; margin-bottom: 80px; }
+.games-i .s-proj-list { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; }
+.games-i .s-proj-more { color: #fff; } .games-i .s-proj-more a { color: #fff; }
+@media (max-width: 1000px) { .games-i .g-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .games-i .g-grid { grid-template-columns: minmax(0, 1fr); gap: 22px; } .games-i .g-card:nth-child(n) { margin-top: 0; } .games-i .c-head > .cf { padding: 26px 22px 28px; } }
+/* step cards and pictures inside the sheet: paper slips and prints lying on it, not outlined boxes */
+.case-i .c-doc .s-flow, .case-i .c-doc .s-case-hero { padding: 34px 0 10px; margin: 0; }
+.case-i .s-flow-steps li { background: #fbfaf6 url("tex/paper001_tile-1024.webp") center / 360px; background-blend-mode: multiply; border: 0; border-radius: 2px;
+  box-shadow: 0 0 0 .5px rgba(60,50,30,.18), .5px 1px 1px rgba(10,14,4,.3), 3px 5px 6px rgba(10,14,4,.16); }
+.case-i .s-flow-steps li:nth-child(odd) { transform: rotate(-.6deg); } .case-i .s-flow-steps li:nth-child(even) { transform: rotate(.5deg); }
+.case-i .s-flow-steps b { color: var(--ink); } .case-i .s-flow-steps span { color: var(--muted); }
+.case-i .s-flow-steps li::after { color: var(--muted); }
+.case-i .s-flow figcaption, .case-i .s-figure figcaption { color: var(--muted); }
+.case-i .s-figure img, .case-i .s-case-hero img { border: 0; background: none; }
