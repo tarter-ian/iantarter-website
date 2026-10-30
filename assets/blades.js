@@ -799,17 +799,20 @@
       for (let i = 0; i < 2000; i++) { const k = i / 2000; d[i] = d[i] * k + d[n - 2000 + i] * (1 - k); } // loops without a click
       const src = ac.createBufferSource(); src.buffer = buf; src.loop = true;
       const f = ac.createBiquadFilter(); f.type = "bandpass"; f.frequency.value = 500; f.Q.value = .6;
-      const g = ac.createGain(); g.gain.value = 0; src.connect(f).connect(g).connect(ac.destination); src.start();
+      const g = ac.createGain(); g.gain.value = 0; const vol = ac.createGain(); vol.gain.value = 0; vol.connect(ac.destination);
+      src.connect(f).connect(g).connect(vol); src.start();
       // under the rustle, the low rumble of the wind itself (Ian: it was missing): deep brown noise, swelling more slowly
       const lb = ac.createBuffer(1, n, ac.sampleRate), ld = lb.getChannelData(0); let br = 0;
       for (let i = 0; i < n; i++) { br = (br + (Math.random() * 2 - 1) * .02) * .998; ld[i] = br * 1.2; }
       for (let i = 0; i < 4000; i++) { const k = i / 4000; ld[i] = ld[i] * k + ld[n - 4000 + i] * (1 - k); }
       const low = ac.createBufferSource(); low.buffer = lb; low.loop = true;
       const lf = ac.createBiquadFilter(); lf.type = "lowpass"; lf.frequency.value = 140; lf.Q.value = .5;
-      const lg = ac.createGain(); lg.gain.value = 0; low.connect(lf).connect(lg).connect(ac.destination); low.start();
-      hum = { ac, f, g, lf, lg }; } catch (e) { return; } }
+      const lg = ac.createGain(); lg.gain.value = 0; low.connect(lf).connect(lg).connect(vol); low.start();
+      hum = { ac, f, g, lf, lg, vol }; } catch (e) { return; } }
     if (!hum) return;
-    if (on) hum.ac.resume(); else { hum.g.gain.setTargetAtTime(0, hum.ac.currentTime, .5); hum.lg.gain.setTargetAtTime(0, hum.ac.currentTime, .8); }
+    // it eases in over several seconds as you settle (Ian), and out as you get up
+    const v = hum.vol.gain, t = hum.ac.currentTime; v.cancelScheduledValues(t); v.setValueAtTime(v.value, t);
+    if (on) { hum.ac.resume(); v.setTargetAtTime(1, t + .6, 2.2); } else v.setTargetAtTime(0, t, .5);
   }
   // how much gust is passing through the window now, 0 to about 1 (sampled on a grid across it)
   function gustNow() {
@@ -860,8 +863,8 @@
       windW = 0; wind.raf = requestAnimationFrame(windFrame); return;
     }
     wind.hush = false;
-    if (hum && wind.sit) { const g = Math.min(1.2, gustNow()), t = hum.ac.currentTime; hum.g.gain.setTargetAtTime(.012 + .16 * g, t, .25); hum.f.frequency.setTargetAtTime(380 + 700 * g, t, .3);
-      hum.lg.gain.setTargetAtTime(.08 + .55 * g, t, .6); hum.lf.frequency.setTargetAtTime(90 + 110 * g, t, .6); }
+    if (hum && wind.sit) { const g = Math.min(1.2, gustNow()), t = hum.ac.currentTime; hum.g.gain.setTargetAtTime(.008 + .1 * g, t, .25); hum.f.frequency.setTargetAtTime(380 + 700 * g, t, .3);
+      hum.lg.gain.setTargetAtTime(.05 + .34 * g, t, .6); hum.lf.frequency.setTargetAtTime(90 + 110 * g, t, .6); }
     // the sprigs along a piece's sides lie across the wind, so they lean with the gust passing them: their strip is skewed
     // about the line their roots are on (a transform only, nothing is repainted); sprigs along the top and bottom point
     // along the wind and hardly bend
