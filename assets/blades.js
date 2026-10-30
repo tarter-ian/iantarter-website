@@ -23,9 +23,10 @@
   // the letters' pixels are read through one reusable canvas kept on the CPU (reading the letters' own canvases made the
   // browser warn, and pull each one back from the GPU)
   let pxc = null;
-  // the strips are never read back, so their canvases can live on the graphics card, where brushing repaints them without
-  // copying every changed frame up from memory (?cpu keeps them in memory, as before, to compare)
-  const STRIP = /[?&]cpu\b/.test(location.search) ? { willReadFrequently: true } : undefined;
+  // Every canvas the grass is made of is kept in memory, none on the graphics card: they're drawn into one another all the
+  // time, and each draw between a card-side canvas and a memory one copied the picture across (profiled: most of a
+  // brushing frame went to that copying)
+  const RW = { willReadFrequently: true }, STRIP = RW;
   const readPx = (cv, W, H) => { if (!pxc) pxc = document.createElement("canvas").getContext("2d", { willReadFrequently: true });
     if (pxc.canvas.width < W) pxc.canvas.width = W; if (pxc.canvas.height < H) pxc.canvas.height = H;
     pxc.clearRect(0, 0, W, H); pxc.drawImage(cv, 0, 0); return pxc.getImageData(0, 0, W, H).data; };
@@ -95,7 +96,7 @@
   // one sprig, painted upright in the light of the spot it lies in
   function bladeImage(g) {
     if (g.cv) return g.cv;
-    const cv = document.createElement("canvas"), ctx = cv.getContext("2d");
+    const cv = document.createElement("canvas"), ctx = cv.getContext("2d", RW);
     cv.width = Math.max(1, Math.ceil(g.w * DPR)); cv.height = Math.max(1, Math.ceil(g.len * DPR)); ctx.scale(DPR, DPR);
     paintGround(ctx, g.px, g.py, g.w, g.len, g.sp.img);
     return (g.cv = cv);
@@ -103,7 +104,7 @@
 
   function liftImage(g) {
     if (g.hi) return g.hi;
-    const base = bladeImage(g), cv = document.createElement("canvas"), ctx = cv.getContext("2d"); cv.width = base.width; cv.height = base.height;
+    const base = bladeImage(g), cv = document.createElement("canvas"), ctx = cv.getContext("2d", RW); cv.width = base.width; cv.height = base.height;
     ctx.drawImage(base, 0, 0); ctx.globalCompositeOperation = "source-atop";
     const gr = ctx.createLinearGradient(0, cv.height, 0, 0); gr.addColorStop(0, "rgba(255,250,220,0)"); gr.addColorStop(1, "rgba(255,250,220,.22)");
     ctx.fillStyle = gr; ctx.fillRect(0, 0, cv.width, cv.height); return (g.hi = cv);
@@ -111,7 +112,7 @@
   const shadows = new Map();
   function shadowImage(sp) { // the sprite's silhouette in soft dark
     if (shadows.has(sp.src)) return shadows.get(sp.src);
-    const cv = document.createElement("canvas"), ctx = cv.getContext("2d"); cv.width = sp.img.width; cv.height = sp.img.height;
+    const cv = document.createElement("canvas"), ctx = cv.getContext("2d", RW); cv.width = sp.img.width; cv.height = sp.img.height;
     ctx.drawImage(sp.img, 0, 0); ctx.globalCompositeOperation = "source-in"; ctx.fillStyle = "rgba(10,12,0,.28)"; ctx.fillRect(0, 0, cv.width, cv.height);
     shadows.set(sp.src, cv); return cv;
   }
@@ -123,7 +124,7 @@
   const SP = 3;
   function softShadow(g) {
     if (g.shd) return g.shd;
-    const c = document.createElement("canvas"), x = c.getContext("2d"); c.width = Math.ceil((g.w + 2 * SP) * DPR); c.height = Math.ceil((g.len + 2 * SP) * DPR);
+    const c = document.createElement("canvas"), x = c.getContext("2d", RW); c.width = Math.ceil((g.w + 2 * SP) * DPR); c.height = Math.ceil((g.len + 2 * SP) * DPR);
     x.scale(DPR, DPR); if ("filter" in x) x.filter = "blur(.9px)"; x.drawImage(shadowImage(g.sp), SP, SP, g.w, g.len); return (g.shd = c);
   }
   function drawShadow(ctx, g, x, y, ang, alpha = 1, sc = 1) {
@@ -189,8 +190,10 @@
   function prepare(st, then) { st.ready = false; if (then) prep.push([st, 0, then]); else prep.unshift([st, 0]); /* growing grass first */ if (!prepare.raf) prepare.raf = soon(prepFrame); }
   function prepFrame() {
     // until the grass starts growing nothing is moving, so the first paint-ahead takes bigger bites (at 5ms a frame the
-    // sprigs took seconds to start; Ian: "they take quite a bit of time to load")
-    prepare.raf = 0; const end = performance.now() + (grassGo ? 5 : 40);
+    // sprigs took seconds to start; Ian: "they take quite a bit of time to load"). After that the growing is played by
+    // the compositor, so only brushing needs the frames kept light (at 5ms a frame the grass further down the page was
+    // still bare when Ian scrolled to it)
+    prepare.raf = 0; const end = performance.now() + (!grassGo ? 40 : active.size ? 5 : 14);
     while (prep.length && performance.now() < end) { const job = prep[0], [st] = job;
       if (!strips.has(st)) { prep.shift(); continue; }
       const g = st.blades[job[1]++]; if (g) { bladeImage(g); softShadow(g); }
@@ -280,7 +283,7 @@
   // a hard line). The hard shadows are left out: they are the piece's own edge, which the sprigs lie over, not under.
   function shade(st) {
     if (st.shade && st.shade.width) return st.shade;
-    const c = st.shade = document.createElement("canvas"), x = c.getContext("2d"); c.width = st.cv.width; c.height = st.cv.height;
+    const c = st.shade = document.createElement("canvas"), x = c.getContext("2d", RW); c.width = st.cv.width; c.height = st.cv.height;
     const el = st.el, w = el.offsetWidth, h = el.offsetHeight, rad = parseFloat(getComputedStyle(el).borderTopLeftRadius) || 0, F = 20000;
     const rr = (X, Y, W, H, r) => { x.beginPath(); x.roundRect ? x.roundRect(X, Y, W, H, r) : x.rect(X, Y, W, H); };
     x.setTransform(DPR, 0, 0, DPR, -st.x0 * DPR, -st.y0 * DPR); x.fillStyle = "#000";
@@ -381,6 +384,7 @@
       el.appendChild(img); if (cut && !shadowsFirst.has(edge)) shadowsFirst.set(edge, img);
       const st = { el, edge, cv, img, ctx: cv.getContext("2d", STRIP), x0, y0, blades: bl, W: cv.width, H: cv.height }; bl.forEach(g => g.st = st);
       if (cut) st.twin = { cv: tcv, img: timg, ctx: tcv.getContext("2d", STRIP) };
+      for (const c of [cv, tcv]) if (c) c.addEventListener("contextrestored", () => { if (strips.has(st)) paintStrip(st); });
       // the fresh canvas shows at once (a relayout swaps old grass for new in the same frame) and hands over to its image
       strips.add(st); if (grow(st)) continue;
       // grass out of view is painted a little at a time once the visible grass is done
@@ -429,7 +433,7 @@
       const [sun, shade, paper] = await Promise.all([tex(ROOT + "assets/tex/canopy-sun-2.webp"), tex(ROOT + "assets/" + shadeSrc), tex(ROOT + "assets/" + paperSrc)]);
       if (!sun || !shade || !paper || gen !== bakeGen) return;
       const cv = document.createElement("canvas"); cv.width = Math.ceil(W * dpr); cv.height = Math.ceil(H * dpr);
-      const x = cv.getContext("2d"); x.scale(dpr, dpr);
+      const x = cv.getContext("2d", RW); x.scale(dpr, dpr);
       const tile = (img, size, px, py, mode) => { const pt = x.createPattern(img, "repeat"); pt.setTransform(new DOMMatrix().translate(px, py).scale(size / img.width));
         x.globalCompositeOperation = mode; x.fillStyle = pt; x.fillRect(0, 0, W, H); };
       const fill = (st, mode) => { x.globalCompositeOperation = mode; x.fillStyle = st; x.fillRect(0, 0, W, H); };
@@ -458,14 +462,14 @@
   async function bakeGround(gen) {
     const sc = scene(), fx = FX(), fy = FY(), key = [PW, PH, fx, fy].join(); if (!PW || !PH || sc._bakeKey === key) return;
     const [shade, moss] = await Promise.all([tex(ROOT + "assets/tex/canopy-shade-L.webp"), tex(ROOT + "assets/tex/moss-quiet-2k.webp")]); if (!shade || !moss || gen !== bakeGen) return;
-    const k = .5, cv = document.createElement("canvas"); cv.width = Math.ceil(PW * k); cv.height = Math.ceil(PH * k); const x = cv.getContext("2d"); x.scale(k, k);
+    const k = .5, cv = document.createElement("canvas"); cv.width = Math.ceil(PW * k); cv.height = Math.ceil(PH * k); const x = cv.getContext("2d", RW); x.scale(k, k);
     const fill = (st, mode) => { x.globalCompositeOperation = mode; x.fillStyle = st; x.fillRect(0, 0, PW, PH); };
     fill("#fff", "source-over");
     { const g = lin(x, 150, PW, PH, 0, 0); g.addColorStop(0, "rgb(255,253,249)"); g.addColorStop(.55, "rgb(246,246,239)"); g.addColorStop(1, "rgb(232,234,223)"); fill(g, "multiply"); }
     { x.save(); x.translate(PW * .25, PH * .15); x.scale(PW * 1.4, PH); const g = x.createRadialGradient(0, 0, 0, 0, 0, 1);
       g.addColorStop(.55, "rgba(40,48,30,0)"); g.addColorStop(1, "rgba(40,48,30,.27)"); x.globalCompositeOperation = "multiply"; x.fillStyle = g; x.fillRect(-.25 / 1.4, -.15, 1 / 1.4, 1); x.restore(); }
     { const pt = x.createPattern(shade, "repeat"); pt.setTransform(new DOMMatrix().translate(-180 - fx, -120 - fy).scale(1600 / shade.width)); fill(pt, "multiply"); }
-    const m = document.createElement("canvas"); m.width = moss.width; m.height = moss.height; const mx = m.getContext("2d"); mx.drawImage(moss, 0, 0); mx.fillStyle = "rgba(22,28,12,.2)"; mx.fillRect(0, 0, m.width, m.height);
+    const m = document.createElement("canvas"); m.width = moss.width; m.height = moss.height; const mx = m.getContext("2d", RW); mx.drawImage(moss, 0, 0); mx.fillStyle = "rgba(22,28,12,.2)"; mx.fillRect(0, 0, m.width, m.height);
     const [b1, b2] = await Promise.all([new Promise(r => cv.toBlob(r)), sc._mossUrl ? null : new Promise(r => m.toBlob(r, "image/webp", 1))]); cv.width = m.width = 0;
     if (!b1 || gen !== bakeGen) return;
     const u1 = URL.createObjectURL(b1), u2 = sc._mossUrl || URL.createObjectURL(b2);
@@ -848,7 +852,7 @@
       vec3 under=mix(texture2D(T,up).rgb,texture2D(B,up).rgb,clamp((mp-mq)/(1.001-mq),0.,1.));
       vec3 col=lit(mix(under,texture2D(T,uq).rgb,mq),O+p);al*=smoothstep(.08,.35,max(mp,mq));gl_FragColor=vec4(col*al,al);}`;
   // the canopy maps are 1600px; WebGL1 only tiles power-of-two textures, so they go up as 1024px copies (they're soft)
-  const pot = img => { const c = document.createElement("canvas"); c.width = c.height = 1024; const x = c.getContext("2d"); x.imageSmoothingQuality = "high"; x.drawImage(img, 0, 0, 1024, 1024); return c; };
+  const pot = img => { const c = document.createElement("canvas"); c.width = c.height = 1024; const x = c.getContext("2d", RW); x.imageSmoothingQuality = "high"; x.drawImage(img, 0, 0, 1024, 1024); return c; };
   let SW = null, kicks = [];
   function makeSway() {
     if (!MOSS || !FRONDS || !BARE || !SHADE || !SUN) return null;
@@ -880,7 +884,7 @@
   // size, its edges feathered) stops the strands moving under a piece and just around it, so none slide under or out.
   function pinUnderLitter(tries = 0) {
     if (!SW || !PW || !PH) return; const k = .25, sc = scene().getBoundingClientRect();
-    const a = document.createElement("canvas"); a.width = Math.ceil(PW * k); a.height = Math.ceil(PH * k); const x = a.getContext("2d");
+    const a = document.createElement("canvas"); a.width = Math.ceil(PW * k); a.height = Math.ceil(PH * k); const x = a.getContext("2d", RW);
     let waiting = false;
     for (const img of document.querySelectorAll(".litter-ground .litter, .litter-under .litter")) {
       if (!img.complete || !img.naturalWidth) { waiting = true; continue; }
@@ -889,7 +893,7 @@
       const ang = parseFloat((img.style.transform.match(/-?[\d.]+/) || [0])[0]) * Math.PI / 180;
       x.save(); x.scale(k, k); x.translate(l + w / 2, t + h / 2); x.rotate(ang); x.drawImage(img, -w / 2, -h / 2, w, h); x.restore();
     }
-    const b = document.createElement("canvas"); b.width = a.width; b.height = a.height; const y = b.getContext("2d");
+    const b = document.createElement("canvas"); b.width = a.width; b.height = a.height; const y = b.getContext("2d", RW);
     y.filter = "blur(2.5px)"; y.drawImage(a, 0, 0); y.drawImage(a, 0, 0); a.width = 0; // drawn twice: the pin reaches a little past each piece's edge
     const { gl } = SW; gl.activeTexture(gl.TEXTURE5); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, b); b.width = 0;
     if (waiting && tries < 10) setTimeout(() => pinUnderLitter(tries + 1), 600);

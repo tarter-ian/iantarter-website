@@ -32,7 +32,7 @@
     const W = site.offsetWidth, H = site.offsetHeight, key = W + "x" + H;
     if (!grainCv) { grainCv = document.createElement("canvas"); grainCv.className = "grain-cv"; grainCv.setAttribute("aria-hidden", "true"); site.appendChild(grainCv); }
     if (grainKey !== key) { grainKey = key; grainCv.width = W; grainCv.height = H; } grainCv.style.width = W + "px"; grainCv.style.height = H + "px";
-    const ctx = grainCv.getContext("2d"), T = 256, tile = ctx.createImageData(T, T), d = tile.data;
+    const ctx = grainCv.getContext("2d", { willReadFrequently: true }), T = 256, tile = ctx.createImageData(T, T), d = tile.data;
     for (let i = 0; i < d.length; i += 4) { const v = 120 + Math.random() * 135 | 0; d[i] = d[i + 1] = d[i + 2] = v; d[i + 3] = Math.random() < 0.55 ? 26 : 10; }
     for (let y = 0; y < H; y += T) for (let x = 0; x < W; x += T) ctx.putImageData(tile, x, y);
     // keep cards, photo, form and buttons clean: cut the grain out where they sit
@@ -101,7 +101,7 @@
     let Wc = box.width + ox + 1; const Hc = box.height + oy + 1;
     // each letter gets its own little canvas, so a single letter can hop on hover
     const glyphs = []; const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT); const range = document.createRange(); let n;
-    const mctx = document.createElement("canvas").getContext("2d");
+    const mctx = document.createElement("canvas").getContext("2d", { willReadFrequently: true });
     let ws = false; // a space came before the next letter (each letter can be its own span)
     while ((n = walker.nextNode())) {
       const cs = getComputedStyle(n.parentElement); const font = `${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`; mctx.font = font;
@@ -150,7 +150,7 @@
     // outline and drawn-on depth become the piece's side, light where it meets the top face and darker toward the ground;
     // the face gets a thin bright bevel on its lit edges and a slight shade on the others.
     function solidify(cv, rgb) {
-      const W = cv.width, H = cv.height, ctx = cv.getContext("2d"), img = ctx.getImageData(0, 0, W, H), a = img.data, N = W * H;
+      const W = cv.width, H = cv.height, ctx = cv.getContext("2d", { willReadFrequently: true }), img = ctx.getImageData(0, 0, W, H), a = img.data, N = W * H;
       const face = new Uint8Array(N), side = new Uint8Array(N);
       for (let p = 0; p < N; p++) { if (a[p * 4 + 3] < 8) continue; const lum = (a[p * 4] + a[p * 4 + 1] + a[p * 4 + 2]) / 3, fl = (rgb[0] + rgb[1] + rgb[2]) / 3;
         if (lum > fl - 30) face[p] = 1; else side[p] = 1; }
@@ -221,7 +221,7 @@
     // anti-alias: average each block of drawing pixels down to one screen pixel (premultiplied), instead of letting the browser resample
     const f = Math.round(S / dpr), W2 = Math.ceil(W / f), H2 = Math.ceil(H / f);
     const fin = document.createElement("canvas"); fin.width = W2; fin.height = H2;
-    const fctx = fin.getContext("2d"), small = fctx.createImageData(W2, H2), d2 = small.data;
+    const fctx = fin.getContext("2d", { willReadFrequently: true }), small = fctx.createImageData(W2, H2), d2 = small.data;
     for (let y2 = 0; y2 < H2; y2++) for (let x2 = 0; x2 < W2; x2++) {
       let r = 0, g = 0, bl = 0, al = 0, cnt = 0;
       for (let yy = y2 * f; yy < Math.min(H, y2 * f + f); yy++) for (let xx = x2 * f; xx < Math.min(W, x2 * f + f); xx++) {
@@ -271,7 +271,7 @@
   // the filled area plus its outline (pixels within a stroke's width of the fill), with real depth stacked behind it instead.
   function faceOf(c, fill, fs) {
     if (c._face) return c._face;
-    const W = c.width, H = c.height, N = W * H, img = c.getContext("2d").getImageData(0, 0, W, H), d = img.data, [FR, FG, FB] = hexToRgb(fill);
+    const W = c.width, H = c.height, N = W * H, img = c.getContext("2d", { willReadFrequently: true }).getImageData(0, 0, W, H), d = img.data, [FR, FG, FB] = hexToRgb(fill);
     let m = new Uint8Array(N); for (let p = 0; p < N; p++) { const q = p * 4; if (d[q + 3] > 200 && Math.abs(d[q] - FR) + Math.abs(d[q + 1] - FG) + Math.abs(d[q + 2] - FB) < 90) m[p] = 1; }
     const k = W / parseFloat(c.style.width), R = Math.max(2, Math.round(fs * 0.035 * k));
     for (let it = 0; it < R; it++) { const n2 = m.slice(); for (let p = 0; p < N; p++) { if (m[p]) continue; const x = p % W;
@@ -279,7 +279,7 @@
     let x0 = W, x1 = 0, y0 = H, y1 = 0, ix1 = 0, iy1 = 0; // face box, and the bottom-right of all the ink (face plus drawn shadow)
     for (let p = 0; p < N; p++) { const x = p % W, y = (p / W) | 0; if (d[p * 4 + 3] > 60) { if (x > ix1) ix1 = x; if (y > iy1) iy1 = y; }
       if (!m[p]) { d[p * 4 + 3] = 0; continue; } if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
-    const f = document.createElement("canvas"); f.width = W; f.height = H; f.getContext("2d").putImageData(img, 0, 0);
+    const f = document.createElement("canvas"); f.width = W; f.height = H; f.getContext("2d", { willReadFrequently: true }).putImageData(img, 0, 0);
     // how far the font's shadow reaches down and right: that becomes the letter's real depth
     return (c._face = { cv: f, cx: (x0 + x1) / 2, cy: (y0 + y1) / 2, ox: Math.max(0, ix1 - x1), oy: Math.max(0, iy1 - y1) });
   }
@@ -391,7 +391,7 @@
     if (c._sil) return;
     faceOf(c, fill, g.fs || 60); c._fillHex = fill; c._inkHex = ink;
     const sil = document.createElement("canvas"); sil.width = c.width; sil.height = c.height;
-    const sx = sil.getContext("2d"); sx.drawImage(c._face.cv, 0, 0); sx.globalCompositeOperation = "source-in"; sx.fillStyle = ink || "#000"; sx.fillRect(0, 0, sil.width, sil.height);
+    const sx = sil.getContext("2d", { willReadFrequently: true }); sx.drawImage(c._face.cv, 0, 0); sx.globalCompositeOperation = "source-in"; sx.fillStyle = ink || "#000"; sx.fillRect(0, 0, sil.width, sil.height);
     c._sil = sil;
     const W = sil.width, H = sil.height, px = sx.getImageData(0, 0, W, H).data, A = new Float32Array(W * H);
     for (let p = 0; p < W * H; p++) A[p] = px[p * 4 + 3] / 255;
@@ -413,15 +413,15 @@
       const sx2 = a1[0] + a2[0], sy2 = a1[1] + a2[1], L = Math.hypot(sx2, sy2) || 1; c._vnorms.set(p, [sx2 / L, sy2 / L]); });
     c._lineW = Math.max(1.5, (g.fs || 60) * 0.022 * (c.width / parseFloat(c.style.width)));
     if (String(fill).toLowerCase() === SHINE_GOLD) shineFace(c);
-    const ctx = c.getContext("2d"); ctx.clearRect(0, 0, c.width, c.height); draw3d(ctx, c, 0, "y", 0, 0);
+    const ctx = c.getContext("2d", { willReadFrequently: true }); ctx.clearRect(0, 0, c.width, c.height); draw3d(ctx, c, 0, "y", 0, 0);
   }
   // gold reads as metal through bands of light and dark running down the face, like a polished bar
   const GOLD_BANDS = [[0, [255, 241, 176]], [.28, [247, 205, 78]], [.5, [205, 140, 26]], [.6, [236, 186, 58]], [.78, [252, 226, 128]], [1, [186, 122, 18]]];
   function goldAt(t) { for (let i = 1; i < GOLD_BANDS.length; i++) { const [t1, c1] = GOLD_BANDS[i]; if (t <= t1) { const [t0, c0] = GOLD_BANDS[i - 1], u = (t - t0) / (t1 - t0 || 1); return c0.map((v, j) => v + (c1[j] - v) * u); } } return GOLD_BANDS[GOLD_BANDS.length - 1][1]; }
   function shineFace(c) {
-    const f = c._face.cv, fx = f.getContext("2d"), W = f.width, H = f.height, img = fx.getImageData(0, 0, W, H), d = img.data, [FR, FG, FB] = hexToRgb(SHINE_GOLD);
+    const f = c._face.cv, fx = f.getContext("2d", { willReadFrequently: true }), W = f.width, H = f.height, img = fx.getImageData(0, 0, W, H), d = img.data, [FR, FG, FB] = hexToRgb(SHINE_GOLD);
     let y0 = H, y1 = 0; for (let p = 0; p < W * H; p++) if (d[p * 4 + 3] > 200) { const y = (p / W) | 0; if (y < y0) y0 = y; if (y > y1) y1 = y; }
-    const mask = document.createElement("canvas"); mask.width = W; mask.height = H; const mx = mask.getContext("2d"), mi = mx.createImageData(W, H), md = mi.data;
+    const mask = document.createElement("canvas"); mask.width = W; mask.height = H; const mx = mask.getContext("2d", { willReadFrequently: true }), mi = mx.createImageData(W, H), md = mi.data;
     for (let p = 0; p < W * H; p++) { const q = p * 4; if (!d[q + 3]) continue;
       const w = Math.max(0, Math.min(1, 1 - (Math.abs(d[q] - FR) + Math.abs(d[q + 1] - FG) + Math.abs(d[q + 2] - FB)) / 110)); if (!w) continue;
       const g = goldAt(Math.max(0, Math.min(1, ((p / W | 0) - y0) / Math.max(1, y1 - y0))));
@@ -432,9 +432,9 @@
   // a glint of light sweeps across the gold name, letter by letter: three times, then only when you hover or focus the name
   // (motion that starts by itself stops after a few seconds, per WCAG 2.2.2; never with reduced motion)
   function glintLetter(c, x) {
-    const ctx = c.getContext("2d"); ctx.clearRect(0, 0, c.width, c.height); draw3d(ctx, c, 0, "y", 0, 0); if (x == null || !c._shineMask) return;
+    const ctx = c.getContext("2d", { willReadFrequently: true }); ctx.clearRect(0, 0, c.width, c.height); draw3d(ctx, c, 0, "y", 0, 0); if (x == null || !c._shineMask) return;
     const W = c.width, H = c.height, t = c._glintCv || (c._glintCv = document.createElement("canvas")); t.width = W; t.height = H;
-    const tx = t.getContext("2d"), bw = H * 0.32, gr = tx.createLinearGradient(x - bw, H * 0.15, x + bw, -H * 0.15);
+    const tx = t.getContext("2d", { willReadFrequently: true }), bw = H * 0.32, gr = tx.createLinearGradient(x - bw, H * 0.15, x + bw, -H * 0.15);
     gr.addColorStop(0, "rgba(255,255,255,0)"); gr.addColorStop(.5, "rgba(255,255,240,.9)"); gr.addColorStop(1, "rgba(255,255,255,0)");
     tx.fillStyle = gr; tx.fillRect(0, 0, W, H); tx.globalCompositeOperation = "destination-in"; tx.drawImage(c._shineMask, 0, 0);
     ctx.globalCompositeOperation = "screen"; ctx.drawImage(t, 0, 0); ctx.globalCompositeOperation = "source-over";
@@ -469,7 +469,7 @@
   site._spinFrame = (i, axis, ang) => {
     const w = nameEl._fillCv; if (!w) return null; const g = w._glyphs[i]; if (!g || !g.base) return null; const c = g.base; prep(c, g, w._ink, w._fill);
     const F = c._face, pad = Math.ceil(Math.max(F.ox, F.oy, 4) * 2), cv = document.createElement("canvas"); cv.width = c.width + pad * 2; cv.height = c.height + pad * 2;
-    draw3d(cv.getContext("2d"), c, ang, axis, pad, pad); return cv;
+    draw3d(cv.getContext("2d", { willReadFrequently: true }), c, ang, axis, pad, pad); return cv;
   };
   // friction on a spinning letter: a steady drag (SPIN_A, rad/ms²) plus one that grows with speed (SPIN_B, per ms), like an
   // axle's bearing and the air. coast() plans a spin from angle `from` at speed w (rad/ms, signed): it turns until friction
@@ -523,7 +523,7 @@
     const k = c.width / parseFloat(c.style.width), F = c._face, pad = Math.ceil(Math.max(F.ox, F.oy, 4) * 2);
     const cv = document.createElement("canvas"); cv.width = c.width + pad * 2; cv.height = c.height + pad * 2; cv.className = "spin-cv";
     Object.assign(cv.style, { position: "absolute", left: parseFloat(c.style.left) - pad / k + "px", top: parseFloat(c.style.top) - pad / k + "px", width: cv.width / k + "px", height: cv.height / k + "px", pointerEvents: "none" });
-    const ctx = cv.getContext("2d"); draw3d(ctx, c, 0, axis, pad, pad);
+    const ctx = cv.getContext("2d", { willReadFrequently: true }); draw3d(ctx, c, 0, axis, pad, pad);
     c.parentNode.insertBefore(cv, c); c.style.visibility = "hidden";
     const st = c._spin = { axis, ...coast(0, dir * w0, dir), t0: performance.now(),
       angle(now) { const t = Math.min(1, (now - this.t0) / this.dur), e = this.lin ? t : this.ease(t); return this.from + (this.to - this.from) * e; },
@@ -540,7 +540,7 @@
       if (n < 2) draw3d(ctx, c, a, st.axis, pad, pad);
       else {
         if (!blurCv) { blurCv = document.createElement("canvas"); blurCv.width = cv.width; blurCv.height = cv.height; }
-        const bx = blurCv.getContext("2d"); ctx.globalCompositeOperation = "lighter"; ctx.globalAlpha = 1 / n;
+        const bx = blurCv.getContext("2d", { willReadFrequently: true }); ctx.globalCompositeOperation = "lighter"; ctx.globalAlpha = 1 / n;
         for (let i = 0; i < n; i++) { bx.clearRect(0, 0, cv.width, cv.height); draw3d(bx, c, a - arc * i / (n - 1), st.axis, pad, pad); ctx.drawImage(blurCv, 0, 0); }
         ctx.globalCompositeOperation = "source-over"; ctx.globalAlpha = 1;
       }
@@ -667,7 +667,7 @@
     const wrap = document.createElement("div"); wrap.className = "rock-tile"; wrap.setAttribute("aria-hidden", "true");
     Object.assign(wrap.style, { position: "absolute", left: c.style.left, top: c.style.top, width: w + "px", height: h + "px", transformStyle: "preserve-3d", transformOrigin: "50% 50%", pointerEvents: "none" });
     // the sides: slices of the letter's silhouette, lighter near the face and darker further down
-    const slice = t => { const s2 = document.createElement("canvas"); s2.width = c.width; s2.height = c.height; const x = s2.getContext("2d");
+    const slice = t => { const s2 = document.createElement("canvas"); s2.width = c.width; s2.height = c.height; const x = s2.getContext("2d", { willReadFrequently: true });
       x.drawImage(c, 0, 0); x.globalCompositeOperation = "source-in";
       x.fillStyle = `rgb(${Math.round(222 - 60 * t)},${Math.round(221 - 58 * t)},${Math.round(210 - 58 * t)})`; x.fillRect(0, 0, s2.width, s2.height); return s2; };
     // the tile's shadow: the resting letter's three drop-shadows baked into a flat image (Safari drops CSS filters around
@@ -676,15 +676,15 @@
     // CSS stacks each drop-shadow under everything before it, letter included; this does the same while keeping a
     // shadows-only copy (S), so the letter can be left out without cutting into the shadow under its edges
     { const mk = () => { const n = document.createElement("canvas"); n.width = sh.width; n.height = sh.height; return n; };
-      let I = mk(), S = mk(); I.getContext("2d").drawImage(c, P * k, P * k);
+      let I = mk(), S = mk(); I.getContext("2d", { willReadFrequently: true }).drawImage(c, P * k, P * k);
       for (const [dx, dy, b, col] of [[.5, .8, .5, "rgba(6,8,2,.7)"], [1.5, 2.5, 2, "rgba(6,8,2,.6)"], [3, 5, 7, "rgba(6,8,2,.35)"]] /* same as the CSS one in dir-i.css */) {
-        const F = 1e5, one = mk(), o = one.getContext("2d"); // this step's shadow alone: the source drawn far away, its shadow pulled back
+        const F = 1e5, one = mk(), o = one.getContext("2d", { willReadFrequently: true }); // this step's shadow alone: the source drawn far away, its shadow pulled back
         // (CSS drop-shadow's blur is the standard deviation; canvas shadowBlur is twice it)
         Object.assign(o, { shadowColor: col, shadowOffsetX: dx * k + F, shadowOffsetY: dy * k, shadowBlur: b * k * 2 }); o.drawImage(I, -F, 0);
-        const nI = mk(), nS = mk(); nI.getContext("2d").drawImage(one, 0, 0); nI.getContext("2d").drawImage(I, 0, 0);
-        nS.getContext("2d").drawImage(one, 0, 0); nS.getContext("2d").drawImage(S, 0, 0);
+        const nI = mk(), nS = mk(); nI.getContext("2d", { willReadFrequently: true }).drawImage(one, 0, 0); nI.getContext("2d", { willReadFrequently: true }).drawImage(I, 0, 0);
+        nS.getContext("2d", { willReadFrequently: true }).drawImage(one, 0, 0); nS.getContext("2d", { willReadFrequently: true }).drawImage(S, 0, 0);
         for (const x of [I, S, one]) x.width = 0; I = nI; S = nS; }
-      sh.getContext("2d").drawImage(S, 0, 0); I.width = S.width = 0; }
+      sh.getContext("2d", { willReadFrequently: true }).drawImage(S, 0, 0); I.width = S.width = 0; }
     sh.className = "rock-shadow"; sh.setAttribute("aria-hidden", "true");
     Object.assign(sh.style, { position: "absolute", left: parseFloat(c.style.left) - P + "px", top: parseFloat(c.style.top) - P + "px", width: w + 2 * P + "px", height: h + 2 * P + "px", transformOrigin: `${P + w / 2}px ${P + h / 2}px`, pointerEvents: "none" });
     const hold = document.createElement("div"); hold.className = "rock-hold"; hold.setAttribute("aria-hidden", "true");
@@ -695,7 +695,7 @@
     const sides = () => { const inset = `scale(${((w - 1.5) / w).toFixed(4)}, ${((h - 1.5) / h).toFixed(4)})`;
       for (let i = D; i >= 1; i--) { const s2 = slice(i / D);
         Object.assign(s2.style, { position: "absolute", left: 0, top: 0, width: w + "px", height: h + "px", transform: `translateZ(${-i}px) ${inset}`, display: "none" }); wrap.insertBefore(s2, top); } };
-    const top = document.createElement("canvas"); top.width = c.width; top.height = c.height; top.getContext("2d").drawImage(c, 0, 0);
+    const top = document.createElement("canvas"); top.width = c.width; top.height = c.height; top.getContext("2d", { willReadFrequently: true }).drawImage(c, 0, 0);
     Object.assign(top.style, { position: "absolute", left: 0, top: 0, width: w + "px", height: h + "px" }); wrap.appendChild(top);
     c.parentNode.insertBefore(sh, c); c.parentNode.insertBefore(hold, c); c.style.visibility = "hidden";
     // the ink's outline points, so the tile tips on the letter's real edge and not on the edge of its (padded) canvas
