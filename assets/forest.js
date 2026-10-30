@@ -65,4 +65,6 @@
     });
   }
   addEventListener("scene-layout", lay);
+  // laid once straight away too, so a page sliding in (whose grass waits for the slide to end) arrives with its litter
+  lay();
 })();
