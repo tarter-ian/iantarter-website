@@ -761,9 +761,25 @@
     wind.aim = wind.ev && now - wind.ev < 100 ? wind.aim * .5 + a * .5 : a; wind.ev = now;
     if (!wind.raf) { wind.t = now; wrec.length = 0; wrec.push([now - 7000, 0]); wind.raf = requestAnimationFrame(windFrame); }
   }, { passive: true });
+  // ---------- Sitting on the rock ----------
+  // the clearing at the bottom has a rock; sitting on it lets a breeze run through the grass, rising and falling slowly,
+  // until you get up (the rock again, Esc, or scrolling away)
+  const breeze = t => { t /= 1000; return .42 + .16 * Math.sin(t * .37) + .1 * Math.sin(t * 1.13 + 1.7); };
+  function sit(on) {
+    const rock = document.querySelector(".i-rock"); if (!rock || !!wind.sit === on) return;
+    wind.sit = on; rock.setAttribute("aria-pressed", on); document.documentElement.classList.toggle("sitting", on);
+    const tag = rock.querySelector(".i-sit"); if (tag) tag.textContent = on ? "Stand up" : "Sit";
+    if (on) { rock.closest(".i-field").scrollIntoView({ behavior: reduce() ? "auto" : "smooth", block: "end" }); sit.t = performance.now(); }
+    if (on && !reduce() && !wind.raf) { wind.t = performance.now(); wrec.length = 0; wrec.push([wind.t - 7000, 0]); wind.raf = requestAnimationFrame(windFrame); }
+  }
+  addEventListener("click", e => { if (e.target.closest(".i-rock")) sit(!wind.sit); });
+  addEventListener("keydown", e => { if (e.key === "Escape") sit(false); });
+  // getting up by scrolling: once the walk to the rock has settled, leaving the clearing stands you up
+  addEventListener("scroll", () => { if (!wind.sit || performance.now() - sit.t < 1500) return;
+    const f = document.querySelector(".i-field").getBoundingClientRect(); if (f.top > innerHeight * .45) sit(false); }, { passive: true });
   function windFrame() {
     const now = performance.now(), dt = Math.min(.034, (now - wind.t) / 1000); wind.t = now;
-    if (now - wind.ev > 90) wind.aim = 0; // scrolling has stopped
+    if (now - wind.ev > 90) wind.aim = wind.sit ? breeze(now) : 0; // scrolling has stopped (sitting on the rock, a breeze keeps up)
     // the wind picks up in about a fifth of a second and dies down over a second and a half
     const rate = Math.abs(wind.aim) > Math.abs(wind.e) ? 6 : 1.2; wind.e += (wind.aim - wind.e) * Math.min(1, rate * dt);
     if (!wind.aim && Math.abs(wind.e) < .004) wind.e = 0;

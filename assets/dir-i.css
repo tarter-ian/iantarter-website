@@ -540,3 +540,10 @@ html:active-view-transition-type(pan-left)::view-transition-new(root) { animatio
 @keyframes pan-from-right { from { transform: translateX(calc(100% - var(--sbw, 0px))); } }
 @keyframes pan-to-right { to { transform: translateX(calc(100% - var(--sbw, 0px))); } }
 @keyframes pan-from-left { from { transform: translateX(calc(var(--sbw, 0px) - 100%)); } }
+/* the clearing at the bottom: open moss with a rock to sit on; sitting lets a breeze run through the grass */
+.i-field { position: relative; height: max(100vh, 680px); margin-top: 120px; }
+.i-rock { position: absolute; left: 50%; top: 52%; width: min(430px, 62vw); transform: translate(-50%, -50%) rotate(-6deg); padding: 0; border: 0; background: none; cursor: pointer; z-index: 3; }
+.rock-img { display: block; width: 100%; height: auto; filter: drop-shadow(2px 4px 3px rgba(8,10,0,.5)) drop-shadow(14px 22px 22px rgba(8,10,0,.38)); }
+.i-sit { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) rotate(4deg); font-family: var(--f-ui); font-weight: 700; font-size: 15px; letter-spacing: .14em; text-transform: uppercase; color: #2b2720;
+  background: rgba(226,214,180,.9) url("tex/paper001_tile-1024.webp") center / 300px; background-blend-mode: multiply; padding: 7px 18px 6px; box-shadow: 0 1px 1px rgba(0,0,0,.5), 2px 4px 6px rgba(0,0,0,.3); }
+.i-rock:focus-visible { outline: none; } .i-rock:focus-visible .i-sit { outline: 2px solid var(--accent); outline-offset: 2px; }
