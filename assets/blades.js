@@ -23,10 +23,11 @@
   // the letters' pixels are read through one reusable canvas kept on the CPU (reading the letters' own canvases made the
   // browser warn, and pull each one back from the GPU)
   let pxc = null;
-  // Every canvas the grass is made of is kept in memory, none on the graphics card: they're drawn into one another all the
-  // time, and each draw between a card-side canvas and a memory one copied the picture across (profiled: most of a
-  // brushing frame went to that copying)
-  const RW = { willReadFrequently: true }, STRIP = RW;
+  // Every canvas the grass is made of lives on the graphics card, all of them together: they're drawn into one another all
+  // the time, and a draw between a card-side canvas and an in-memory one copies the picture across (profiled: that copying
+  // was most of a brushing frame). On the card they're also drawn into the page without being uploaded again, which keeps
+  // fast scrolls from flashing bare ground. (Only readPx, which reads pixels back, keeps its canvas in memory.)
+  const RW = undefined, STRIP = RW;
   const readPx = (cv, W, H) => { if (!pxc) pxc = document.createElement("canvas").getContext("2d", { willReadFrequently: true });
     if (pxc.canvas.width < W) pxc.canvas.width = W; if (pxc.canvas.height < H) pxc.canvas.height = H;
     pxc.clearRect(0, 0, W, H); pxc.drawImage(cv, 0, 0); return pxc.getImageData(0, 0, W, H).data; };
