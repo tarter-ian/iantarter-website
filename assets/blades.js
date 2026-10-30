@@ -50,7 +50,8 @@
   // Every blade is a real moss sprig in the ground's colours, lit by the same canopy light as the spot it lies in. The blades around a piece are painted once into a few canvas
   // strips (one per edge) instead of being hundreds of masked elements, which is what made scrolling and brushing lag.
   const DPR = Math.min(2, devicePixelRatio || 1);
-  const load = src => new Promise(r => { const i = new Image(); i.onload = () => r(i); i.onerror = () => r(null); i.src = src; });
+  // (asked for with CORS, so canvases and WebGL may read them even when a host serves the files from another address)
+  const load = src => new Promise(r => { const i = new Image(); i.crossOrigin = "anonymous"; i.onload = () => r(i); i.onerror = () => r(null); i.src = src; });
   // the strand maps only matter where a cursor can stir the moss, so touch screens skip downloading them
   const stir = matchMedia("(hover: hover)").matches;
   const [MOSS, SHADE, SUN, FRONDS, BARE] = await Promise.all([ROOT + "assets/tex/moss-quiet-2k.webp", ROOT + "assets/tex/canopy-shade-L.webp", ROOT + "assets/tex/canopy-sun-2.webp", stir && ROOT + "assets/tex/moss-fronds.webp", stir && ROOT + "assets/tex/moss-bare.webp?v=2"].map(u => u ? load(u) : null));

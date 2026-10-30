@@ -13,6 +13,7 @@
     const wide = sp.w > sp.h, w = wide ? sp.h * len / sp.w : sp.w * len / sp.h, img = spare.find(n => n.dataset.src === sp.src && !n.isConnected) || new Image();
     spare.splice(spare.indexOf(img), spare.includes(img) ? 1 : 0); img.style.cssText = ""; img.dataset.src = sp.src;
     if (wide) { img.style.setProperty("--wide", "1"); }
+    img.crossOrigin = "anonymous"; // the moss layer reads the litter to pin the strands under it
     if (img.getAttribute("src") !== sp.src) img.src = sp.src; img.alt = ""; img.className = "litter " + cls; img.setAttribute("aria-hidden", "true");
     Object.assign(img.style, { width: w + "px", height: len + "px", left: (x - w / 2) + "px", top: (y - len / 2) + "px", transform: `rotate(${ang}deg)` });
     if (wide) { img.style.width = len + "px"; img.style.height = w + "px"; img.style.left = (x - len / 2) + "px"; img.style.top = (y - w / 2) + "px"; img.style.transform = `rotate(${ang + 90}deg)`; }
