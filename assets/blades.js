@@ -885,7 +885,7 @@
   function makeSway() {
     if (!MOSS || !FRONDS || !BARE || !SHADE || !SUN) return null;
     const cv = document.createElement("canvas"); cv.className = "sway-cv"; cv.setAttribute("aria-hidden", "true");
-    Object.assign(cv.style, { position: "absolute", pointerEvents: "none", display: "none" });
+    Object.assign(cv.style, { position: "absolute", left: "0", top: "0", pointerEvents: "none", display: "none" });
     const gl = cv.getContext("webgl", { premultipliedAlpha: true, alpha: true, antialias: false }); if (!gl) return null;
     const sh = (t, src) => { const o = gl.createShader(t); gl.shaderSource(o, src); gl.compileShader(o); return o; };
     const pr = gl.createProgram(); gl.attachShader(pr, sh(gl.VERTEX_SHADER, VS)); gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, FS)); gl.linkProgram(pr);
@@ -934,7 +934,7 @@
     if (SW.at === key) return; SW.at = key;
     const { cv, gl } = SW, cw = Math.round(W * sd), ch = Math.round(H * sd); SW.d = sd;
     if (cv.width !== cw || cv.height !== ch) { cv.width = cw; cv.height = ch; cv.style.width = W + "px"; cv.style.height = H + "px"; }
-    cv.style.left = x + "px"; cv.style.top = y + "px";
+    cv.style.transform = `translate(${x}px,${y}px)`; // a transform, not left/top: moving it by left/top counted as a layout shift on every scroll
     gl.uniform2f(SW.uP, PW, PH); gl.uniform2f(SW.uO, x, y); gl.uniform2f(SW.uF, FX(), FY()); gl.uniform2f(SW.uS, W, H); SW.x = x; SW.y = y;
   }
   function swayFrame() {
