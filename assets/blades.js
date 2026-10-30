@@ -774,7 +774,11 @@
   const h2 = (i, j) => { const s = Math.sin(i * 127.1 + j * 311.7) * 43758.5453; return s - Math.floor(s); };
   const gn = (x, y) => { x /= 420; y = (y - wdir * wind.ph * 40) / 420; const i = Math.floor(x), j = Math.floor(y), fx = x - i, fy = y - j, ux = fx * fx * (3 - 2 * fx), uy = fy * fy * (3 - 2 * fy);
     const a = h2(i, j), b = h2(i + 1, j), c = h2(i, j + 1), d = h2(i + 1, j + 1); return .35 + 1.3 * (a + (b - a) * ux + (c - a) * uy + (a - b - c + d) * ux * uy); };
-  const gust = (x, y) => { const q = wdir * (y * .0121 + x * .0035), u = (((wind.ph - q) / (2 * Math.PI)) % 1 + 1) % 1; return u < .48 ? wob(u / .48) * gn(x, y) : 0; };
+  // and no two gusts are alike (Ian): each crest gets its own strength (now and then hardly any) and sets off a little
+  // early or late, so the waves come irregularly. The moss shader works this out the same way.
+  const fr = v => v - Math.floor(v), cyc = (x, y) => (wind.ph - wdir * (y * .0121 + x * .0035)) / (2 * Math.PI);
+  const gust = (x, y) => { const c = cyc(x, y), k = Math.floor(c), h1 = fr(Math.sin(k * 12.9898) * 43758.5453), h2 = fr(Math.sin(k * 78.233) * 43758.5453),
+    u = fr(c) - h2 * .42, ga = h1 < .22 ? .12 : .45 + h1 * .9; return u > 0 && u < .48 ? wob(u / .48) * gn(x, y) * ga : 0; };
   addEventListener("scroll", () => {
     if (reduce()) return; const now = performance.now(), dy = scrollY - wind.y, dt = Math.max(8, now - (wind.ev || now - 16)); wind.y = scrollY;
     const v = dy / dt, a = Math.sign(v) * Math.min(1, Math.sqrt(Math.abs(v) / 3)); // px per ms, eased so a slow scroll still shows
@@ -910,8 +914,8 @@
       vec4 u=texture2D(U,cu);return mix(c,soft(c,u.rgb),u.a);}
     void main(){vec2 p=vec2(v.x,1.-v.y)*S;vec2 d=vec2(0.);
       for(int i=0;i<${MAXK};i++){if(float(i)>=NK)break;vec4 k=K[i];vec2 a=p-k.xy;float r=length(a)/${SR}.;if(r<1.){float f=1.-r,am=length(k.zw);vec2 m=k.zw/(am+.001),w=m+(a-m*dot(a,m))/${SR}.*1.5;d+=w/(length(w)+.001)*am*f*f*(3.-2.*f);}}
-      vec2 gp=O+p,sc=gp-V.xy;float u=fract((Wd.z-Wd.x*(gp.y*.0121+gp.x*.0035))/6.2831853),wd=Wd.x>0.?sc.y+sc.x*.2893:V.w-sc.y+(V.z-sc.x)*.2893;
-      float ew=(texture2D(E,vec2((max(wd,0.)/${WV}.*${WHZ}.+.5)/${WH}.,.5)).r*255.-128.)/127.;d.y+=Wd.y*ew*(u<.48?wb(u/.48)*gn(gp):0.);d*=1.-smoothstep(.05,.55,texture2D(L,gp/P).a);
+      vec2 gp=O+p,sc=gp-V.xy;float cy=(Wd.z-Wd.x*(gp.y*.0121+gp.x*.0035))/6.2831853,ck=floor(cy),hA=fract(sin(ck*12.9898)*43758.5453),hB=fract(sin(ck*78.233)*43758.5453),u=fract(cy)-hB*.42,ga=hA<.22?.12:.45+hA*.9,wd=Wd.x>0.?sc.y+sc.x*.2893:V.w-sc.y+(V.z-sc.x)*.2893;
+      float ew=(texture2D(E,vec2((max(wd,0.)/${WV}.*${WHZ}.+.5)/${WH}.,.5)).r*255.-128.)/127.;d.y+=Wd.y*ew*(u>0.&&u<.48?wb(u/.48)*gn(gp)*ga:0.);d*=1.-smoothstep(.05,.55,texture2D(L,gp/P).a);
       vec4 m0=texture2D(M,(O+F+p)/900.);float a=(m0.g-.5)*1.2,c=cos(a),s=sin(a);d=vec2(c*d.x-s*d.y,s*d.x+c*d.y)*(.45+.55*m0.g);
       vec2 sn=floor(d*R+.5)/R,q=p-sn,uq=(O+F+q)/900.,up=(O+F+p)/900.;float al=step(.001,length(sn)),mp=texture2D(M,up).r,mq=texture2D(M,uq).r;
       vec3 under=mix(texture2D(T,up).rgb,texture2D(B,up).rgb,clamp((mp-mq)/(1.001-mq),0.,1.));
