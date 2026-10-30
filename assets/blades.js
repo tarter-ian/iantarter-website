@@ -72,7 +72,15 @@
   const scene = () => document.querySelector(".x-i");
   // where this page lies on the forest floor (set in each page's head, so the light and moss run on from the last page)
   const FX = () => (window.__floor || {}).x || 0, FY = () => (window.__floor || {}).y || 0;
-  const pat = (ctx, img, px, py, size, ox = 0, oy = 0) => { const p = ctx.createPattern(img, "repeat"); p.setTransform(new DOMMatrix().translate(ox - px, oy - py).scale(size / img.width)); return p; };
+  // The ground's pictures are filled from canvas copies made once, not from the images themselves: every sprig is painted
+  // on its own small canvas, and filling from an image made the browser bring that image over to the graphics card again
+  // for each one (Ian's profile: most of a scroll went to that). Each copy is made at the size it's shown on screen,
+  // shrunk smoothly the way the browser shrinks the CSS ground, so filling from it pixel for pixel looks as before.
+  const copies = new Map(), copy = (img, size) => { const k = img.src + "@" + size; let c = copies.get(k); if (c) return c;
+    const w0 = img.naturalWidth || img.width, h0 = img.naturalHeight || img.height, w = Math.min(w0, Math.round(size * DPR)), h = Math.round(h0 * w / w0);
+    c = document.createElement("canvas"); c.width = w; c.height = h; const x = c.getContext("2d", RW); x.imageSmoothingQuality = "high"; x.drawImage(img, 0, 0, w, h);
+    copies.set(k, c); return c; };
+  const pat = (ctx, img, px, py, size, ox = 0, oy = 0) => { img = copy(img, size); const p = ctx.createPattern(img, "repeat"); p.setTransform(new DOMMatrix().translate(ox - px, oy - py).scale(size / img.width)); return p; };
   // fill a w x h box whose top-left sits at (px, py) in the scene with exactly what the ground looks like there (see dir-i.css)
   // with a base image, that image takes the moss's place and gets the same light, cut to its own shape
   function paintGround(ctx, px, py, w, h, base, bare) {
@@ -443,7 +451,7 @@
       if (!sun || !shade || !paper || gen !== bakeGen) return;
       const cv = document.createElement("canvas"); cv.width = Math.ceil(W * dpr); cv.height = Math.ceil(H * dpr);
       const x = cv.getContext("2d", RW); x.scale(dpr, dpr);
-      const tile = (img, size, px, py, mode) => { const pt = x.createPattern(img, "repeat"); pt.setTransform(new DOMMatrix().translate(px, py).scale(size / img.width));
+      const tile = (img, size, px, py, mode) => { img = copy(img, size); const pt = x.createPattern(img, "repeat"); pt.setTransform(new DOMMatrix().translate(px, py).scale(size / img.width));
         x.globalCompositeOperation = mode; x.fillStyle = pt; x.fillRect(0, 0, W, H); };
       const fill = (st, mode) => { x.globalCompositeOperation = mode; x.fillStyle = st; x.fillRect(0, 0, W, H); };
       // bottom up, as CSS stacks them: the colour, the paper, (cards: a pale wash and a sheen), then the light
