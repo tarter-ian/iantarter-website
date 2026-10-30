@@ -34,10 +34,9 @@
   requestAnimationFrame(() => { F.drawn = true; });
   // the ground's pictures start decoding now, at the top of the page, rather than once the page has been read
   F.groundP = Promise.all([...document.querySelectorAll('link[rel="preload"][as="image"]')].map(l => { const i = new Image(); i.src = l.href; return i.decode().catch(() => {}); }));
-  // the pan can go once the ground and the grass on screen are in
-  const ready = () => { if (F.ground && F.grass) { F.ready = true; F.go && requestAnimationFrame(() => F.go && F.go()); } };
+  // the pan goes as soon as the ground is in (Ian: no need to wait for the grass)
+  const ready = () => { if (F.ground) { F.ready = true; F.go && requestAnimationFrame(() => F.go && F.go()); } };
   F.groundP.then(() => { F.ground = true; ready(); });
-  addEventListener("scene-layout", () => { F.grass = true; ready(); }, { once: true });
   let back = false; const last = () => { try { return JSON.parse(sessionStorage.getItem("floor")); } catch (e) { return null; } };
   const lay = (s, top) => { if (!s) return; F.x = s.x + Math.sign(here - s.X) * innerWidth; F.y = s.y - top; };
   const set = () => { de.style.setProperty("--wx", F.x + "px"); de.style.setProperty("--wy", F.y + "px"); };
@@ -51,7 +50,7 @@
     if (!back) { const x = F.x, y = F.y; lay(last(), scrollY); if (x !== F.x || Math.abs(y - F.y) > .5) { set(); dispatchEvent(new Event("floor-moved")); } }
     save();
     const t = e.viewTransition, a = window.navigation && navigation.activation; if (!t) return;
-    // the pan waits (half a second at most) until this page's ground and grass are in, so it never slides in bare or hazy
+    // the pan waits (half a second at most) until this page's ground is in, so it never slides in bare or hazy
     F.panned = true;
     t.ready.then(() => { if (F.ready) return; const an = document.getAnimations().filter(n => n.effect && /view-transition/.test(n.effect.pseudoElement || ""));
       an.forEach(n => n.pause()); const go = () => { F.go = null; an.forEach(n => n.play()); }; F.go = go; setTimeout(go, 500); }).catch(() => {});
