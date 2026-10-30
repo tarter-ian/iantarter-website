@@ -33,6 +33,12 @@
   // carry straight across the seam while the view pans.
   const here = X(location.pathname), F = window.__floor = { x: 0, y: 0 }, de = document.documentElement;
   requestAnimationFrame(() => { F.drawn = true; });
+  // the ground's pictures start decoding now, at the top of the page, rather than once the page has been read
+  F.groundP = Promise.all([...document.querySelectorAll('link[rel="preload"][as="image"]')].map(l => { const i = new Image(); i.src = l.href; return i.decode().catch(() => {}); }));
+  // the pan can go once the ground and the grass on screen are in
+  const ready = () => { if (F.ground && F.grass) { F.ready = true; F.go && requestAnimationFrame(() => F.go && F.go()); } };
+  F.groundP.then(() => { F.ground = true; ready(); });
+  addEventListener("scene-layout", () => { F.grass = true; ready(); }, { once: true });
   let back = false; const last = () => { try { return JSON.parse(sessionStorage.getItem("floor")); } catch (e) { return null; } };
   const lay = (s, top) => { if (!s) return; F.x = s.x + Math.sign(here - s.X) * innerWidth; F.y = s.y - top; };
   const set = () => { de.style.setProperty("--wx", F.x + "px"); de.style.setProperty("--wy", F.y + "px"); };
@@ -120,9 +126,7 @@
 
 </div>
 <script>(() => { const done = () => document.documentElement.classList.add("ground-in");
-  Promise.all(["../../assets/tex/moss-quiet-2k.webp", "../../assets/tex/canopy-shade-L.webp", "../../assets/tex/canopy-sun-2.webp"].map(u => { const i = new Image(); i.src = u; return i.decode().catch(() => {}); })).then(() => { const F = window.__floor || {}; if (document.prerendering || !F.drawn || F.panned) { document.documentElement.classList.add("ground-now"); done(); } else requestAnimationFrame(done);
-    F.ground = true; if (F.grass) { F.ready = true; F.go && F.go(); } });
-  addEventListener("scene-layout", () => { const F = window.__floor || {}; F.grass = true; if (F.ground) { F.ready = true; requestAnimationFrame(() => F.go && F.go()); } }, { once: true });
+  window.__floor.groundP.then(() => { const F = window.__floor || {}; if (document.prerendering || !F.drawn || F.panned) { document.documentElement.classList.add("ground-now"); done(); } else requestAnimationFrame(done); });
   setTimeout(done, 5000); })();</script><script src="../../assets/blades.js?v=20261030a" defer></script><script src="../../assets/forest.js?v=20261029m" defer></script>
 </body>
 </html>
