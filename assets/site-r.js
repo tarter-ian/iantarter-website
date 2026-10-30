@@ -661,6 +661,7 @@
   // before settling flat. It's real 3D: the tile is its face plus a stack of thin slices below it, turned in perspective.
   // The tile (sides, face and baked shadow) stands in for the letter for good once it's made, even when flat, so a letter
   // is drawn the same way still as moving and nothing swaps when it starts or stops.
+  let inkCtx = null;
   function tileFor(c) {
     const k = c.width / parseFloat(c.style.width), w = parseFloat(c.style.width), h = parseFloat(c.style.height), D = Math.max(8, Math.round(parseFloat(c.style.height) * 0.08));
     const wrap = document.createElement("div"); wrap.className = "rock-tile"; wrap.setAttribute("aria-hidden", "true");
@@ -698,7 +699,8 @@
     Object.assign(top.style, { position: "absolute", left: 0, top: 0, width: w + "px", height: h + "px" }); wrap.appendChild(top);
     c.parentNode.insertBefore(sh, c); c.parentNode.insertBefore(hold, c); c.style.visibility = "hidden";
     // the ink's outline points, so the tile tips on the letter's real edge and not on the edge of its (padded) canvas
-    const ink = []; { const a = c.getContext("2d").getImageData(0, 0, c.width, c.height).data, st = Math.max(1, Math.round(k * 2));
+    const ink = []; { const rx = inkCtx || (inkCtx = document.createElement("canvas").getContext("2d", { willReadFrequently: true }));
+      rx.canvas.width = c.width; rx.canvas.height = c.height; rx.drawImage(c, 0, 0); const a = rx.getImageData(0, 0, c.width, c.height).data, st = Math.max(1, Math.round(k * 2));
       for (let y = 0; y < c.height; y += st) for (let x = 0; x < c.width; x += st) if (a[(y * c.width + x) * 4 + 3] > 128) ink.push([x / k - w / 2, y / k - h / 2]); }
     const R = c._rock = { wrap, top, shadow: R0, sh, sides, w, h, D, ink, ux: 1, uy: 0, lo: 0, hi: 0, th: 0, k: 0 }; lie(R); return R;
   }

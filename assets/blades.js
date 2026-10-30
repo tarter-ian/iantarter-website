@@ -150,10 +150,10 @@
     // the blades' shadows fall only on the piece (on the ground they'd show as dark smudges), and move with their blades
     if (!st.shape) { const el = st.el; st.shape = [el.offsetWidth, el.offsetHeight, parseFloat(getComputedStyle(el).borderTopLeftRadius) || 0]; }
     const [w, h, rad] = st.shape; sx.save(); sx.beginPath(); sx.roundRect ? sx.roundRect(0, 0, w, h, rad) : sx.rect(0, 0, w, h); sx.clip();
-    for (const g of st.blades) { if (!near(g)) continue; const P = pose(g); if (P) drawShadow(sx, g, g.x, g.y, P[0], P[1], P[2]); }
+    for (const g of st.blades) { if (g.gpu || !near(g)) continue; const P = pose(g); if (P) drawShadow(sx, g, g.x, g.y, P[0], P[1], P[2]); }
     sx.restore();
     // a bending blade is drawn right here in its own strip, so it stays under whatever lies on top of its piece
-    for (const g of st.blades) { if (!near(g)) continue; const P = pose(g); if (P) drawBlade(ctx, g, g.x, g.y, P[0], P[1], P[2]); }
+    for (const g of st.blades) { if (g.gpu || !near(g)) continue; const P = pose(g); if (P) drawBlade(ctx, g, g.x, g.y, P[0], P[1], P[2]); }
     // the piece's own shadow doesn't fall on them: they lean up over its edge, above it
     for (const c of cxs) c.restore();
   }
@@ -526,11 +526,93 @@
       const k = Math.floor(g.fx / CELL) + "," + Math.floor(g.fy / CELL); (grid.get(k) || grid.set(k, []).get(k)).push(g);
     }
     probes.forEach(p => p.remove());
+    if (GL) GL.index();
     // DOM blades (the name's) keep their own animation
     domBlades = [...document.querySelectorAll(".blade")].map(b => { const r = b.getBoundingClientRect(), a = parseFloat((b.style.transform.match(/-?[\d.]+/) || [0])[0]) * Math.PI / 180;
       return { b, x: r.left + r.width / 2 + scrollX, y: r.top + r.height / 2 + scrollY, dx: Math.sin(a), dy: -Math.cos(a) }; });
   }
   let domBlades = [];
+  // ---------- The bending sprigs on the GPU ----------
+  // A sprig the cursor bends is lifted out of its strip and drawn in one WebGL layer over the page until it is still again,
+  // so brushing never repaints the strips frame after frame (Ian: still a bit laggy). Every piece is also drawn into the
+  // layer's depth (not its colour), ranked by how the page stacks them, so a piece lying on top still hides the sprigs of
+  // the pieces under it; a sprig's shadow is cut to its own piece's rounded shape, as in the strips. For now behind ?gpu.
+  const GL = /[?&]gpu\b/.test(location.search) && matchMedia("(hover: hover)").matches ? makeGL() : null;
+  function makeGL() {
+    const cv = document.createElement("canvas"); cv.className = "sprig-gl"; cv.setAttribute("aria-hidden", "true");
+    Object.assign(cv.style, { position: "fixed", left: 0, top: 0, width: "100vw", height: "100vh", pointerEvents: "none", zIndex: 40 });
+    const gl = cv.getContext("webgl", { premultipliedAlpha: true, alpha: true, antialias: false, depth: true }); if (!gl) return null;
+    const VSs = `attribute vec2 p;attribute vec2 uv;attribute vec2 lc;attribute vec4 pc;attribute float z;uniform vec2 vs;varying vec2 v,l;varying vec4 c;
+      void main(){v=uv;l=lc;c=pc;gl_Position=vec4(p.x/vs.x*2.-1.,1.-p.y/vs.y*2.,z,1.);}`;
+    const FSs = `precision mediump float;varying vec2 v,l;varying vec4 c;uniform sampler2D A;uniform float occ;
+      void main(){if(occ>.5){gl_FragColor=vec4(0.);return;}
+      if(c.w>.5){vec2 q=abs(l-c.xy*.5)-(c.xy*.5-vec2(c.z));if(length(max(q,0.))+min(max(q.x,q.y),0.)>c.z)discard;}
+      gl_FragColor=texture2D(A,v);}`;
+    const sh = (t, src) => { const o = gl.createShader(t); gl.shaderSource(o, src); gl.compileShader(o); return o; };
+    const pr = gl.createProgram(); gl.attachShader(pr, sh(gl.VERTEX_SHADER, VSs)); gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, FSs)); gl.linkProgram(pr);
+    if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) { console.warn("sprig layer:", gl.getProgramInfoLog(pr)); return null; } gl.useProgram(pr);
+    const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf); const ST = 10 * 4;
+    [["p", 2, 0], ["uv", 2, 8], ["lc", 2, 16], ["pc", 4, 24]].forEach(([n, k, o]) => { const a = gl.getAttribLocation(pr, n); gl.enableVertexAttribArray(a); gl.vertexAttribPointer(a, k, gl.FLOAT, false, ST + 4, o); });
+    { const a = gl.getAttribLocation(pr, "z"); gl.enableVertexAttribArray(a); gl.vertexAttribPointer(a, 1, gl.FLOAT, false, ST + 4, ST); }
+    const uVs = gl.getUniformLocation(pr, "vs"), uOcc = gl.getUniformLocation(pr, "occ");
+    // one atlas for every lifted sprig's picture and its shadow, filled shelf by shelf as sprigs are first bent
+    const AW = 2048, tex = gl.createTexture(); gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, AW, AW, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+    for (const [k, v] of [[gl.TEXTURE_MIN_FILTER, gl.LINEAR], [gl.TEXTURE_MAG_FILTER, gl.LINEAR], [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]]) gl.texParameteri(gl.TEXTURE_2D, k, v);
+    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+    let sx = 0, sy = 0, sh2 = 0, slots = new Map();
+    const slot = c => { let s = slots.get(c); if (s) return s; const w = c.width + 2, h = c.height + 2;
+      if (sx + w > AW) { sx = 0; sy += sh2; sh2 = 0; } if (sy + h > AW) { sx = sy = sh2 = 0; slots = new Map(); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, AW, AW, 0, gl.RGBA, gl.UNSIGNED_BYTE, null); }
+      gl.texSubImage2D(gl.TEXTURE_2D, 0, sx + 1, sy + 1, gl.RGBA, gl.UNSIGNED_BYTE, c);
+      s = [(sx + 1) / AW, (sy + 1) / AW, (sx + 1 + c.width) / AW, (sy + 1 + c.height) / AW]; slots.set(c, s); sx += w; sh2 = Math.max(sh2, h); return s; };
+    gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA); gl.enable(gl.DEPTH_TEST); gl.depthFunc(gl.LESS);
+    let pieces = [], shown = false; document.body.appendChild(cv);
+    // each piece's map from its own coordinates to the page (three probe points), and its place in the stacking
+    function index() {
+      const els = new Set([...strips].map(st => st.el)); document.querySelectorAll(".x-i .card, .x-i .lay, .x-i .hand a").forEach(e => els.add(e));
+      const order = [...document.querySelectorAll("*")], at = new Map(order.map((e, i) => [e, i]));
+      const zk = e => { const k = []; for (let n = e; n && !n.classList.contains("x-i"); n = n.parentElement) { const z = parseInt(getComputedStyle(n).zIndex); k.unshift(isNaN(z) ? 0 : z); } return k; };
+      const cmp = (a, b) => { const ka = a._zk, kb = b._zk; for (let i = 0; i < Math.max(ka.length, kb.length); i++) { const d = (ka[i] || 0) - (kb[i] || 0); if (d) return d; } return at.get(a) - at.get(b); };
+      pieces = [...els].filter(e => e.offsetWidth);
+      for (const e of pieces) { e._zk = zk(e);
+        const ps = [[0, 0], [100, 0], [0, 100]].map(([x, y]) => { const q = document.createElement("i"); q.style.cssText = `position:absolute;left:${x}px;top:${y}px;width:0;height:0`; e.appendChild(q); return q; });
+        const [a, b, c] = ps.map(q => q.getBoundingClientRect()); ps.forEach(q => q.remove());
+        e._M = [(b.left - a.left) / 100, (b.top - a.top) / 100, (c.left - a.left) / 100, (c.top - a.top) / 100, a.left + scrollX, a.top + scrollY];
+        e._sh = [e.offsetWidth, e.offsetHeight, parseFloat(getComputedStyle(e).borderTopLeftRadius) || 0]; }
+      pieces.sort(cmp); pieces.forEach((e, i) => e._rank = i);
+    }
+    const Z = r => 1 - (r + 1) / (pieces.length + 3);
+    function draw(list) {
+      const W = innerWidth, H = innerHeight, D = Math.min(2, devicePixelRatio || 1);
+      if (!list.length) { if (shown) { gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT); shown = false; } return; }
+      if (cv.width !== Math.round(W * D) || cv.height !== Math.round(H * D)) { cv.width = Math.round(W * D); cv.height = Math.round(H * D); }
+      gl.viewport(0, 0, cv.width, cv.height); gl.uniform2f(uVs, W, H); gl.clearColor(0, 0, 0, 0); gl.clearDepth(1); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+      const v = [], ox = scrollX, oy = scrollY;
+      const vert = (M, x, y, u, w, pc, z) => v.push(M[0] * x + M[2] * y + M[4] - ox, M[1] * x + M[3] * y + M[5] - oy, u, w, x, y, pc[0], pc[1], pc[2], pc[3], z);
+      const quad = (M, c, uvs, pc, z) => { const [a, b, cc, d] = c, [u0, v0, u1, v1] = uvs;
+        for (const [q, u, w] of [[a, u0, v0], [b, u1, v0], [d, u0, v1], [b, u1, v0], [cc, u1, v1], [d, u0, v1]]) vert(M, q[0], q[1], u, w, pc, z); };
+      // the pieces on top, into the depth only
+      for (const e of pieces) { const [w, h] = e._sh; quad(e._M, [[0, 0], [w, 0], [w, h], [0, h]], [0, 0, 0, 0], [0, 0, 0, 0], Z(e._rank)); }
+      // the open word grid sits over everything
+      const open = document.querySelector(".s-egg-pop:not([hidden])");
+      if (open && open.offsetWidth) { const b = open.getBoundingClientRect();
+        quad([1, 0, 0, 1, b.left + ox, b.top + oy], [[0, 0], [b.width, 0], [b.width, b.height], [0, b.height]], [0, 0, 0, 0], [0, 0, 0, 0], Z(pieces.length + 1)); }
+      const n0 = v.length;
+      // the sprigs' shadows (cut to their piece), then the sprigs, each turned about its foot exactly as in its strip
+      const corners = (g, x, y, a, l, t, r, b, sk) => { const c = Math.cos(a), s = Math.sin(a);
+        return [[l, t], [r, t], [r, b], [l, b]].map(([px, py]) => { let X = x + px * c - py * s, Y = y + px * s + py * c; if (sk) Y += Math.tan(sk[0] * Math.PI / 180) * (X - g.st.x0 - sk[1]); return [X, Y]; }); };
+      for (const g of list) { const e = g.st.el, a = (g.ang + g.bend) * Math.PI / 180, sk = g.st.skew;
+        quad(e._M, corners(g, g.x + .6, g.y + 1.6, a, -g.w / 2 - SP, -g.len - SP, g.w / 2 + SP, SP, sk), slot(softShadow(g)), [...e._sh, 1], Z(e._rank + .5)); }
+      for (const g of list) { const e = g.st.el, a = (g.ang + g.bend) * Math.PI / 180, sk = g.st.skew;
+        quad(e._M, corners(g, g.x, g.y, a, -g.w / 2, -g.len, g.w / 2, 0, sk), slot(bladeImage(g)), [0, 0, 0, 0], Z(e._rank + .5)); }
+      gl.bindBuffer(gl.ARRAY_BUFFER, buf); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(v), gl.STREAM_DRAW);
+      const per = 11;
+      gl.colorMask(false, false, false, false); gl.depthMask(true); gl.uniform1f(uOcc, 1); gl.drawArrays(gl.TRIANGLES, 0, n0 / per);
+      gl.colorMask(true, true, true, true); gl.depthMask(false); gl.uniform1f(uOcc, 0); gl.drawArrays(gl.TRIANGLES, n0 / per, (v.length - n0) / per);
+      shown = true;
+    }
+    return { index, draw };
+  }
   const active = new Set();
   // wobble: out to amt, then eased back to rest
   const KEYS = [[0, 0], [.2, 1], [1, 0]]; // out, then eases back to rest with no swing past it (Ian: ease back is best)
@@ -543,7 +625,7 @@
     const c0 = g.moving ? g.bend || 0 : 0;
     g.prev = g.moving ? { t0: g.t0, dur: g.dur, amt: g.amt, c0: g.c0 || 0, prev: null } : null; g.c0 = c0;
     g.moving = true; g.t0 = now; g.dur = 900 + Math.random() * 300; g.amt = amt; g.bt = now; g.bend = g.bend || 0;
-    if (!active.has(g)) { active.add(g); if (g.st) { thaw(g.st); paintStrip(g.st); } }
+    if (!active.has(g)) { active.add(g); if (GL && g.st && g.st.el._M) { g.gpu = g.enter = true; } else if (g.st) { thaw(g.st); paintStrip(g.st); } }
     if (!frame.raf) frame.raf = requestAnimationFrame(frame);
   }
   function frame() {
@@ -553,10 +635,11 @@
       const t = (now - g.t0) / g.dur;
       if (t < 0) { if (g.prev) { g.bend = bendAt(g.prev, now); dirt(g); } continue; } // a gust that hasn't reached this blade yet
       if (g.prev) { g.c0 = g.bend || 0; g.prev = null; } // it starts from where the old swing has got to
-      if (t >= 1) { active.delete(g); g.moving = false; g.bend = 0; if (g.st) touched.add(g.st); dirt(g); continue; }
-      g.bend = bendAt(g, now); dirt(g);
+      if (t >= 1) { active.delete(g); g.moving = false; g.bend = 0; if (g.gpu) { g.gpu = false; dirt(g); continue; } if (g.st) touched.add(g.st); dirt(g); continue; }
+      g.bend = bendAt(g, now); if (g.gpu) { if (g.enter) { g.enter = false; thaw(g.st); dirt(g); } } else dirt(g);
     }
     live.forEach((gs, st) => paintStrip(st, gs));
+    if (GL) GL.draw([...active].filter(g => g.gpu));
     // a strip goes back to being an image once its blades have been still for a moment (not on every settle, so brushing back
     // and forth doesn't keep re-encoding it)
     touched.forEach(st => { clearTimeout(st.ft);
@@ -624,8 +707,8 @@
       const on = !calm && seen[i];
       if (on) { if (!windSt.has(st)) { windSt.add(st); const ox = (st.edge === "left" ? 0 : wd[i]) - st.x0;
           for (const q of pair(st)) for (const n of [q.img, q.cv]) n.style.transformOrigin = `${ox}px 50%`; }
-        const r = rs[i], ex = r.left + (st.edge === "left" ? 0 : r.width), ey = r.top + st.y0 + st.H / DPR / 2, k = (st.edge === "left" ? 1 : -1) * envAt(ex, ey) * 12 * gust(r.left + (st.edge === "left" ? 0 : r.width) + scrollX - sr.x, r.top + st.y0 + st.H / DPR / 2 + scrollY - sr.y), tf = `skewY(${k.toFixed(2)}deg)`; for (const q of pair(st)) q.img.style.transform = q.cv.style.transform = tf; }
-      else if (windSt.has(st)) { windSt.delete(st); for (const q of pair(st)) q.img.style.transform = q.cv.style.transform = ""; } }
+        const r = rs[i], ex = r.left + (st.edge === "left" ? 0 : r.width), ey = r.top + st.y0 + st.H / DPR / 2, k = (st.edge === "left" ? 1 : -1) * envAt(ex, ey) * 12 * gust(r.left + (st.edge === "left" ? 0 : r.width) + scrollX - sr.x, r.top + st.y0 + st.H / DPR / 2 + scrollY - sr.y), tf = `skewY(${k.toFixed(2)}deg)`; st.skew = [+k.toFixed(2), (st.edge === "left" ? 0 : wd[i]) || st.skew && st.skew[1] || 0]; for (const q of pair(st)) q.img.style.transform = q.cv.style.transform = tf; }
+      else if (windSt.has(st)) { windSt.delete(st); st.skew = null; for (const q of pair(st)) q.img.style.transform = q.cv.style.transform = ""; } }
     if (SW && !swayFrame.raf) swayFrame.raf = requestAnimationFrame(swayFrame);
     wind.raf = calm ? 0 : requestAnimationFrame(windFrame);
   }
