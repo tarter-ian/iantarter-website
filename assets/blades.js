@@ -362,8 +362,9 @@
       const nx = (by - ay) / seg, ny = -(bx - ax) / seg; // outward, for an outline running clockwise on screen
       for (run += seg; run > 13; run -= 13) {
         const t = 1 - (run - 13) / seg, x0 = ax + (bx - ax) * t, y0 = ay + (by - ay) * t;
-        const clump = rnd() < .45, len = (clump ? 30 + rnd() * 22 : 26 + rnd() * 26) * K(), sp = pick(rnd() < .3 ? moss : clump ? clumps : blades);
-        const jit = (rnd() - .5) * 70, intrude = 5 + rnd() * 10, out = len * Math.abs(Math.cos(jit * Math.PI / 180)) - intrude;
+        const clump = rnd() < .45, len = (clump ? 24 + rnd() * 18 : 20 + rnd() * 22) * K(), sp = pick(rnd() < .3 ? moss : clump ? clumps : blades);
+        // they grow round its foot and lean against its sides, their tips just reaching the edge, never over its top (Ian)
+        const jit = (rnd() - .5) * 70, intrude = -2 + rnd() * 5, out = len * Math.abs(Math.cos(jit * Math.PI / 180)) - intrude;
         const x = x0 + nx * out, y = y0 + ny * out, sw = sp.w * len / sp.h, ang = Math.atan2(-nx, ny) * 180 / Math.PI + jit;
         const edge = Math.abs(nx) > Math.abs(ny) ? (nx < 0 ? "r2" : "r3") : (ny < 0 ? "r0" : "r1");
         list.push({ el, edge, sp, x, y, w: sw, len, ang, px: ox + x - sw / 2, py: oy + y - len });
@@ -789,16 +790,44 @@
   // the clearing at the bottom has a rock; sitting on it lets a breeze run through the grass, rising and falling slowly,
   // until you get up (the rock again, Esc, or scrolling away)
   const breeze = t => { t /= 1000; return .62 + .2 * Math.sin(t * .37) + .12 * Math.sin(t * 1.13 + 1.7); };
+  // and while you sit you can hear it: soft noise, made here rather than downloaded, that swells as each gust crosses the
+  // window and settles between them. It only starts from the click on the rock (browsers only allow sound after one).
+  let hum = null;
+  function hear(on) {
+    if (on && !hum) { try { const ac = new (window.AudioContext || window.webkitAudioContext)(), n = ac.sampleRate * 3, buf = ac.createBuffer(1, n, ac.sampleRate), d = buf.getChannelData(0);
+      let b0 = 0, b1 = 0, b2 = 0; for (let i = 0; i < n; i++) { const w = Math.random() * 2 - 1; b0 = .997 * b0 + w * .03; b1 = .985 * b1 + w * .06; b2 = .95 * b2 + w * .12; d[i] = (b0 + b1 + b2) * .5; } // pinkish
+      for (let i = 0; i < 2000; i++) { const k = i / 2000; d[i] = d[i] * k + d[n - 2000 + i] * (1 - k); } // loops without a click
+      const src = ac.createBufferSource(); src.buffer = buf; src.loop = true;
+      const f = ac.createBiquadFilter(); f.type = "bandpass"; f.frequency.value = 500; f.Q.value = .6;
+      const g = ac.createGain(); g.gain.value = 0; src.connect(f).connect(g).connect(ac.destination); src.start();
+      hum = { ac, f, g }; } catch (e) { return; } }
+    if (!hum) return;
+    if (on) hum.ac.resume(); else { hum.g.gain.setTargetAtTime(0, hum.ac.currentTime, .5); }
+  }
+  // how much gust is passing through the window now, 0 to about 1 (sampled on a grid across it)
+  function gustNow() {
+    const sr = sceneRect(); let t = 0;
+    for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++) { const x = innerWidth * (i + .5) / 3, y = innerHeight * (j + .5) / 3;
+      t += Math.abs(envAt(x, y)) * gust(x + scrollX - sr.x, y + scrollY - sr.y); }
+    return t / 9;
+  }
   function sit(on) {
     const rock = document.querySelector(".i-rock"); if (!rock || !!wind.sit === on) return;
-    wind.sit = on; rock.setAttribute("aria-pressed", on); rock.setAttribute("aria-label", on ? "Stand up" : "Sit on the rock"); document.documentElement.classList.toggle("sitting", on);
+    wind.sit = on; sit.hold(on); if (!reduce()) hear(on); rock.setAttribute("aria-pressed", on); rock.setAttribute("aria-label", on ? "Stand up" : "Sit on the rock"); document.documentElement.classList.toggle("sitting", on);
     if (on) { rock.closest(".i-field").scrollIntoView({ behavior: reduce() ? "auto" : "smooth", block: "end" }); sit.t = performance.now(); }
     if (on && !reduce() && !wind.raf) { wind.t = performance.now(); wrec.length = 0; wrec.push([wind.t - 7000, 0]); wind.raf = requestAnimationFrame(windFrame); }
   }
   addEventListener("click", e => { if (e.target.closest(".i-rock")) sit(!wind.sit); });
   addEventListener("keydown", e => { if (e.key === "Escape") sit(false); });
-  // getting up by scrolling: once the walk to the rock has settled, leaving the clearing stands you up
-  addEventListener("scroll", () => { if (!wind.sit || performance.now() - sit.t < 1500) return;
+  // sitting holds the page still (Ian): once you're settled on the rock, trying to scroll doesn't move the page, it just
+  // stands you up, and from then on scrolling works as usual. (The page's own glide down to the rock isn't stopped.)
+  // (the listeners that can hold the page are only there while you sit: on all the time they'd slow every scroll)
+  const seated = () => wind.sit && performance.now() - sit.t > 1200;
+  const hold = e => { if (!seated()) return; e.preventDefault(); sit(false); };
+  const holdKey = e => { if (["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End", " "].includes(e.key)) hold(e); };
+  sit.hold = on => { const f = on ? addEventListener : removeEventListener;
+    f("wheel", hold, { passive: false }); f("touchmove", hold, { passive: false }); f("keydown", holdKey); };
+  addEventListener("scroll", () => { if (!seated()) return; // a scrollbar drag can't be held back, so it stands you up too
     const r = document.querySelector(".i-rock").getBoundingClientRect(), c = (r.top + r.bottom) / 2; if (c < 0 || c > innerHeight) sit(false); }, { passive: true });
   function windFrame() {
     const now = performance.now(), dt = Math.min(.034, (now - wind.t) / 1000); wind.t = now;
@@ -824,6 +853,7 @@
       windW = 0; wind.raf = requestAnimationFrame(windFrame); return;
     }
     wind.hush = false;
+    if (hum && wind.sit) { const g = Math.min(1.2, gustNow()), t = hum.ac.currentTime; hum.g.gain.setTargetAtTime(.012 + .16 * g, t, .25); hum.f.frequency.setTargetAtTime(380 + 700 * g, t, .3); }
     // the sprigs along a piece's sides lie across the wind, so they lean with the gust passing them: their strip is skewed
     // about the line their roots are on (a transform only, nothing is repainted); sprigs along the top and bottom point
     // along the wind and hardly bend
