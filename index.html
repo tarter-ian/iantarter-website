@@ -37,21 +37,23 @@
   // the pan goes as soon as the ground is in (Ian: no need to wait for the grass)
   const ready = () => { if (F.ground) { F.ready = true; F.go && requestAnimationFrame(() => F.go && F.go()); } };
   F.groundP.then(() => { F.ground = true; ready(); });
-  let back = false; const last = () => { try { return JSON.parse(sessionStorage.getItem("floor")); } catch (e) { return null; } };
+  const last = () => { try { return JSON.parse(sessionStorage.getItem("floor")); } catch (e) { return null; } };
   const lay = (s, top) => { if (!s) return; F.x = s.x + Math.sign(here - s.X) * de.clientWidth; /* the page's own width, without a scrollbar, as the pan moves it */ F.y = s.y - top; };
   const set = () => { de.style.setProperty("--wx", F.x + "px"); de.style.setProperty("--wy", F.y + "px"); };
   lay(last(), 0); set();
   let q = 0; const save = () => { clearTimeout(q); q = 0; try { sessionStorage.setItem("floor", JSON.stringify({ X: here, x: F.x, y: F.y + scrollY })); } catch (e) {} };
   addEventListener("scroll", () => { if (!q) q = setTimeout(save, 120); }, { passive: true });
   addEventListener("pageswap", save);
-  addEventListener("pageshow", e => { back = e.persisted; });
   addEventListener("pagereveal", e => {
-    // (a page kept from before, coming back, keeps where it lay: moving its light now would show)
-    if (!back) { const x = F.x, y = F.y; lay(last(), scrollY); if (x !== F.x || Math.abs(y - F.y) > .5) { set(); dispatchEvent(new Event("floor-moved")); } }
+    // where the view will be once it lands: a link to #work lands on that section even if the browser hasn't scrolled yet
+    let top = scrollY; const tg = location.hash.length > 1 && document.getElementById(decodeURIComponent(location.hash.slice(1)));
+    if (tg) top = Math.max(0, Math.min(de.scrollHeight - innerHeight, tg.getBoundingClientRect().top + scrollY - (parseFloat(getComputedStyle(tg).scrollMarginTop) || 0)));
+    // (a page coming back from the back button moves too: its light is drawn from these numbers, so it is right from the first frame)
+    { const x = F.x, y = F.y; lay(last(), top); if (x !== F.x || Math.abs(y - F.y) > .5) { set(); dispatchEvent(new Event("floor-moved")); } }
     save();
     const t = e.viewTransition, a = window.navigation && navigation.activation; if (!t) return;
     // the pan waits (half a second at most) until this page's ground is in, so it never slides in bare or hazy
-    F.panned = true;
+    F.panned = true; F.panDone = t.finished.catch(() => {});
     { const m = document.createElement("div"); m.style.cssText = "position:absolute;top:-200px;width:100px;height:100px;overflow:scroll"; de.append(m);
       de.style.setProperty("--sbw", (m.offsetWidth - m.clientWidth) + "px"); m.remove(); }
     t.ready.then(() => { if (F.ready) return; const an = document.getAnimations().filter(n => n.effect && /view-transition/.test(n.effect.pseudoElement || ""));
@@ -116,4 +118,4 @@
   document.querySelectorAll(".card, .hand a").forEach(el => { const r = el.getBoundingClientRect();
     el.style.setProperty("--ox", (r.left + r.width / 2 - el.offsetWidth / 2 - R.left) + "px"); el.style.setProperty("--oy", (r.top + r.height / 2 - el.offsetHeight / 2 - R.top) + "px"); }); })();</script><script>(() => { const done = () => document.documentElement.classList.add("ground-in");
   window.__floor.groundP.then(() => { const F = window.__floor || {}; if (document.prerendering || !F.drawn || F.panned) { document.documentElement.classList.add("ground-now"); done(); } else requestAnimationFrame(done); });
-  setTimeout(done, 5000); })();</script><script src="assets/site-r.js?v=20261029h" defer></script><script src="assets/blades.js?v=20261030e" defer></script><script src="assets/forest.js?v=20261030e" defer></script></body></html>
+  setTimeout(done, 5000); })();</script><script src="assets/site-r.js?v=20261029h" defer></script><script src="assets/blades.js?v=20261030g" defer></script><script src="assets/forest.js?v=20261030e" defer></script></body></html>

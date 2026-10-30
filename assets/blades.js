@@ -471,7 +471,9 @@
     const r = a * Math.PI / 180, dx = Math.sin(r), dy = -Math.cos(r), L = Math.abs(w * dx) + Math.abs(h * dy), cx = bx + w / 2, cy = by + h / 2;
     return x.createLinearGradient(cx - dx * L / 2, cy - dy * L / 2, cx + dx * L / 2, cy + dy * L / 2);
   }
-  addEventListener("scene-layout", () => later(() => setTimeout(bakeLight, 300)));
+  // (baked while the grass is still coming in: the baked ground is a level or two off the CSS one, and once the page had
+  // settled that swap showed as the moss flicking, Ian's "flips to the image")
+  addEventListener("scene-layout", () => setTimeout(bakeLight, 300));
   let sizes = "";
   function relayout() {
     const now = [...document.querySelectorAll(".x-i, .lay")].map(e => e.offsetWidth + "x" + e.offsetHeight).join() + innerWidth;
@@ -481,10 +483,18 @@
   // while the window is being resized the grass is redone every tenth of a second, so it keeps fitting its pieces
   // the page learnt where it lies only as it was shown (it was scrolled since it was laid out ahead): the grass and the
   // light are redone in place, the old grass staying up until the new is painted
-  addEventListener("floor-moved", () => { sizes = ""; relayout(); });
+  // the baked pictures of the light are dropped at once (the CSS underneath draws the same light from the new numbers,
+  // so the pan shows it right away) and baked again later
+  addEventListener("floor-moved", () => { bakeGen++;
+    for (const el of [scene(), ...document.querySelectorAll(".x-i .card, .x-i .hand a")]) { if (!el._bakeKey && !el._lightUrl) continue; el._bakeKey = null;
+      for (const k of ["backgroundImage", "backgroundSize", "backgroundPosition", "backgroundRepeat", "backgroundBlendMode", "backgroundOrigin"]) el.style[k] = ""; }
+    sizes = ""; relayout(); });
   let rt = 0; const ro = new ResizeObserver(() => { if (!rt) rt = setTimeout(() => { rt = 0; relayout(); }, 100); });
   ro.observe(scene()); document.querySelectorAll(".lay").forEach(el => ro.observe(el));
-  // laid out now rather than on the observer's first call, which a page built ahead of a click doesn't get until it's shown
+  // laid out now rather than on the observer's first call, which a page built ahead of a click doesn't get until it's shown;
+  // but if the page is sliding in, the slide gets the page to itself and the grass grows once it has landed (Ian: the pan
+  // was jittery). A page built ahead of time was laid out before its slide, so it arrives with its grass.
+  if (window.__floor && window.__floor.panDone) await window.__floor.panDone;
   relayout();
 
   // ---------- The cursor brushes through the grass ----------
