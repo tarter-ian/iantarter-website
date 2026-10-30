@@ -808,7 +808,11 @@
       const low = ac.createBufferSource(); low.buffer = lb; low.loop = true;
       const lf = ac.createBiquadFilter(); lf.type = "lowpass"; lf.frequency.value = 140; lf.Q.value = .5;
       const lg = ac.createGain(); lg.gain.value = 0; low.connect(lf).connect(lg).connect(vol); low.start();
-      hum = { ac, f, g, lf, lg, vol }; } catch (e) { return; } }
+      // and the grass under the cursor: a brighter rustle, only while the cursor is brushing it
+      const rs = ac.createBufferSource(); rs.buffer = buf; rs.loop = true; rs.playbackRate.value = 1.7;
+      const rf = ac.createBiquadFilter(); rf.type = "bandpass"; rf.frequency.value = 2600; rf.Q.value = .8;
+      const rg = ac.createGain(); rg.gain.value = 0; rs.connect(rf).connect(rg).connect(vol); rs.start(ac.currentTime + 1.1);
+      hum = { ac, f, g, lf, lg, vol, rf, rg }; } catch (e) { return; } }
     if (!hum) return;
     // it eases in over several seconds as you settle (Ian), and out as you get up
     const v = hum.vol.gain, t = hum.ac.currentTime; v.cancelScheduledValues(t); v.setValueAtTime(v.value, t);
@@ -909,6 +913,9 @@
     const prev = last; last = p; if (!prev || p.t - prev.t > 120) return;
     const dt = Math.max(8, p.t - prev.t), vx = (p.x - prev.x) / dt, vy = (p.y - prev.y) / dt, sp = Math.hypot(vx, vy);
     if (sp < .05) return;
+    if (hum && wind.sit) { const k = Math.min(1, sp / 2.5), t = hum.ac.currentTime; // a faster sweep is louder and a little brighter
+      const rg = hum.rg.gain; if (rg.cancelAndHoldAtTime) rg.cancelAndHoldAtTime(t); else { rg.cancelScheduledValues(t); rg.setValueAtTime(rg.value, t); }
+      rg.setTargetAtTime(.025 + .09 * k, t, .03); rg.setTargetAtTime(0, t + .07, .14); hum.rf.frequency.setTargetAtTime(2200 + 1600 * k, t, .05); }
     sway(p, vx, vy, sp, p.t);
     const now = p.t, cx = Math.floor(p.x / CELL), cy = Math.floor(p.y / CELL);
     for (let i = -1; i <= 1; i++) for (let j = -1; j <= 1; j++) for (const g of grid.get((cx + i) + "," + (cy + j)) || []) {
