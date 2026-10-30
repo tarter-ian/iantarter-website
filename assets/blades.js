@@ -376,8 +376,8 @@
       if (cut) { // the edge's shadow layers go in front of its first sprig layer, in order
         const first = shadowsFirst.get(edge); if (first) el.insertBefore(timg, first); else el.appendChild(timg); }
       el.appendChild(img); if (cut && !shadowsFirst.has(edge)) shadowsFirst.set(edge, img);
-      const st = { el, edge, cv, img, ctx: cv.getContext("2d"), x0, y0, blades: bl, W: cv.width, H: cv.height }; bl.forEach(g => g.st = st);
-      if (cut) st.twin = { cv: tcv, img: timg, ctx: tcv.getContext("2d") };
+      const st = { el, edge, cv, img, ctx: cv.getContext("2d", STRIP), x0, y0, blades: bl, W: cv.width, H: cv.height }; bl.forEach(g => g.st = st);
+      if (cut) st.twin = { cv: tcv, img: timg, ctx: tcv.getContext("2d", STRIP) };
       // the fresh canvas shows at once (a relayout swaps old grass for new in the same frame) and hands over to its image
       strips.add(st); if (grow(st)) continue;
       // grass out of view is painted a little at a time once the visible grass is done
@@ -537,7 +537,10 @@
   // so brushing never repaints the strips frame after frame (Ian: still a bit laggy). Every piece is also drawn into the
   // layer's depth (not its colour), ranked by how the page stacks them, so a piece lying on top still hides the sprigs of
   // the pieces under it; a sprig's shadow is cut to its own piece's rounded shape, as in the strips. For now behind ?gpu.
-  const GL = /[?&]gpu\b/.test(location.search) && matchMedia("(hover: hover)").matches ? makeGL() : null;
+  // the strips are never read back, so their canvases can live on the graphics card, where brushing repaints them without
+  // copying every changed frame up from memory (?cpu keeps them in memory, as before, to compare)
+  const STRIP = /[?&]cpu\b/.test(location.search) ? { willReadFrequently: true } : undefined;
+  const GL = /[?&]gpulayer\b/.test(location.search) && matchMedia("(hover: hover)").matches ? makeGL() : null;
   function makeGL() {
     const cv = document.createElement("canvas"); cv.className = "sprig-gl"; cv.setAttribute("aria-hidden", "true");
     Object.assign(cv.style, { position: "fixed", left: 0, top: 0, width: "100vw", height: "100vh", pointerEvents: "none", zIndex: 40 });
