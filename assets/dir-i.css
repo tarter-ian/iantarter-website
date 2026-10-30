@@ -556,3 +556,5 @@ html:active-view-transition-type(pan-left)::view-transition-new(root) { animatio
   mask-size: 100% 100%, 1600px; mask-repeat: no-repeat, repeat; mask-composite: intersect; -webkit-mask-composite: source-in;
   mask-position: 0 0, -180px calc(-120px - var(--ph, 0px) + max(240vh, 1700px) + 60vh); -webkit-mask-size: 100% 100%, 1600px; -webkit-mask-repeat: no-repeat, repeat;
   -webkit-mask-position: 0 0, -180px calc(-120px - var(--ph, 0px) + max(240vh, 1700px) + 60vh); }
+/* on the narrowest phones the longest link (linkedin.com/in/ian-tarter) would reach the card's edge on one line */
+@container (max-width: 262px) { .x-i .card .c-links a { font-size: 13.5px; } }

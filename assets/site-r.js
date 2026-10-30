@@ -71,7 +71,7 @@
   // per letter: turn (degrees), sideways and up/down nudge (in font sizes), at scatter 1
   const SCATTER = [[-4, 0, .03], [3, .01, -.05], [-2, -.01, .06], [5, .015, -.02], [-3, 0, .05], [2, .01, -.06], [-5, -.015, .04], [3, .01, -.03], [-2, 0, .05]];
   const pref = (k, d) => { let v = d; try { const s = localStorage.getItem(k); if (s != null) v = +s; } catch (e) {} return isFinite(v) ? v : d; };
-  const scatterAmt = () => pref("it-scatter", 1), spreadAmt = () => pref("it-spread2", 1.75);
+  const scatterAmt = () => pref("it-scatter", .75), spreadAmt = () => pref("it-spread2", 1.75);
   async function fillHollow(el, color, altColor) {
     if (!el) return;
     const gen = (fillGen.get(el) || 0) + 1; fillGen.set(el, gen);

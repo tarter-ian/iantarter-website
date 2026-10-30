@@ -905,7 +905,7 @@
     // side lean forward and out, more outward the further they are from the path (a V-shaped wake). Strongest close in,
     // fading out smoothly toward the edge of its reach
     const f = 1 - d / R, s = sp || 1, ux = vx / s, uy = vy / s, al = (x - p.x) * ux + (y - p.y) * uy,
-      px = ux + (x - p.x - ux * al) / R * 1.5, py = uy + (y - p.y - uy * al) / R * 1.5, cross = dx * py - dy * px, amt = Math.min(30, (10 + sp * 12) * f * f * (3 - 2 * f)) * Math.sign(cross || 1);
+      px = ux + (x - p.x - ux * al) / R * 1.5, py = uy + (y - p.y - uy * al) / R * 1.5, cross = dx * py - dy * px, amt = Math.min(45, (11 + sp * 18) * f * f * (3 - 2 * f)) * Math.sign(cross || 1);
     return Math.abs(amt) < 1 ? 0 : amt;
   };
   function brush() {
