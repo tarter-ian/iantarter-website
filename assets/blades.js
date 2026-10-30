@@ -23,6 +23,9 @@
   // the letters' pixels are read through one reusable canvas kept on the CPU (reading the letters' own canvases made the
   // browser warn, and pull each one back from the GPU)
   let pxc = null;
+  // the strips are never read back, so their canvases can live on the graphics card, where brushing repaints them without
+  // copying every changed frame up from memory (?cpu keeps them in memory, as before, to compare)
+  const STRIP = /[?&]cpu\b/.test(location.search) ? { willReadFrequently: true } : undefined;
   const readPx = (cv, W, H) => { if (!pxc) pxc = document.createElement("canvas").getContext("2d", { willReadFrequently: true });
     if (pxc.canvas.width < W) pxc.canvas.width = W; if (pxc.canvas.height < H) pxc.canvas.height = H;
     pxc.clearRect(0, 0, W, H); pxc.drawImage(cv, 0, 0); return pxc.getImageData(0, 0, W, H).data; };
@@ -537,9 +540,6 @@
   // so brushing never repaints the strips frame after frame (Ian: still a bit laggy). Every piece is also drawn into the
   // layer's depth (not its colour), ranked by how the page stacks them, so a piece lying on top still hides the sprigs of
   // the pieces under it; a sprig's shadow is cut to its own piece's rounded shape, as in the strips. For now behind ?gpu.
-  // the strips are never read back, so their canvases can live on the graphics card, where brushing repaints them without
-  // copying every changed frame up from memory (?cpu keeps them in memory, as before, to compare)
-  const STRIP = /[?&]cpu\b/.test(location.search) ? { willReadFrequently: true } : undefined;
   const GL = /[?&]gpulayer\b/.test(location.search) && matchMedia("(hover: hover)").matches ? makeGL() : null;
   function makeGL() {
     const cv = document.createElement("canvas"); cv.className = "sprig-gl"; cv.setAttribute("aria-hidden", "true");
