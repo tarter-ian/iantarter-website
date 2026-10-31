@@ -178,6 +178,7 @@
   // a strip grows as a live canvas: every sprig rises from its own root, scaling up whole (not squashed), each a little
   // after the last; the sprigs' shadows on the card come in with them. Then it turns back into an image as usual.
   const GROW = 950, growing = new Set();
+  const PHONE = matchMedia("(hover: none)").matches;
   // work nobody sees right away (the cursor's map of the blades, the baked light, the stirrable moss) waits until the grass
   // has grown in, so it doesn't hold up the grass's first frames (Ian: "they take quite a bit of time to load")
   let settled = false; const waiting = new Set();
@@ -238,6 +239,14 @@
     if (at[k] === "wait") { st.wait = true; prepare(st); seen.observe(st.el); return true; }
     const t0 = at[k], dur = GROW + 500; if (now > t0 + dur) return false;
     if (still()) { for (const s of pair(st)) s.img.animate && s.img.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 500, delay: t0 - now, fill: "backwards" }); return false; }
+    // on a phone each strip grows as one piece, up from the edge it's rooted on: every sprig growing as its own little
+    // picture put up hundreds of them at once while scrolling, and iPhones ran out of memory and closed the page (Ian)
+    if (PHONE) { const el = st.el, ax = { top: [0, 1], bottom: [el.offsetHeight, 1], left: [0, 0], right: [el.offsetWidth, 0] }[k];
+      for (const s of pair(st)) { if (!s.img.animate) continue; const o = { duration: GROW, delay: Math.max(0, t0 - now), fill: "backwards" };
+        if (ax) { s.img.style.transformOrigin = ax[1] ? `50% ${ax[0] - st.y0}px` : `${ax[0] - st.x0}px 50%`; const sc = ax[1] ? "scale(1, .12)" : "scale(.12, 1)";
+          s.img.animate([{ transform: sc }, { transform: "none" }], { ...o, easing: "cubic-bezier(.33, 1, .68, 1)" }); }
+        s.img.animate([{ opacity: 0 }, { opacity: 1 }], { ...o, duration: ax ? GROW / 4 : 500 }); }
+      return false; }
     st.gr = { t0, dur };
     st.blades.forEach((g, i) => { g.gd = ((i * 2654435761) % 1000) / 1000 * 120; });
     // a redress mid-growth carries straight on
@@ -1089,3 +1098,14 @@
   // the name's blades arrive a little later (they wait for its canvas), so index once more after they do
   addEventListener("name-dressed", () => setTimeout(index, 50));
 })();
+// On a phone, leaving a page frees what it drew: the browser keeps the last page in memory for the back button, and the
+// homepage's grass plus the next page's together were more than an iPhone allows, so it closed the page while Ian
+// scrolled the case study. Coming back to a freed page reloads it.
+if (matchMedia("(hover: none)").matches) {
+  addEventListener("pagehide", () => {
+    for (const c of document.querySelectorAll("canvas")) { const gl = c.classList.contains("sway-cv") && c.getContext("webgl"); const lose = gl && gl.getExtension("WEBGL_lose_context"); if (lose) lose.loseContext(); c.width = c.height = 0; }
+    for (const i of document.querySelectorAll("img")) if (i.src.startsWith("blob:")) { URL.revokeObjectURL(i.src); i.removeAttribute("src"); }
+    window.__freed = true;
+  });
+  addEventListener("pageshow", e => { if (e.persisted && window.__freed) location.reload(); });
+}
