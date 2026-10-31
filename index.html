@@ -12,14 +12,14 @@
 <meta property="og:url" content="https://iantarter.com/">
 <meta property="og:image" content="https://iantarter.com/assets/img/headshot.jpg">
 <meta name="theme-color" content="#3b4a2a">
-<link rel="icon" href="/favicon.ico" sizes="32x32">
-<link rel="icon" href="assets/img/favicon.svg?v=2" type="image/svg+xml">
-<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+<link rel="icon" href="/favicon.ico?v=3" sizes="32x32">
+<link rel="icon" href="assets/img/favicon.png?v=3" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png?v=3">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..800&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&family=Rampart+One&display=swap">
 <link rel="stylesheet" href="assets/site.css?v=20261013u">
-<link rel="stylesheet" href="assets/dir-i.css?v=20261031a">
+<link rel="stylesheet" href="assets/dir-i.css?v=20261031d">
 <!-- the ground fetched first, so it is usually there for the first frame -->
 <link rel="preload" as="image" href="assets/tex/moss-quiet-2k.webp" fetchpriority="high">
 <link rel="preload" as="image" href="assets/tex/canopy-shade-L.webp" fetchpriority="high">
@@ -43,7 +43,12 @@
   lay(last(), 0); set();
   let q = 0; const save = () => { clearTimeout(q); q = 0; try { sessionStorage.setItem("floor", JSON.stringify({ X: here, x: F.x, y: F.y + scrollY })); } catch (e) {} };
   addEventListener("scroll", () => { if (!q) q = setTimeout(save, 120); }, { passive: true });
-  addEventListener("pageswap", save);
+  // the menu cards are tucked under the top edge of the view, not lying on the floor, so they stay where they are while the
+  // floor slides by (Ian: their jump felt out of place). Only when they're in view on both sides; otherwise the page
+  // just slides as one.
+  const nav = () => document.querySelector(".i-nav"), navIn = () => { const n = nav(); return n && n.getBoundingClientRect().bottom > 0; };
+  addEventListener("pageswap", e => { save(); const on = !!e.viewTransition && navIn(); if (on) nav().style.viewTransitionName = "nav";
+    try { sessionStorage.setItem("navvt", on ? "1" : ""); } catch (er) {} });
   addEventListener("pagereveal", e => {
     // where the view will be once it lands: a link to #work lands on that section even if the browser hasn't scrolled yet
     let top = scrollY; const tg = location.hash.length > 1 && document.getElementById(decodeURIComponent(location.hash.slice(1)));
@@ -52,12 +57,19 @@
     { const x = F.x, y = F.y; lay(last(), top); if (x !== F.x || Math.abs(y - F.y) > .5) { set(); dispatchEvent(new Event("floor-moved")); } }
     save();
     const t = e.viewTransition, a = window.navigation && navigation.activation; if (!t) return;
+    let was = false; try { was = !!sessionStorage.getItem("navvt"); } catch (er) {}
+    if (nav()) { nav().style.viewTransitionName = was && top < 80 ? "nav" : ""; const off = () => { if (nav()) nav().style.viewTransitionName = ""; }; t.finished.then(off, off); setTimeout(off, 3000); }
     // the pan waits (half a second at most) until this page's ground is in, so it never slides in bare or hazy
     F.panned = true; F.panDone = t.finished.catch(() => {});
     { const m = document.createElement("div"); m.style.cssText = "position:absolute;top:-200px;width:100px;height:100px;overflow:scroll"; de.append(m);
       de.style.setProperty("--sbw", (m.offsetWidth - m.clientWidth) + "px"); m.remove(); }
-    t.ready.then(() => { if (F.ready) return; const an = document.getAnimations().filter(n => n.effect && /view-transition/.test(n.effect.pseudoElement || ""));
-      an.forEach(n => n.pause()); const go = () => { F.go = null; an.forEach(n => n.play()); }; F.go = go; setTimeout(go, 500); }).catch(() => {});
+    // and until its first, heavy frames are drawn: sliding while they were drawn made the pan stutter (Ian). It sets off once
+    // two frames in a row come quickly, at most 0.6s after the click.
+    t.ready.then(() => { const an = document.getAnimations().filter(n => n.effect && /view-transition/.test(n.effect.pseudoElement || ""));
+      an.forEach(n => n.pause()); let done = false, calm = 0, prev = performance.now();
+      const go = () => { if (done) return; done = true; an.forEach(n => n.play()); };
+      const tick = now => { calm = now - prev < 34 ? calm + 1 : 0; prev = now; if (F.ready && calm >= 2) go(); else if (!done) requestAnimationFrame(tick); };
+      requestAnimationFrame(tick); setTimeout(go, 600); }).catch(() => {});
     const d = a && a.from && a.entry ? X(new URL(a.entry.url).pathname) - X(new URL(a.from.url).pathname) : 0;
     if (!d) t.skipTransition(); else t.types.add(d > 0 ? "pan-right" : "pan-left"); });
 })();</script>
@@ -120,4 +132,4 @@
   document.querySelectorAll(".card, .hand a").forEach(el => { const r = el.getBoundingClientRect();
     el.style.setProperty("--ox", (r.left + r.width / 2 - el.offsetWidth / 2 - R.left) + "px"); el.style.setProperty("--oy", (r.top + r.height / 2 - el.offsetHeight / 2 - R.top) + "px"); }); })();</script><script>(() => { const done = () => document.documentElement.classList.add("ground-in");
   window.__floor.groundP.then(() => { const F = window.__floor || {}; if (document.prerendering || !F.drawn || F.panned) { document.documentElement.classList.add("ground-now"); done(); } else requestAnimationFrame(done); });
-  setTimeout(done, 5000); })();</script><script src="assets/site-r.js?v=20261031a" defer></script><script src="assets/blades.js?v=20261031b" defer></script><script src="assets/forest.js?v=20261030f" defer></script></body></html>
+  setTimeout(done, 5000); })();</script><script src="assets/site-r.js?v=20261031a" defer></script><script src="assets/blades.js?v=20261031e" defer></script><script src="assets/forest.js?v=20261031a" defer></script></body></html>

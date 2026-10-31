@@ -546,6 +546,7 @@ html:active-view-transition-type(pan-left)::view-transition-new(root) { animatio
 .i-rock { position: absolute; left: 50%; bottom: 25vh; width: min(205px, 36vw); transform: translate(-50%, 50%) rotate(-6deg); /* its middle three quarters of the way down the last screen */ padding: 0; border: 0; background: none; cursor: pointer; z-index: 3; }
 .rock-img { display: block; width: 100%; height: auto; filter: drop-shadow(2px 3px 2px rgba(8,10,0,.5)) drop-shadow(10px 16px 16px rgba(8,10,0,.38)); }
 .i-rock:focus-visible { outline: 2px solid var(--accent); outline-offset: 6px; border-radius: 40%; }
+/* (the gold is cut to the canopy gaps where this page lies on the floor: --wx/--wy, as for the daylight) */
 /* at sunset the low sun is warm and dim and the sky is blue: the moss in shade is lit only by the sky, so it goes darker
    and cooler, and the patches the sun still reaches turn gold. So one layer cools and dims everything, and a second, cut
    to the same canopy gaps as the daylight, brings the sun back warm, both fading in down the clearing */
@@ -554,7 +555,9 @@ html:active-view-transition-type(pan-left)::view-transition-new(root) { animatio
 .x-i > .i-glow { mix-blend-mode: color-dodge; background: rgb(128,86,18);
   -webkit-mask-image: linear-gradient(transparent 5%, rgba(0,0,0,.6) 50%, #000 90%), url("tex/dusk-sun.webp"); mask-image: linear-gradient(transparent 5%, rgba(0,0,0,.6) 50%, #000 90%), url("tex/dusk-sun.webp");
   mask-size: 100% 100%, 1600px; mask-repeat: no-repeat, repeat; mask-composite: intersect; -webkit-mask-composite: source-in;
-  mask-position: 0 0, -180px calc(-120px - var(--ph, 0px) + max(240vh, 1700px) + 60vh); -webkit-mask-size: 100% 100%, 1600px; -webkit-mask-repeat: no-repeat, repeat;
-  -webkit-mask-position: 0 0, -180px calc(-120px - var(--ph, 0px) + max(240vh, 1700px) + 60vh); }
+  mask-position: 0 0, calc(-180px - var(--wx, 0px)) calc(-120px - var(--wy, 0px) - var(--ph, 0px) + max(240vh, 1700px) + 60vh); -webkit-mask-size: 100% 100%, 1600px; -webkit-mask-repeat: no-repeat, repeat;
+  -webkit-mask-position: 0 0, calc(-180px - var(--wx, 0px)) calc(-120px - var(--wy, 0px) - var(--ph, 0px) + max(240vh, 1700px) + 60vh); }
 /* on the narrowest phones the longest link (linkedin.com/in/ian-tarter) would reach the card's edge on one line */
 @container (max-width: 262px) { .x-i .card .c-links a { font-size: 13.5px; } }
+@media (max-width: 700px) { .i-field { margin-bottom: -80px; } } /* the scene's bottom padding is smaller on phones */
+html.sitting, html.sitting body { touch-action: none; overscroll-behavior: none; } /* sitting, a finger on the moss combs it rather than moving the page */
