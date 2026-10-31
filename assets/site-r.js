@@ -938,7 +938,7 @@
     box.querySelector(".s-egg-pop").classList.toggle("done", n >= total); box.querySelector(".s-egg-again").hidden = n < total || reduceMotion(); chip.classList.toggle("done", n >= total && !finishing);
     if (finishing) {
       chip._doneT = setTimeout(() => { const e = chip.firstChild; clearTimeout(chip._badgeT); e.textContent = "🎉"; chip.classList.add("done"); e.classList.remove("pop"); void e.offsetWidth; e.classList.add("cheer"); }, 1400); }
-    box.querySelector(".s-egg-pop p").textContent = n >= total ? `You found all ${total} hidden words!` : `${n} of ${total} hidden words. Spin the letters of my name to spell more, or tap a dot for a hint.`;
+    box.querySelector(".s-egg-pop p").textContent = n >= total ? `You found all ${total} hidden words!` : `${n} of ${total} hidden words. Brush across the letters of my name to spell more, or tap a dot for a hint.`;
     const grid = box.querySelector(".s-egg-grid"); grid.textContent = "";
     // each word keeps its own square, shortest words first, then alphabetical, so hints and finds stay put
     for (const k of EGG_ORDER) { const li = document.createElement("li");
@@ -1013,7 +1013,7 @@
   // keyboard players: with the name focused (Tab to it, or click it), typing its letters spins them and spells words too.
   // Only while focused, so single-letter keys never fire elsewhere (WCAG 2.1.4, e.g. voice control dictating a sentence)
   let keyLast = -1;
-  nameEl.tabIndex = 0; nameEl.setAttribute("aria-description", "Type letters from the name to spin them");
+  nameEl.tabIndex = 0; nameEl.setAttribute("aria-description", "Type letters from the name to nudge them");
   // the underline marks keyboard focus only: someone who clicked or tapped the name never sees it, even if they then type
   // (browsers otherwise switch to the focus style as soon as a key is pressed)
   nameEl.addEventListener("pointerdown", () => nameEl.classList.add("by-pointer"));
