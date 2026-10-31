@@ -856,6 +856,9 @@
   }
   addEventListener("click", e => { if (e.target.closest(".i-rock")) sit(!wind.sit); });
   addEventListener("keydown", e => { if (e.key === "Escape") sit(false); });
+  // leaving for another tab (or another page) stands you up too, so the sound doesn't carry on unseen (Ian)
+  document.addEventListener("visibilitychange", () => { if (document.hidden) sit(false); });
+  addEventListener("pagehide", () => sit(false));
   // sitting holds the page still (Ian): once you're settled on the rock, trying to scroll doesn't move the page, it just
   // stands you up, and from then on scrolling works as usual. (The page's own glide down to the rock isn't stopped.)
   // (the listeners that can hold the page are only there while you sit: on all the time they'd slow every scroll)
