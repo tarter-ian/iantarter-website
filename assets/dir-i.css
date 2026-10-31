@@ -624,3 +624,7 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 .g-pitch .g-photo { margin-bottom: 26px; }
 .g-pitch .g-facts { gap: 20px 20px; margin: 4px 0 24px; }
 .g-pitch .g-facts dd { margin-top: 4px; }
+/* Daily Weather card in the facts layout: wallet fills the photo slot, lying on the card */
+.x-i .g1.g-pitch .art-dw { aspect-ratio: 3 / 2; height: auto; margin: 0 0 26px; display: flex; align-items: center; justify-content: center; }
+.x-i .g1.g-pitch .art-dw img.wallet { width: 104%; max-width: none; margin: 0 -2%; transform: rotate(-6deg); }
+.x-i .g-pitch .g-facts dd a { white-space: normal; }
