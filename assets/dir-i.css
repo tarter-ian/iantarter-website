@@ -585,3 +585,4 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 .g-sheet dl { margin: 0 0 10px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 12px; font-size: 13.5px; }
 .g-sheet dt { font-weight: 700; } .g-sheet dd { margin: 0; }
 .g-sheet a { font: 600 13.5px/1 var(--f-ui); }
+.g-sheet .g-wide { grid-column: 1 / -1; }
