@@ -65,7 +65,7 @@
   const load = src => new Promise(r => { const i = new Image(); i.crossOrigin = "anonymous"; i.onload = () => r(i); i.onerror = () => r(null); i.src = src; });
   // the strand maps only matter where a cursor can stir the moss, so touch screens skip downloading them
   const stir = matchMedia("(hover: hover)").matches;
-  const [MOSS, SHADE, SUN, FRONDS, BARE] = await Promise.all([ROOT + "assets/tex/moss-quiet-2k.webp", ROOT + "assets/tex/canopy-shade-L.webp", ROOT + "assets/tex/canopy-sun-2.webp", stir && ROOT + "assets/tex/moss-fronds.webp", stir && ROOT + "assets/tex/moss-bare.webp?v=2"].map(u => u ? load(u) : null));
+  let [MOSS, SHADE, SUN, FRONDS, BARE] = await Promise.all([ROOT + "assets/tex/moss-quiet-2k.webp", ROOT + "assets/tex/canopy-shade-L.webp", ROOT + "assets/tex/canopy-sun-2.webp", stir && ROOT + "assets/tex/moss-fronds.webp", stir && ROOT + "assets/tex/moss-bare.webp?v=2"].map(u => u ? load(u) : null));
   const imgs = new Map(); const sprite = sp => imgs.get(sp.src) || (imgs.set(sp.src, load(sp.src)), imgs.get(sp.src));
   await Promise.all(sprites.map(sprite)); for (const sp of sprites) sp.img = await sprite(sp);
   let PW = 1, PH = 1;
@@ -198,7 +198,11 @@
   // a page built ahead of a click (Chrome's prerender) draws no frames until it is shown, so its painting runs on timers
   const soon = f => document.prerendering ? setTimeout(f, 0) : requestAnimationFrame(f);
   function prepare(st, then) { st.ready = false; if (then) prep.push([st, 0, then]); else prep.unshift([st, 0]); /* growing grass first */ if (!prepare.raf) prepare.raf = soon(prepFrame); }
+  // while the view slides over from the last page nothing is painted or grown: the slide gets the frames to itself (Ian: the
+  // pan was jittery), and the grass carries on once it has landed
+  const panning = () => { const F = window.__floor; if (!F || !F.panDone) return false; if (!F.waitLand) { F.waitLand = true; F.panDone.then(() => { F.landed = true; }); } return !F.landed; };
   function prepFrame() {
+    if (panning()) { prepare.raf = setTimeout(() => { prepare.raf = soon(prepFrame); }, 120); return; }
     // until the grass starts growing nothing is moving, so the first paint-ahead takes bigger bites (at 5ms a frame the
     // sprigs took seconds to start; Ian: "they take quite a bit of time to load"). After that the growing is played by
     // the compositor, so only brushing needs the frames kept light (at 5ms a frame the grass further down the page was
@@ -240,6 +244,7 @@
     thaw(st); growing.add(st); if (now >= t0) st.ready = st.begun = true; else if (!st.ready) prepare(st); if (!growFrame.raf) growFrame.raf = requestAnimationFrame(growFrame); return true;
   }
   function growFrame() {
+    if (panning()) { lastFrame = null; growFrame.raf = setTimeout(() => { growFrame.raf = requestAnimationFrame(growFrame); }, 120); return; }
     growFrame.raf = 0; const now = tick();
     // while any strip due to start isn't painted yet, every strip that hasn't begun waits with it, so they all start together
     let held = false; for (const st of growing) if (!st.ready && now >= st.gr.t0) held = true;
@@ -539,8 +544,9 @@
   addEventListener("floor-moved", () => { bakeGen++;
     for (const el of [scene(), ...document.querySelectorAll(".x-i .card, .x-i .hand a")]) { if (!el._bakeKey && !el._lightUrl) continue; el._bakeKey = null;
       for (const k of ["backgroundImage", "backgroundSize", "backgroundPosition", "backgroundRepeat", "backgroundBlendMode", "backgroundOrigin"]) el.style[k] = ""; }
-    sizes = ""; relayout(); });
-  let rt = 0; const ro = new ResizeObserver(() => { if (!rt) rt = setTimeout(() => { rt = 0; relayout(); }, 100); });
+    // (the grass is redone once the pan has landed: redoing it mid-slide made the slide stutter)
+    sizes = ""; Promise.resolve(window.__floor && window.__floor.panDone).then(relayout); });
+  let rt = 0; const ro = new ResizeObserver(() => { if (!rt) rt = setTimeout(() => { Promise.resolve(window.__floor && window.__floor.panDone).then(() => { rt = 0; relayout(); }); }, 100); });
   ro.observe(scene()); document.querySelectorAll(".lay").forEach(el => ro.observe(el));
   // laid out now rather than on the observer's first call, which a page built ahead of a click doesn't get until it's shown;
   // but if the page is sliding in, the slide gets the page to itself and the grass grows once it has landed (Ian: the pan
@@ -825,8 +831,16 @@
       t += Math.abs(envAt(x, y)) * gust(x + scrollX - sr.x, y + scrollY - sr.y); }
     return t / 9;
   }
+  // on a touch screen the moss's strand maps aren't fetched up front (nothing stirs it there); sitting fetches them, so the
+  // waves can roll through the moss and a finger can comb it
+  async function wakeSway() {
+    if (SW || wakeSway.busy || reduce()) return; wakeSway.busy = true;
+    [FRONDS, BARE] = await Promise.all([ROOT + "assets/tex/moss-fronds.webp", ROOT + "assets/tex/moss-bare.webp?v=2"].map(load));
+    SW = makeSway(); if (SW) pinUnderLitter(); wakeSway.busy = false;
+  }
   function sit(on) {
     const rock = document.querySelector(".i-rock"); if (!rock || !!wind.sit === on) return;
+    if (on) wakeSway();
     wind.sit = on; sit.hold(on); if (!reduce()) hear(on); rock.setAttribute("aria-pressed", on); rock.setAttribute("aria-label", on ? "Stand up" : "Sit on the rock"); document.documentElement.classList.toggle("sitting", on);
     if (on) { rock.closest(".i-field").scrollIntoView({ behavior: reduce() ? "auto" : "smooth", block: "end" }); sit.t = performance.now(); }
     if (on && !reduce() && !wind.raf) { wind.t = performance.now(); wrec.length = 0; wrec.push([wind.t - 7000, 0]); wind.raf = requestAnimationFrame(windFrame); }
@@ -837,7 +851,7 @@
   // stands you up, and from then on scrolling works as usual. (The page's own glide down to the rock isn't stopped.)
   // (the listeners that can hold the page are only there while you sit: on all the time they'd slow every scroll)
   const seated = () => wind.sit && performance.now() - sit.t > 1200;
-  const hold = e => { if (!seated()) return; e.preventDefault(); sit(false); };
+  const hold = e => { if (!seated()) return; e.preventDefault(); if (e.type !== "touchmove") sit(false); }; // a finger dragging on a phone combs the grass instead (Ian); the rock stands you up
   const holdKey = e => { if (["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End", " "].includes(e.key)) hold(e); };
   sit.hold = on => { const f = on ? addEventListener : removeEventListener;
     f("wheel", hold, { passive: false }); f("touchmove", hold, { passive: false }); f("keydown", holdKey); };
@@ -889,7 +903,7 @@
   let last = null, queued = null;
   let mouseAt = null;
   addEventListener("pointermove", e => {
-    if (e.pointerType === "touch" || reduce()) { mouseAt = null; return; } mouseAt = [e.clientX, e.clientY];
+    if ((e.pointerType === "touch" && !wind.sit) || reduce()) { mouseAt = null; return; } mouseAt = [e.clientX, e.clientY];
     queued = { x: e.clientX + scrollX, y: e.clientY + scrollY, t: performance.now() };
     if (!brush.raf) brush.raf = requestAnimationFrame(brush);
   }, { passive: true });
