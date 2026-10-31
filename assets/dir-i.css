@@ -596,3 +596,22 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 .skip { font-family: "Plus Jakarta Sans", system-ui, sans-serif; }
 .x-i .c-intro { color: var(--ink); }
 .x-i .c-me { color: var(--ink); }
+
+/* ONE TYPE SCALE (Ian, 2026-10-31: keep the hierarchy simple). Six sizes, each with one job; the name keeps its own.
+   14 labels and small print · 17 body, links and buttons · 20 intro lines · 22 titles · 26 the hero line · 58 page titles */
+.x-i.x-i { --t14: 14px; --t17: 17px; --t20: 20px; --t22: 22px; --t26: 26px; --t58: 58px; }
+.x-i.x-i .c-type, .x-i.x-i .c-org, .x-i.x-i .meta, .x-i.x-i .s-case-meta, .x-i.x-i .c-links b, .x-i.x-i .s-form label,
+.x-i.x-i .s-case-facts dt, .x-i.x-i figcaption, .x-i.x-i .i-jobs .c-text { font-size: var(--t14); }
+.x-i.x-i .c-text, .x-i.x-i .s-body p, .x-i.x-i .s-skills dd, .x-i.x-i .s-skills dt, .x-i.x-i dl dd, .x-i.x-i dl dt,
+.x-i.x-i .s-form select, .x-i.x-i .s-form input, .x-i.x-i .s-form textarea, .x-i.x-i .s-btn, .x-i.x-i .hand a span,
+.x-i.x-i .cf a, .x-i.x-i .c-links a, .x-i.x-i .i-more, .x-i.x-i .i-more a, .x-i.x-i .s-quote cite a, .x-i.x-i .s-more { font-size: var(--t17); }
+.x-i.x-i .s-case-facts dt { font-size: var(--t14); }
+.x-i.x-i .s-case-facts dd { font-size: var(--t17); }
+.x-i.x-i .s-case-lede, .x-i.x-i .s-case-q, .x-i.x-i .i-jobs h3 { font-size: var(--t20); }
+.x-i.x-i .cf h3, .x-i.x-i .c-name, .x-i.x-i .s-label { font-size: var(--t22); }
+.x-i.x-i .i-jobs h3 { font-size: var(--t20); }
+.x-i.x-i .c-pitch, .x-i.x-i .art-birds .slip { font-size: var(--t26); }
+.x-i.x-i .s-case-title, .x-i.x-i .s-case-stats b { font-size: var(--t58); }
+.x-i.x-i .g-facts dt, .x-i.x-i .g-facts dd, .x-i.x-i .s-tldr dt { font-size: var(--t14); }
+.x-i.x-i .s-tldr dd { font-size: var(--t17); }
+@media (max-width: 700px) { .x-i.x-i .hand a span { font-size: 10px; } } /* the phone menu cards are too small for the scale: like the name, they keep their own size */
