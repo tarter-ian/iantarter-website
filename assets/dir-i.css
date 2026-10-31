@@ -586,3 +586,4 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 .g-sheet dt { font-weight: 700; } .g-sheet dd { margin: 0; }
 .g-sheet a { font: 600 13.5px/1 var(--f-ui); }
 .g-sheet .g-wide { grid-column: 1 / -1; }
+.g-pdf { margin: 12px 0 0; font: 600 14px/1.2 var(--f-ui); } .g-card .g-photo { margin: 0 0 12px; }
