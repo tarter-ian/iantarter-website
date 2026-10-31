@@ -799,8 +799,16 @@
   // and while you sit you can hear it: soft noise, made here rather than downloaded, that swells as each gust crosses the
   // window and settles between them. It only starts from the click on the rock (browsers only allow sound after one).
   let hum = null;
+  // a tenth of a second of silence as a WAV (8kHz, 8-bit), for the iPhone switch below
+  const SILENT = "data:audio/wav;base64," + btoa("RIFF" + String.fromCharCode(68, 3, 0, 0) + "WAVEfmt " + String.fromCharCode(16, 0, 0, 0, 1, 0, 1, 0, 64, 31, 0, 0, 64, 31, 0, 0, 1, 0, 8, 0) + "data" + String.fromCharCode(32, 3, 0, 0) + String.fromCharCode(128).repeat(800));
   function hear(on) {
-    if (on && !hum) { try { const ac = new (window.AudioContext || window.webkitAudioContext)(), n = ac.sampleRate * 3, buf = ac.createBuffer(1, n, ac.sampleRate), d = buf.getChannelData(0);
+    if (on && !hum) { try {
+      // an iPhone with its ring switch on silent mutes page sound unless the page says it's playing on purpose (Ian heard
+      // nothing on his phone): newer Safari takes that as an audio session type; older ones switch over once a looping
+      // (silent) <audio> element plays, which has to start inside the tap too
+      if (navigator.audioSession) try { navigator.audioSession.type = "playback"; } catch (e) {}
+      else if (/iP(hone|ad|od)|Macintosh/.test(navigator.userAgent) && "ontouchend" in document) { const el = new Audio(SILENT); el.loop = true; el.setAttribute("playsinline", ""); el.play().catch(() => {}); hear.el = el; }
+      const ac = new (window.AudioContext || window.webkitAudioContext)(), n = ac.sampleRate * 3, buf = ac.createBuffer(1, n, ac.sampleRate), d = buf.getChannelData(0);
       let b0 = 0, b1 = 0, b2 = 0; for (let i = 0; i < n; i++) { const w = Math.random() * 2 - 1; b0 = .997 * b0 + w * .03; b1 = .985 * b1 + w * .06; b2 = .95 * b2 + w * .12; d[i] = (b0 + b1 + b2) * .5; } // pinkish
       for (let i = 0; i < 2000; i++) { const k = i / 2000; d[i] = d[i] * k + d[n - 2000 + i] * (1 - k); } // loops without a click
       const src = ac.createBufferSource(); src.buffer = buf; src.loop = true;
@@ -822,6 +830,7 @@
     if (!hum) return;
     // it eases in over several seconds as you settle (Ian), and out as you get up
     const v = hum.vol.gain, t = hum.ac.currentTime; v.cancelScheduledValues(t); v.setValueAtTime(v.value, t);
+    if (hear.el) on ? hear.el.play().catch(() => {}) : hear.el.pause();
     if (on) { hum.ac.resume(); v.setTargetAtTime(1, t + .6, 2.2); } else v.setTargetAtTime(0, t, .5);
   }
   // how much gust is passing through the window now, 0 to about 1 (sampled on a grid across it)
