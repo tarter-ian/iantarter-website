@@ -572,19 +572,27 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 .c-pdf a { color: var(--accent, #b5371f); }
 .c-now { margin-top: 14px; }
 .s-tldr { margin-top: 54px; padding: 16px 18px 14px; background: rgba(255,250,236,.55); }
-.s-tldr-h { margin: 0 0 10px; font: 700 13px/1 var(--f-ui); letter-spacing: .08em; text-transform: uppercase; color: #5b5546; }
+.s-tldr-h { margin: 0 0 12px; }
 .s-tldr dl { margin: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
-.s-tldr dt { font: 700 14px/1.3 var(--f-ui); margin-bottom: 4px; }
-.s-tldr dd { margin: 0; font-size: 15px; line-height: 1.5; }
+.s-tldr dt { font-size: 14px; line-height: 1.4; color: var(--muted); margin-bottom: 4px; }
+.s-tldr dd { margin: 0; font-size: 17px; line-height: 1.5; }
 @media (max-width: 700px) { .s-tldr dl { grid-template-columns: minmax(0, 1fr); gap: 12px; } }
 .s-artifact { margin-block: 30px; }
 .s-artifact-box { aspect-ratio: 16 / 5; display: grid; place-items: center; background: repeating-linear-gradient(135deg, rgba(120,110,90,.08) 0 10px, rgba(120,110,90,.03) 10px 20px); border: 1px solid rgba(60,55,45,.18); }
-.s-artifact figcaption { margin-top: 8px; font: 14px/1.4 var(--f-ui); }
+.s-artifact figcaption { margin-top: 8px; font-size: 14px; line-height: 1.4; }
 .g-sheet { margin-top: 16px; padding: 12px; background: rgba(255,250,236,.5); }
-.g-photo { aspect-ratio: 3 / 2; display: grid; place-items: center; margin-bottom: 10px; background: repeating-linear-gradient(135deg, rgba(120,110,90,.08) 0 10px, rgba(120,110,90,.03) 10px 20px); border: 1px solid rgba(60,55,45,.18); font-size: 13px; }
+.g-photo { aspect-ratio: 3 / 2; display: grid; place-items: center; margin-bottom: 10px; background: repeating-linear-gradient(135deg, rgba(120,110,90,.08) 0 10px, rgba(120,110,90,.03) 10px 20px); border: 1px solid rgba(60,55,45,.18); font-size: 14px; }
 .g-sheet dl { margin: 0 0 10px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 12px; font-size: 13.5px; }
 .g-sheet dt { font-weight: 700; } .g-sheet dd { margin: 0; }
 .g-sheet a { font: 600 13.5px/1 var(--f-ui); }
 .g-sheet .g-wide { grid-column: 1 / -1; }
-.g-pdf { margin: 24px 0 0; font: 600 14px/1.2 var(--f-ui); } .g-card .g-photo { margin: 0 0 12px; }
-.g-facts { margin: 14px 0 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 14px; font-size: 13.5px; } .g-facts dt { font: 700 12.5px/1.3 var(--f-ui); color: #5b5546; } .g-facts dd { margin: 2px 0 0; }
+.g-pdf { margin: 24px 0 0; } .g-card .g-photo { margin: 0 0 12px; }
+.g-facts { margin: 14px 0 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 14px; font-size: 14px; line-height: 1.4; } .g-facts dt { color: var(--muted); } .g-facts dd { margin: 2px 0 0; }
+
+/* one set of text colours (Ian, 2026-10-31: keep the hierarchy simple): the older site tokens follow the diorama's ink,
+   muted and link colours, so there is one near-black, one grey and one red */
+.x-i { --s-text: var(--ink); --s-muted: var(--muted); --s-link: var(--link); }
+.x-i .i-label { color: var(--ink); }
+.skip { font-family: "Plus Jakarta Sans", system-ui, sans-serif; }
+.x-i .c-intro { color: var(--ink); }
+.x-i .c-me { color: var(--ink); }
