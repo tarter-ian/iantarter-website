@@ -615,3 +615,7 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 .x-i.x-i .g-facts dt, .x-i.x-i .g-facts dd, .x-i.x-i .s-tldr dt { font-size: var(--t14); }
 .x-i.x-i .s-tldr dd { font-size: var(--t17); }
 @media (max-width: 700px) { .x-i.x-i .hand a span { font-size: 10px; } } /* the phone menu cards are too small for the scale: like the name, they keep their own size */
+/* in-progress games read as a quick screen (Ian): name, photo, a 3x2 row of facts, then the one-line hook */
+.g-pitch h3 { margin: 0 0 12px; }
+.g-pitch .g-facts { grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 0 0 14px; }
+.g-pitch .cf > p { margin: 0; }
