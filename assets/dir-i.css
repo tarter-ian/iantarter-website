@@ -661,3 +661,12 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 .g-photo.mock, .s-artifact.mock, .g-facts > div:has(.ph) { display: none; }
 .g-facts.mock { outline: none; }
 .g-facts.mock::before { display: none; }
+/* Everything on the homepage centered (Ian, 2026-11-01) */
+@media (min-width: 701px) {
+  .x-i .i-about { margin-left: auto; margin-right: auto; justify-content: center; }
+  .x-i #about { margin-left: max(0px, calc((100% - 700px) / 2)); }
+  .x-i .i-skills { margin-left: 0; grid-template-columns: minmax(0,1fr); justify-items: center; }
+  .x-i #skills { margin-left: max(0px, calc((100% - var(--mm) * 152) / 2)); }
+  .x-i .i-more { max-width: 760px; margin-left: auto; margin-right: auto; }
+  .x-i .i-cases { translate: 10px 0; }
+}
