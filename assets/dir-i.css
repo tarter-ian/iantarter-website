@@ -654,3 +654,4 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
   .x-i.games-i .i-scene { max-width: calc(760px + 80px); }
   .x-i.games-i .c-head { max-width: none; }
 }
+.x-i .i-row.i-games { margin-top: 0; } /* the wallet no longer hangs over the top edge */
