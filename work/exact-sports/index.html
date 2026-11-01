@@ -3,14 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Measuring athletes with a phone · Ian Tarter</title>
+<title>Reimagining the Combine · Ian Tarter</title>
 <meta name="description" content="Case study: how field research with coaches shaped an iPhone app that measures athletes with AR and computer vision.">
 <link rel="canonical" href="https://iantarter.com/work/exact-sports/">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Measuring athletes with a phone · Ian Tarter">
+<meta property="og:title" content="Reimagining the Combine · Ian Tarter">
 <meta property="og:description" content="Case study: how field research with coaches shaped an iPhone app that measures athletes with AR and computer vision.">
 <meta property="og:url" content="https://iantarter.com/work/exact-sports/">
-<meta property="og:image" content="https://iantarter.com/assets/img/headshot.jpg">
+<meta property="og:image" content="https://iantarter.com/assets/img/og/og-exact-sports.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#3b4a2a">
 <link rel="icon" href="/favicon.ico?v=3" sizes="32x32">
 <link rel="icon" href="../../assets/img/favicon.png?v=3" type="image/png" sizes="192x192">
@@ -19,7 +22,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@300..800&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&family=Rampart+One&display=swap">
 <link rel="stylesheet" href="../../assets/site.css?v=20261013u">
-<link rel="stylesheet" href="../../assets/dir-i.css?v=20261031g">
+<link rel="stylesheet" href="../../assets/dir-i.css?v=20261101d">
 <link rel="stylesheet" href="../../assets/case-i.css?v=20261029m">
 <!-- the ground fetched first, so it is usually there for the first frame -->
 <link rel="preload" as="image" href="../../assets/tex/moss-quiet-2k.webp" fetchpriority="high">
@@ -78,22 +81,27 @@
 <body>
 <a class="skip" href="#main">Skip to content</a>
 <div class="site x-i case-i" id="site" data-hero="split" data-photo="square" data-nav="spread" data-brand="on" data-focus="on" data-labelpos="side" data-exp="timeline" data-contact="side" data-form="on" data-poly="on" data-links="underline" data-buttons="solid" data-texture="none" data-hover="lift" data-marks="on" data-dividers="none" data-labeldeco="none">
-<header class="i-nav"><nav class="hand" aria-label="Site"><a class="lay" href="../../#work" style="--i:0"><span>Work</span></a><a class="lay" href="../../#exp" style="--i:1"><span>Experience</span></a><a class="lay" href="../../#games" style="--i:2"><span>Games</span></a><a class="lay" href="../../#contact" style="--i:3"><span>Contact</span></a><a class="r lay" href="https://docs.google.com/document/d/1XuY_TyHXnFRND8e-d0cqOBNURvKf7TVkxwYfW7ypXXY/edit?usp=sharing" style="--i:4"><span>Resume</span></a></nav></header>
+<header class="i-nav"><nav class="hand" aria-label="Site"><a class="lay" href="../../#work" style="--i:0"><span>Work</span></a><a class="lay" href="../../#exp" style="--i:1"><span>Experience</span></a><a class="lay" href="../../#games" style="--i:2"><span>Games</span></a><a class="lay" href="../../#contact" style="--i:3"><span>Contact</span></a><a class="r lay" href="../../resume.pdf" style="--i:4"><span>Resume</span></a></nav></header>
 
 <main class="i-scene" id="main">
 <a class="i-label c-back" href="../../#work">All case studies</a>
 <article class="card lay c-doc" aria-labelledby="case-exact-title"><div class="cf">
   <div class="s-inner s-case-head">
     <p class="s-case-meta">EXACT Sports, Summer 2026</p>
-    <h1 class="s-case-title" id="case-exact-title">Measuring athletes with a phone</h1>
-    <p class="s-case-lede">I designed and built an iPhone app that lets coaches measure athletes with the phone's camera at combines, the testing events where high school athletes run, jump and lift for college&nbsp;recruiters.</p>
+    <h1 class="s-case-title" id="case-exact-title">Reimagining the Combine</h1>
+    <p class="s-case-lede">I researched, designed, and built an iPhone app that automates the combine.</p>
     <dl class="s-case-facts">
       <div><dt>Role</dt><dd>UX Engineer Intern</dd></div>
       <div><dt>Methods</dt><dd>Field observation, coach interviews, user testing</dd></div>
       <div><dt>Built with</dt><dd>Swift, SwiftUI, ARKit, Apple Vision</dd></div>
-      <div><dt>Status</dt><dd>In development, Android version underway</dd></div>
+      <div><dt>Status</dt><dd>Set to release by EXACT Sports in iOS and Android</dd></div>
     </dl>
   </div>
+  <div class="s-inner s-tldr">
+    <h2 class="s-label s-tldr-h">TL;DR</h2>
+    <dl><div><dt>The question</dt><dd>Can we improve the way that combines are run over manually writing each athlete's results?</dd></div><div><dt>What I did</dt><dd>Watched a combine, talked with coaches, then designed and built the beta version of the iPhone app.</dd></div><div><dt>What came out of it</dt><dd>An app that uses speech recognition and computer vision to self-measure and run various stations at a combine.</dd></div></dl>
+  </div>
+
 
   <figure class="s-inner s-shots s-shots-hero">
     <div class="s-shot-row">
@@ -101,32 +109,37 @@
       <img src="../../assets/img/exact-capture-push-ups.webp" alt="Push-up camera screen with corner brackets framing the athlete" width="720" height="1565">
       <img src="../../assets/img/exact-capture-40-yard-dash.webp" alt="40-yard dash camera screen with a dashed lane showing the run's path" width="720" height="1565">
     </div>
-    <figcaption>Each camera screen shows the coach where to put the athlete. The gym is a placeholder image; the interface is the app's own.</figcaption>
+    <figcaption>While recording, the app analyzes the body position to calculate measurements.</figcaption>
   </figure>
 
   <div class="s-case-stats s-inner">
-    <div><b>40</b><span>stations, each with a manual-entry fallback</span></div>
-    <div><b>6</b><span>stations the phone measures by itself</span></div>
-    <div><b>200+</b><span>of the app's 233 code commits are mine</span></div>
+    <div><b>40</b><span>stations integrated into the app</span></div>
+    <div><b>6</b><span>stations which I made fully autonomous</span></div>
+    <div><b>200+</b><span>commits added to the GitHub repo</span></div>
   </div>
 
   <section class="s-section">
     <div class="s-inner">
       <h2 class="s-label">The problem</h2>
       <div class="s-body">
-        <p>Coaches ran combines with pen and paper. At most events, one coach did nothing but write down numbers instead of coaching.</p>
-        <p>The paper sheets then went to EXACT, where staff transcribed and typed every result. Each handoff cost time and added another chance for an error.</p>
-        <p class="s-case-q">Could a phone take the measurements and record them, so coaches could coach and the data arrived clean?</p>
+        <p>Traditionally, coaches use pen and paper to track combines. Combines are events where athletes do different tests to evaluate their physical skill, like a 40-meter dash, a vertical jump, or long jump. At combines, it's typical to have one coach's job solely be writing numbers down.</p>
+        <p>The paper sheets then went to EXACT, where staff transcribed and typed every result. This has a huge amount of friction for both EXACT and the coaches: it forced dull, repetitive transcription work, forces coaches to transport the data, and frequently, coaches forgot to pass this essential data on.</p>
+        <p class="s-case-q">Is there a better way where coaches are free to coach, and data arrives already digitized?</p>
       </div>
     </div>
   </section>
+
+  <figure class="s-inner s-artifact mock" data-mock="Placeholder: a real artifact goes here">
+    <div class="s-artifact-box"><span class="ph">[Artifact image]</span></div>
+    <figcaption><span class="ph">[Suggestion: Station notes from the Wisconsin combine, or the written spec every screen was held to]</span></figcaption>
+  </figure>
 
   <section class="s-section">
     <div class="s-inner">
       <h2 class="s-label">Research</h2>
       <div class="s-body">
         <p>I went to an EXACT combine in Wisconsin. I watched how each station ran, took notes on where time and accuracy slipped, and talked with coaches about their frustrations and about the idea of an app doing the measuring.</p>
-        <p>Apple's AR tools turned out to have real limits. The front and back cameras can do different things, so some stations needed their own setup instead of one shared approach. The lesson I took: find a technology's limits early and design around them.</p>
+        <p>Apple's AR tools turned out to have real limits. The back camera is better measuring at a distance, whereas the front camera was necessary for precise, close measurements. As a result, some stations needed their own setup instead of one shared approach. My takeaway was that a good approach when integrating technology is to consider its limitations early and design around them.</p>
       </div>
     </div>
   </section>
@@ -135,22 +148,22 @@
     <div class="s-inner">
       <h2 class="s-label">What I built</h2>
       <div class="s-body">
-        <p>A coach picks the event, then a station, then the athlete. Every station has a manual-entry fallback, so it works on day one even before the phone can measure it.</p>
+        <p>Coaches can pick across different combines, stations, and athletes all in one app.</p>
         <figure class="s-shots">
           <div class="s-shot-row">
             <img src="../../assets/img/exact-combines.webp" alt="List of upcoming combines with sport, date and city" width="720" height="1565" loading="lazy">
             <img src="../../assets/img/exact-stations.webp" alt="Stations for one combine: body scan, vertical jump, broad jump, 40-yard dash, push-ups, hand size" width="720" height="1565" loading="lazy">
             <img src="../../assets/img/exact-athletes.webp" alt="Athletes for the vertical jump station, with numbers, positions and schools" width="720" height="1565" loading="lazy">
           </div>
-          <figcaption>Event, station, athlete: three taps to the right attempt.</figcaption>
+          <figcaption>Filters are present for combines and athletes that help support quickly finding what you want at a glance.</figcaption>
         </figure>
-        <p>A continuous mode lets one coach run a whole line of athletes hands-free: the app identifies each athlete by their spoken name or jersey number. Results save on the phone first and sync when there's a connection, so nothing is lost when the gym's signal drops.</p>
+        <p>A continuous mode lets one coach run a whole line of athletes hands-free: the app identifies each athlete by their spoken name or jersey number. In addition, since Wi-Fi on the field is spotty, it's saved locally and reinforced in the cloud when a connection becomes available.</p>
         <figure class="s-shots s-shots-two">
           <div class="s-shot-row">
             <img src="../../assets/img/exact-record-attempt.webp" alt="Record Attempt screen with the athlete, station range, capture button and manual entry" width="720" height="1565" loading="lazy">
             <img src="../../assets/img/exact-results.webp" alt="Results screen listing each athlete's vertical jump and its sync status" width="720" height="1565" loading="lazy">
           </div>
-          <figcaption>Recording an attempt, and the results it adds to. The values shown are sample entries.</figcaption>
+          <figcaption>Results are saved and easily modified in the app.</figcaption>
         </figure>
       </div>
     </div>
@@ -160,9 +173,9 @@
     <div class="s-inner">
       <h2 class="s-label">Design decisions</h2>
       <div class="s-body">
-        <p><b>I wrote the experience down before building it.</b> I built the app with Claude Code as a coding partner. AI-written code drifts: ask twice and you get two slightly different screens. So I wrote out the user flow and the rules each screen had to follow, and held every build to that spec. Every station works the same way, so a coach who learns one can run them all.</p>
-        <p><b>The broad jump took the most rework.</b> My first version tracked the athlete's body with ARKit. Body tracking only works with the phone held sideways, and it measured from ankle to ankle instead of the official toe to heel. I switched to finding the feet in the video and placing them on the floor the phone had detected, then corrected the reading to the official distance.</p>
-        <p><b>The vertical jump went the other way.</b> The app times how long the athlete is in the air, and physics turns that time into jump height. Because it needs no calibration, it was the most reliable station from the start.</p>
+        <p><b>I wrote the experience down before building it.</b> I built the app with Claude Code as a coding partner, since I had limited experience with Swift and Apple Vision. Although AI-written code can be very powerful, it lacks the intuition for ease-of-use that a human has. To mitigate this, I wrote out the user flow and the rules each screen had to follow, and held every build to that spec. Every station works the same way, so even as new features and refinements were added, the app stayed usable and focused.</p>
+        <p><b>Refining and optimizing measurements took trial-and-error.</b> My first version tracked the athlete's body with ARKit, which tracks body movement. Body tracking only works with the phone held sideways, and it initially measured from ankle to ankle instead of the official toe to heel in real combines. I switched to finding the feet in the video and placing them on the floor the phone had detected, then corrected the reading based on adjustments from field tests.</p>
+        <p>In contrast, for vertical jump, implementation was more straightforward. The app times how long the athlete is in the air, and physics turns that time into jump height. Because it needs no calibration, it was the most reliable station from the start. This taught me that design decisions can reframe technical difficulties.</p>
       </div>
     </div>
   </section>
@@ -171,8 +184,8 @@
     <div class="s-inner">
       <h2 class="s-label">Testing</h2>
       <div class="s-body">
-        <p>EXACT staff and I tested the app all the way through the build, not just at the end, so a core flaw could show up before any feature got polished.</p>
-        <p>The biggest flaw was measurement accuracy. I recorded real jumps and built replay tests that run each recording back through the measuring code, so a change that broke a reading showed up right away, not at the next event.</p>
+        <p>EXACT staff and I tested the app all the way through the build, not just at the end, so flaws could be squashed early before polishing unnecessary features.</p>
+        <p>The biggest hurdle was measurement accuracy. I recorded real jumps and built replay tests that run each recording back through the measuring code, so a change that broke a reading showed up right away, even when physical testing was difficult.</p>
       </div>
     </div>
   </section>
@@ -182,7 +195,7 @@
       <h2 class="s-label">Outcome</h2>
       <div class="s-body">
         <p>The app is still in development. EXACT is porting it to Android and building more stations on top of the ones I introduced.</p>
-        <p><b>Next time, I'd test the hardware's limits in week one.</b> The camera differences shaped several stations, and knowing them before designing would have saved rework. I'd also time a paper-based station first, so the app's improvement has a number attached.</p>
+        <p><b>Next time, I'd test the hardware's limits in week one.</b> The camera differences shaped several stations, and knowing them before designing would have saved rework. I'd also track the time for the paper-based station, to see how much the digital implementation improved.</p>
         <p><a class="s-more" href="../../#case-studies">Back to all case studies</a></p>
       </div>
     </div>

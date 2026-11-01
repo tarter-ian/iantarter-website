@@ -561,3 +561,103 @@ html:active-view-transition-type(pan-left)::view-transition-new(root) { animatio
 @container (max-width: 262px) { .x-i .card .c-links a { font-size: 13.5px; } }
 @media (max-width: 700px) { .i-field { margin-bottom: -80px; } } /* the scene's bottom padding is smaller on phones */
 html.sitting, html.sitting body { touch-action: none; overscroll-behavior: none; } /* sitting, a finger on the moss combs it rather than moving the page */
+
+/* PREVIEW MOCKUPS (Ian, 2026-10-31): slots for the "above and beyond" ideas. Each is outlined and tagged so it can't be
+   mistaken for finished copy; bracketed text is a placeholder for Ian's own material. */
+.mock { position: relative; outline: 1.5px dashed rgba(181,55,31,.75); outline-offset: 6px; border-radius: 2px; }
+.mock::before { content: attr(data-mock); position: absolute; right: -6px; top: -18px; z-index: 3; font: 600 10.5px/1 var(--f-ui); letter-spacing: .02em; color: #fff8ec; background: #b5371f; padding: 3px 6px 2px; border-radius: 2px; white-space: nowrap; pointer-events: none; }
+li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { top: -14px; }
+.ph { color: #8a5a2b; font-style: italic; }
+.c-pdf { margin: 14px 0 0; font: 500 14px/1.4 var(--f-ui); }
+.c-pdf a { color: var(--accent, #b5371f); }
+.c-now { margin-top: 14px; }
+.s-tldr { margin-top: 54px; padding: 16px 18px 14px; background: rgba(255,250,236,.55); }
+.s-tldr-h { margin: 0 0 12px; }
+.s-tldr dl { margin: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+.s-tldr dt { font-size: 14px; line-height: 1.4; color: var(--muted); margin-bottom: 4px; }
+.s-tldr dd { margin: 0; font-size: 17px; line-height: 1.5; }
+@media (max-width: 700px) { .s-tldr dl { grid-template-columns: minmax(0, 1fr); gap: 12px; } }
+.s-artifact { margin-block: 30px; }
+.s-artifact-box { aspect-ratio: 16 / 5; display: grid; place-items: center; background: repeating-linear-gradient(135deg, rgba(120,110,90,.08) 0 10px, rgba(120,110,90,.03) 10px 20px); border: 1px solid rgba(60,55,45,.18); }
+.s-artifact figcaption { margin-top: 8px; font-size: 14px; line-height: 1.4; }
+.g-sheet { margin-top: 16px; padding: 12px; background: rgba(255,250,236,.5); }
+.g-photo { aspect-ratio: 3 / 2; display: grid; place-items: center; margin-bottom: 10px; background: repeating-linear-gradient(135deg, rgba(120,110,90,.08) 0 10px, rgba(120,110,90,.03) 10px 20px); border: 1px solid rgba(60,55,45,.18); font-size: 14px; }
+.g-sheet dl { margin: 0 0 10px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 12px; font-size: 13.5px; }
+.g-sheet dt { font-weight: 700; } .g-sheet dd { margin: 0; }
+.g-sheet a { font: 600 13.5px/1 var(--f-ui); }
+.g-sheet .g-wide { grid-column: 1 / -1; }
+.g-pdf { margin: 24px 0 0; } .g-card .g-photo { margin: 0 0 12px; }
+.g-facts { margin: 14px 0 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 14px; font-size: 14px; line-height: 1.4; } .g-facts dt { color: var(--muted); } .g-facts dd { margin: 2px 0 0; }
+
+/* one set of text colours (Ian, 2026-10-31: keep the hierarchy simple): the older site tokens follow the diorama's ink,
+   muted and link colours, so there is one near-black, one grey and one red */
+.x-i { --s-text: var(--ink); --s-muted: var(--muted); --s-link: var(--link); }
+.x-i .i-label { color: var(--ink); }
+.skip { font-family: "Plus Jakarta Sans", system-ui, sans-serif; }
+.x-i .c-intro { color: var(--ink); }
+.x-i .c-me { color: var(--ink); }
+
+/* ONE TYPE SCALE (Ian, 2026-10-31: keep the hierarchy simple). Six sizes, each with one job; the name keeps its own.
+   14 labels and small print · 17 body, links and buttons · 20 intro lines · 22 titles · 26 the hero line · 58 page titles */
+.x-i.x-i { --t14: 14px; --t17: 17px; --t20: 20px; --t22: 22px; --t26: 26px; --t58: 58px; }
+.x-i.x-i .c-type, .x-i.x-i .c-org, .x-i.x-i .meta, .x-i.x-i .s-case-meta, .x-i.x-i .c-links b, .x-i.x-i .s-form label,
+.x-i.x-i .s-case-facts dt, .x-i.x-i figcaption, .x-i.x-i .i-jobs .c-text { font-size: var(--t14); }
+.x-i.x-i .c-text, .x-i.x-i .s-body p, .x-i.x-i .s-skills dd, .x-i.x-i .s-skills dt, .x-i.x-i dl dd, .x-i.x-i dl dt,
+.x-i.x-i .s-form select, .x-i.x-i .s-form input, .x-i.x-i .s-form textarea, .x-i.x-i .s-btn, .x-i.x-i .hand a span,
+.x-i.x-i .cf a, .x-i.x-i .c-links a, .x-i.x-i .i-more, .x-i.x-i .i-more a, .x-i.x-i .s-quote cite a, .x-i.x-i .s-more { font-size: var(--t17); }
+.x-i.x-i .s-case-facts dt { font-size: var(--t14); }
+.x-i.x-i .s-case-facts dd { font-size: var(--t17); }
+.x-i.x-i .s-case-lede, .x-i.x-i .s-case-q, .x-i.x-i .i-jobs h3 { font-size: var(--t20); }
+.x-i.x-i .cf h3, .x-i.x-i .c-name, .x-i.x-i .s-label { font-size: var(--t22); }
+.x-i.x-i .i-jobs h3 { font-size: var(--t20); }
+.x-i.x-i .c-pitch, .x-i.x-i .art-birds .slip { font-size: var(--t26); }
+.x-i.x-i .s-case-title, .x-i.x-i .s-case-stats b { font-size: var(--t58); }
+.x-i.x-i .g-facts dt, .x-i.x-i .g-facts dd, .x-i.x-i .s-tldr dt { font-size: var(--t14); }
+.x-i.x-i .s-tldr dd { font-size: var(--t17); }
+@media (max-width: 700px) { .x-i.x-i .hand a span { font-size: 10px; } } /* the phone menu cards are too small for the scale: like the name, they keep their own size */
+/* in-progress games read as a quick screen (Ian): name, photo, a 3x2 row of facts, then the one-line hook */
+.g-pitch h3 { margin: 0 0 12px; }
+.g-pitch .g-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 0 0 14px; }
+.g-pitch .cf > p { margin: 0; }
+.g-pitch .cf { padding-top: 22px; padding-bottom: 24px; }
+.g-pitch h3 { margin-bottom: 16px; }
+.g-pitch .g-photo { margin-bottom: 26px; }
+.g-pitch .g-facts { gap: 20px 20px; margin: 4px 0 24px; }
+.g-pitch .g-facts dd { margin-top: 4px; }
+/* Daily Weather card in the facts layout: wallet fills the photo slot, lying on the card */
+.x-i .g1.g-pitch .art-dw { aspect-ratio: 3 / 2; height: auto; margin: 0 0 26px; display: flex; align-items: center; justify-content: center; }
+.x-i .g1.g-pitch .art-dw img.wallet { width: 104%; max-width: none; margin: 0 -2%; transform: rotate(-6deg); }
+.x-i .g-pitch .g-facts dd a { white-space: normal; }
+/* Games as a 2x2 grid (Ian, 2026-10-31) */
+@media (min-width: 701px) { .x-i .i-games { grid-template-columns: repeat(2, minmax(0,1fr)); gap: 40px 40px; max-width: 760px; } }
+/* Projects page uses the homepage game cards: same grid, size and spacing */
+.x-i.games-i .g-grid { grid-template-columns: repeat(2, minmax(0,1fr)); gap: 40px 40px; max-width: 760px; }
+@media (max-width: 700px) { .x-i.games-i .g-grid { grid-template-columns: minmax(0,1fr); gap: 22px; } }
+.x-i.games-i .g-card.g-pitch > .cf { display: block; padding: 22px 24px 24px; }
+.x-i.games-i .g-card.g-pitch h3 { margin: 0 0 16px; }
+.x-i.games-i .g-card.g-pitch p.c-text { font-size: 15px; line-height: 1.5; }
+.x-i.games-i .g-card.g-pitch p.c-text + p.c-text { margin-top: 10px; }
+.g-facts dd { overflow-wrap: anywhere; }
+.g-photo.g-real { background: none; border: 0; display: block; aspect-ratio: auto; }
+.g-photo.g-real img { width: 100%; height: auto; display: block; border-radius: 2px; box-shadow: .5px 1px 1px rgba(10,14,4,.4), 3px 5px 6px rgba(10,14,4,.22); }
+.x-i.games-i .g-quotes { max-width: 760px; } .x-i.games-i .g-quotes > .cf { gap: 14px; }
+.x-i.games-i .g-grid + .g-quotes { margin-top: -40px; }
+.x-i.games-i .g-card.g-pitch .g-photo { margin: 0 0 26px; }
+/* Experience as 3 columns, 2 rows (Ian, 2026-11-01) */
+@media (min-width: 701px) { .x-i .i-jobs { grid-template-columns: repeat(3, minmax(0,1fr)); gap: 32px 32px; max-width: 900px; } }
+/* Center the card groups on the page, labels aligned to each group's left edge (Ian, 2026-11-01) */
+@media (min-width: 701px) {
+  .x-i .i-games { margin-left: auto; margin-right: auto; }
+  .x-i #games { margin-left: max(0px, calc((100% - 760px) / 2)); }
+  .x-i .i-jobs { margin-left: auto; margin-right: auto; }
+  .x-i #exp { margin-left: max(0px, calc((100% - 900px) / 2)); }
+  .x-i.games-i .i-scene { max-width: calc(760px + 80px); }
+  .x-i.games-i .c-head { max-width: none; }
+}
+.x-i .i-row.i-games { margin-top: 0; } /* the wallet no longer hangs over the top edge */
+.x-i .g-photo.g-real img.s-card-img { width: 100%; margin: 0; aspect-ratio: auto; order: 0; }
+
+/* Live site: unfilled placeholders stay hidden until they have real content */
+.g-photo.mock, .s-artifact.mock, .g-facts > div:has(.ph) { display: none; }
+.g-facts.mock { outline: none; }
+.g-facts.mock::before { display: none; }
