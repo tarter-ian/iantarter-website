@@ -628,3 +628,20 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 .x-i .g1.g-pitch .art-dw { aspect-ratio: 3 / 2; height: auto; margin: 0 0 26px; display: flex; align-items: center; justify-content: center; }
 .x-i .g1.g-pitch .art-dw img.wallet { width: 104%; max-width: none; margin: 0 -2%; transform: rotate(-6deg); }
 .x-i .g-pitch .g-facts dd a { white-space: normal; }
+/* Games as a 2x2 grid (Ian, 2026-10-31) */
+@media (min-width: 701px) { .x-i .i-games { grid-template-columns: repeat(2, minmax(0,1fr)); gap: 40px 40px; max-width: 760px; } }
+/* Projects page uses the homepage game cards: same grid, size and spacing */
+.x-i.games-i .g-grid { grid-template-columns: repeat(2, minmax(0,1fr)); gap: 40px 40px; max-width: 760px; }
+@media (max-width: 700px) { .x-i.games-i .g-grid { grid-template-columns: minmax(0,1fr); gap: 22px; } }
+.x-i.games-i .g-card.g-pitch > .cf { display: block; padding: 22px 24px 24px; }
+.x-i.games-i .g-card.g-pitch h3 { margin: 0 0 16px; }
+.x-i.games-i .g-card.g-pitch p.c-text { font-size: 15px; line-height: 1.5; }
+.x-i.games-i .g-card.g-pitch p.c-text + p.c-text { margin-top: 10px; }
+.g-facts dd { overflow-wrap: anywhere; }
+.g-photo.g-real { background: none; border: 0; display: block; aspect-ratio: auto; }
+.g-photo.g-real img { width: 100%; height: auto; display: block; border-radius: 2px; box-shadow: .5px 1px 1px rgba(10,14,4,.4), 3px 5px 6px rgba(10,14,4,.22); }
+.x-i.games-i .g-quotes { max-width: 760px; } .x-i.games-i .g-quotes > .cf { gap: 14px; }
+.x-i.games-i .g-grid + .g-quotes { margin-top: -40px; }
+.x-i.games-i .g-card.g-pitch .g-photo { margin: 0 0 26px; }
+/* Experience as 3 columns, 2 rows (Ian, 2026-11-01) */
+@media (min-width: 701px) { .x-i .i-jobs { grid-template-columns: repeat(3, minmax(0,1fr)); gap: 32px 32px; max-width: 900px; } }
