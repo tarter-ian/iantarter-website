@@ -645,3 +645,12 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 .x-i.games-i .g-card.g-pitch .g-photo { margin: 0 0 26px; }
 /* Experience as 3 columns, 2 rows (Ian, 2026-11-01) */
 @media (min-width: 701px) { .x-i .i-jobs { grid-template-columns: repeat(3, minmax(0,1fr)); gap: 32px 32px; max-width: 900px; } }
+/* Center the card groups on the page, labels aligned to each group's left edge (Ian, 2026-11-01) */
+@media (min-width: 701px) {
+  .x-i .i-games { margin-left: auto; margin-right: auto; }
+  .x-i #games { margin-left: max(0px, calc((100% - 760px) / 2)); }
+  .x-i .i-jobs { margin-left: auto; margin-right: auto; }
+  .x-i #exp { margin-left: max(0px, calc((100% - 900px) / 2)); }
+  .x-i.games-i .i-scene { max-width: calc(760px + 80px); }
+  .x-i.games-i .c-head { max-width: none; }
+}
