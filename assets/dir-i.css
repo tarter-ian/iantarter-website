@@ -655,3 +655,4 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
   .x-i.games-i .c-head { max-width: none; }
 }
 .x-i .i-row.i-games { margin-top: 0; } /* the wallet no longer hangs over the top edge */
+.x-i .g-photo.g-real img.s-card-img { width: 100%; margin: 0; aspect-ratio: auto; order: 0; }
