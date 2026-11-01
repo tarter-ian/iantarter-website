@@ -681,3 +681,10 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
   .x-i .i-games { gap: 40px; }
 }
 @media (min-width: 701px) and (max-width: 860px) { .x-i .c-about .cf { columns: 1; } }
+/* Case card titles on one line across the row (Ian, 2026-11-01): same picture height, meta line reserves two lines and sits on the title */
+@media (min-width: 1001px) {
+  .x-i .i-cases > .card .c-art { height: 256px; aspect-ratio: auto; }
+  .x-i .i-cases > .card .c-type { min-height: 46px; display: flex; align-items: flex-end; }
+  .x-i .i-cases > .k1, .x-i .i-cases > .k2, .x-i .i-cases > .k3 { margin-top: 110px; translate: none; }
+  .x-i .i-cases > .k1 { transform: rotate(-1.6deg); } .x-i .i-cases > .k2 { transform: rotate(.9deg); } .x-i .i-cases > .k3 { transform: rotate(-.5deg); }
+}
