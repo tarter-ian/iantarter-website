@@ -670,3 +670,14 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
   .x-i .i-more { max-width: 760px; margin-left: auto; margin-right: auto; }
   .x-i .i-cases { translate: 10px 0; }
 }
+/* One shared 900px column for About, Experience, Skills, Games, Contact; hero and case row stay wide (Ian, 2026-11-01) */
+@media (min-width: 701px) {
+  .x-i { --col: 900px; }
+  .x-i .i-about, .x-i .i-jobs, .x-i .i-skills, .x-i .i-games, .x-i .i-more, .x-i .i-contact { max-width: var(--col); margin-left: auto; margin-right: auto; }
+  .x-i #about, .x-i #exp, .x-i #skills, .x-i #games, .x-i #contact { margin-left: max(0px, calc((100% - var(--col)) / 2)); }
+  .x-i .i-about { grid-template-columns: minmax(0, 1fr); }
+  .x-i .c-about .cf { display: block; columns: 2; column-gap: 44px; }
+  .x-i .c-about .cf > * { break-inside: avoid; margin: 0 0 14px; }
+  .x-i .i-games { gap: 40px; }
+}
+@media (min-width: 701px) and (max-width: 860px) { .x-i .c-about .cf { columns: 1; } }
