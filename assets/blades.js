@@ -273,6 +273,7 @@
     const sh = document.createElement("div"), fx = document.createElement("div");
     sh.className = fx.className = "blade-strip grow-fx"; sh.setAttribute("aria-hidden", "true"); fx.setAttribute("aria-hidden", "true");
     Object.assign(sh.style, { left: 0, top: 0, width: w + "px", height: h + "px", overflow: "hidden", borderRadius: rad + "px" }); Object.assign(fx.style, { left: 0, top: 0, width: 0, height: 0 });
+    for (const n of [sh, fx]) { n.dataset.edge = st.edge; n.style.setProperty("--cx", "0px"); n.style.setProperty("--cy", "0px"); n.style.setProperty("--cw", w + "px"); n.style.setProperty("--ch", h + "px"); } // (lifted-sheet rules, dir-i.css)
     const first = pair(st)[0]; first.img.before(sh); first.img.before(fx);
     for (const s of pair(st)) s.cv.style.visibility = "hidden";
     let left = 0; const an = st.fxAn = [], done = () => { if (--left <= 0) st.fxDone = true; };
@@ -918,8 +919,10 @@
     for (const [i, st] of sides.entries()) {
       const on = !calm && seen[i];
       if (on) { if (!windSt.has(st)) { windSt.add(st); const ox = (st.edge === "left" ? 0 : wd[i]) - st.x0;
-          for (const q of pair(st)) for (const n of [q.img, q.cv]) n.style.transformOrigin = `${ox}px 50%`; }
-        const r = rs[i], ex = r.left + (st.edge === "left" ? 0 : r.width), ey = r.top + st.y0 + st.H / DPR / 2, k = (st.edge === "left" ? 1 : -1) * envAt(ex, ey) * (12 + 8 * wind.amp) * gust(r.left + (st.edge === "left" ? 0 : r.width) + scrollX - sr.x, r.top + st.y0 + st.H / DPR / 2 + scrollY - sr.y), tf = `skewY(${k.toFixed(2)}deg)`; st.skew = [+k.toFixed(2), (st.edge === "left" ? 0 : wd[i]) || st.skew && st.skew[1] || 0]; for (const q of pair(st)) q.img.style.transform = q.cv.style.transform = tf; }
+          // (the lean is about the root line, written into the transform itself: the strip's transform-origin stays free for the stylesheet,
+          // which scales case-study grass about the sheet's centre while the sheet is lifted)
+          st.wo = ox - (parseFloat(getComputedStyle(st.img).transformOrigin) || 0); }
+        const r = rs[i], ex = r.left + (st.edge === "left" ? 0 : r.width), ey = r.top + st.y0 + st.H / DPR / 2, k = (st.edge === "left" ? 1 : -1) * envAt(ex, ey) * (12 + 8 * wind.amp) * gust(r.left + (st.edge === "left" ? 0 : r.width) + scrollX - sr.x, r.top + st.y0 + st.H / DPR / 2 + scrollY - sr.y), tf = `translateX(${st.wo}px) skewY(${k.toFixed(2)}deg) translateX(${-st.wo}px)`; st.skew = [+k.toFixed(2), (st.edge === "left" ? 0 : wd[i]) || st.skew && st.skew[1] || 0]; for (const q of pair(st)) q.img.style.transform = q.cv.style.transform = tf; }
       else if (windSt.has(st)) { windSt.delete(st); st.skew = null; for (const q of pair(st)) q.img.style.transform = q.cv.style.transform = ""; } }
     if (SW && !swayFrame.raf) swayFrame.raf = requestAnimationFrame(swayFrame);
     wind.raf = calm ? 0 : requestAnimationFrame(windFrame);
