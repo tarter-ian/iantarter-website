@@ -849,3 +849,11 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 .x-i.x-i.x-i .i-cases > .case.d-trade .c-art.c-deck, .x-i.x-i.x-i .i-cases > .case.d-tarot .c-art.c-deck { inset: 0; border: 0; outline: 0; box-shadow: none; border-radius: inherit; overflow: hidden; }
 .x-i.x-i.x-i .i-cases > .case.d-trade .c-art.c-deck img, .x-i.x-i.x-i .i-cases > .case.d-tarot .c-art.c-deck img { object-fit: cover; position: static; z-index: auto; }
 .x-i.x-i.x-i .i-cases > .case h3 { box-shadow: none; }
+/* Scanned cards: the scan is the face, edge to edge (the base .card padding made a second border). */
+.x-i.x-i.x-i .i-cases > .case.d-trade, .x-i.x-i.x-i .i-cases > .case.d-hana, .x-i.x-i.x-i .i-cases > .case.d-tarot { padding: 0; }
+.x-i.x-i.x-i .i-cases > .case.d-trade::after, .x-i.x-i.x-i .i-cases > .case.d-tarot::after { background-image: linear-gradient(125deg, rgba(255,255,255,.14) 0%, rgba(255,255,255,0) 35%, rgba(255,255,255,0) 70%, rgba(255,255,255,.06) 100%); box-shadow: none; }
+/* EXACT: a real 1910 trading card (Frank Irons, broad jump) at its own squarer shape, same height as the others. */
+.x-i.x-i.x-i .i-cases > .case.d-trade { aspect-ratio: 2514 / 2898; width: 121.4%; justify-self: end; border-radius: 6px; background: none; }
+.x-i.x-i.x-i .i-cases > .case.d-trade .c-art.c-deck img { object-fit: fill; }
+@media (max-width: 1000px) { .x-i.x-i.x-i .i-cases > .case.d-trade { width: min(100%, 340px); justify-self: center; } }
+@media (min-width: 1001px) { .x-i.x-i .c-intro { grid-column: 1 / 8; } } /* 7 columns: hugs the tagline and buttons */
