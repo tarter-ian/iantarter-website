@@ -716,3 +716,35 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 }
 /* The shared column below the fold sits on the same 12-column grid: columns 2 to 11 */
 @media (min-width: 1001px) { .x-i { --col: calc(100% - 2 * ((100% - 264px) / 12 + 24px)); } }
+/* Case studies as real playing cards (Ian, 2026-11-05): 5:7, corner indices, only the graphic and the title, the whole card is the link */
+.x-i.x-i.x-i .i-cases > .case { aspect-ratio: 5 / 7; position: relative; cursor: pointer; transition: translate .25s cubic-bezier(.3,0,.3,1); }
+.x-i.x-i.x-i .i-cases > .case .cf { height: 100%; display: flex; flex-direction: column; padding: 40px 28px 40px; box-sizing: border-box; }
+.x-i.x-i.x-i .i-cases > .case .c-art { flex: 1; height: auto; min-height: 0; margin: 0 0 24px; display: flex; align-items: center; justify-content: center; overflow: visible; }
+.x-i.x-i.x-i .i-cases > .case .c-art .slip { scale: .86; transform-origin: 50% 50%; }
+.x-i.x-i.x-i .i-cases > .case .c-type, .x-i.x-i.x-i .i-cases > .case .c-text, .x-i.x-i.x-i .i-cases > .case .c-more { display: none; }
+.x-i.x-i.x-i .i-cases > .case h3 { margin: 0; text-align: center; }
+.x-i.x-i.x-i .i-cases > .case h3 a { color: var(--ink); text-decoration: none; }
+.x-i.x-i.x-i .i-cases > .case h3 a::after { content: ""; position: absolute; inset: 0; z-index: 5; border-radius: inherit; }
+.x-i.x-i.x-i .i-cases > .case:hover { translate: 0 -6px; }
+.x-i.x-i.x-i .i-cases > .case:hover h3 a, .x-i.x-i.x-i .i-cases > .case h3 a:focus-visible { text-decoration: underline; text-underline-offset: 4px; }
+.x-i.x-i.x-i .i-cases > .case:focus-within { outline: 3px solid var(--link); outline-offset: 4px; }
+.x-i .c-index { position: absolute; top: 14px; left: 16px; display: flex; flex-direction: column; align-items: center; gap: 4px; z-index: 2; pointer-events: none; }
+.x-i .c-index b { font-family: var(--f-heading); font-weight: 700; font-size: 22px; line-height: 1; color: var(--link); }
+.x-i .c-index i { width: 11px; height: 11px; background: var(--link); border-radius: 0 100% 0 100%; transform: rotate(45deg); }
+.x-i .c-index-b { top: auto; left: auto; bottom: 14px; right: 16px; transform: rotate(180deg); }
+@media (min-width: 1001px) { .x-i.x-i .i-hero + #work, .x-i.x-i #work { margin: 48px 0 24px; } }
+@media (max-width: 1000px) { .x-i.x-i.x-i .i-cases > .case { width: min(100%, 300px); justify-self: center; } }
+/* Every card is a real playing card: 5:7 (grows if the text needs it), corner indices; each section is a suit (case = leaf, experience = pine, games = acorn) */
+.x-i.x-i .job, .x-i.x-i .game, .x-i.x-i .g-card.g-pitch { aspect-ratio: 5 / 7; position: relative; }
+.x-i.x-i .job > .cf, .x-i.x-i .game > .cf, .x-i.x-i .g-card.g-pitch > .cf { padding-top: 48px; padding-bottom: 48px; padding-left: 28px; padding-right: 28px; height: 100%; box-sizing: border-box; }
+.x-i.x-i .i-jobs { align-items: start; } .x-i.x-i .i-jobs .cf { height: 100%; }
+.x-i .c-index.s-pine i { width: 0; height: 0; background: none; border-radius: 0; transform: none; border-left: 6px solid transparent; border-right: 6px solid transparent; border-bottom: 11px solid var(--link); }
+.x-i .c-index.s-acorn i { width: 10px; height: 11px; border-radius: 45% 45% 50% 50% / 35% 35% 65% 65%; transform: none; box-shadow: inset 0 3px 0 rgba(0,0,0,.28); }
+/* Real cards keep their 5:7 shape and grow when the text needs it */
+.x-i.x-i.x-i .i-cases > .case { align-self: start; }
+.x-i.x-i .job > .cf, .x-i.x-i .game > .cf, .x-i.x-i .g-card.g-pitch > .cf { height: auto; min-height: 100%; }
+/* Text-heavy pieces are paper, not cards: About is a letter, Contact a note and a printed form */
+.x-i.x-i .c-about, .x-i.x-i .c-contact, .x-i.x-i .c-form { border-radius: 2px;
+  background-image: linear-gradient(rgba(251,249,242,.86), rgba(251,249,242,.86)), url("tex/paper001_tile-1024.webp"); background-size: auto, 420px; }
+.x-i.x-i .c-about > .cf, .x-i.x-i .c-contact > .cf, .x-i.x-i .c-form > .cf { border: 0; border-radius: 0; }
+.x-i.x-i .i-games, .x-i.x-i.games-i .g-grid { align-items: start; }
