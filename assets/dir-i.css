@@ -826,7 +826,7 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 .x-i.x-i.x-i .i-cases > .case.d-hana .c-index-b { top: 15px; bottom: auto; left: auto; right: 16px; transform: none; }
 .x-i.x-i.x-i .i-cases > .case.d-hana .c-index i { display: none; }
 /* Physical card stock: a linen-embossed grain over the print and the title band, a hairline of edge thickness, and a faint sheen. */
-.x-i.x-i.x-i .i-cases > .case::after { z-index: 9; background-image: linear-gradient(125deg, rgba(255,255,255,.16) 0%, rgba(255,255,255,0) 35%, rgba(255,255,255,0) 70%, rgba(255,255,255,.08) 100%), url("tex/stock-grain.webp"); background-size: auto, 160px; mix-blend-mode: overlay; box-shadow: inset 0 0 0 1px rgba(255,255,255,.45), inset 0 -1px 0 rgba(0,0,0,.18), inset 0 0 10px rgba(30,40,0,.14); }
+.x-i.x-i.x-i .i-cases > .case::after { z-index: 9; background-image: linear-gradient(125deg, rgba(255,255,255,.16) 0%, rgba(255,255,255,0) 35%, rgba(255,255,255,0) 70%, rgba(255,255,255,.08) 100%), url("tex/stock-grain.webp?v=2"); background-size: auto, 340px; mix-blend-mode: overlay; box-shadow: inset 0 0 0 1px rgba(255,255,255,.45), inset 0 -1px 0 rgba(0,0,0,.18), inset 0 0 10px rgba(30,40,0,.14); }
 .x-i.x-i.x-i .i-cases > .case { --edge: 0 1px 0 #d9d5ca, 0 2px 0 #b9b4a8; }
 .x-i.x-i.x-i .i-cases > .case.d-hana { --edge: 0 1px 0 #3a231c, 0 2.5px 0 #1a0e0b; }
 /* Lifting a card: the grass lying over it slides off quickly instead of rising with it, and settles back once the card is down. */
