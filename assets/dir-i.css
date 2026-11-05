@@ -1122,14 +1122,24 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3 > :first-child { position: relative; }
 .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3 { z-index: 7; }
 .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3::after { z-index: 1; border-color: #9c845a; }
-/* Hover, take 3 (Ian 21:21: still not right): nothing moves. The sheet stays where it lies; only the title underlines and the cursor shows it opens. */
-.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:hover, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:focus-within { translate: none; scale: none; box-shadow: var(--edge), var(--sh); }
-.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k2:hover, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k2:focus-within { transform: rotate(1deg); }
-.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k3:hover, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k3:focus-within { transform: rotate(-1deg); }
-.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k4:hover, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k4:focus-within { transform: rotate(.8deg); }
-.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k5:hover, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k5:focus-within { transform: rotate(-.7deg); }
-.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:hover > .blade-strip, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:focus-within > .blade-strip { transform: none; clip-path: none; opacity: 1; }
 /* Tags, take 3 (Ian 21:24): the string loops out to the LEFT, round the object's left edge. Tags sit near the left edge so the string is short. */
 .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3 { left: 30px; right: auto; translate: none; max-width: calc(100% - 52px); }
 .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3::after { left: -36px; right: auto; top: calc(50% - 6px); bottom: auto; width: 53px; height: 12px; rotate: 0deg; transform-origin: 100% 50%;
   border: 2px solid #9c845a; border-left: 0; border-radius: 0 7px 7px 0; background: none; }
+
+/* Hover, take 4 (Ian 21:25: keep the lift, fix the grass). Lifting a sheet, as grass really behaves: the blades lying over its edge ride up with it
+   for a moment, then slip off the rising edge (they are rooted, so they end where they grew), spring outward a few px and sway to rest beside it.
+   The part now under the raised paper is hidden by its footprint. Putting it down reverses the slide, and the blades fall back over the edge. */
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone) > .blade-strip { --sx: 0px; --sy: 0px; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone) > .blade-strip[data-edge="top"] { --sy: -1px; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone) > .blade-strip[data-edge="bottom"] { --sy: 1px; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone) > .blade-strip[data-edge="left"] { --sx: -1px; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone) > .blade-strip[data-edge="right"] { --sx: 1px; }
+@keyframes blade-slip { 0%, 18% { translate: 0 0; } 38% { translate: calc(var(--sx) * 7) calc(var(--sy) * 7); } 58% { translate: calc(var(--sx) * -2.5) calc(var(--sy) * -2.5); }
+  76% { translate: calc(var(--sx) * 1.2) calc(var(--sy) * 1.2); } 100% { translate: 0 0; } }
+@media (hover: hover) {
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone) > .blade-strip { transition: transform .3s cubic-bezier(.3,.6,.3,1) 0s, clip-path .3s cubic-bezier(.3,.6,.3,1) 0s; }
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone):hover > .blade-strip, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone):focus-within > .blade-strip { opacity: 1;
+    transition: transform .22s cubic-bezier(.4,0,.2,1) .07s, clip-path .14s linear .1s; animation: blade-slip .9s cubic-bezier(.3,.5,.4,1) both; }
+}
+@media (prefers-reduced-motion: reduce) { .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case > .blade-strip { animation: none !important; } }

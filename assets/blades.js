@@ -432,7 +432,7 @@
       for (const n of [cv, img, tcv, timg]) { if (!n) continue; n.className = cut ? "blade-strip side" : "blade-strip"; n.setAttribute("aria-hidden", "true"); n.alt = "";
         Object.assign(n.style, { left: x0 + "px", top: y0 + "px", width: cv.width / DPR + "px", height: cv.height / DPR + "px" });
         // where the piece lies, in the strip's own box: a lifted piece hides the grass under its footprint (dir-i.css)
-        n.style.setProperty("--cx", -x0 + "px"); n.style.setProperty("--cy", -y0 + "px"); n.style.setProperty("--cw", el.offsetWidth + "px"); n.style.setProperty("--ch", el.offsetHeight + "px"); }
+        n.dataset.edge = edge; n.style.setProperty("--cx", -x0 + "px"); n.style.setProperty("--cy", -y0 + "px"); n.style.setProperty("--cw", el.offsetWidth + "px"); n.style.setProperty("--ch", el.offsetHeight + "px"); }
       if (cut) { // the edge's shadow layers go in front of its first sprig layer, in order
         const first = shadowsFirst.get(edge); if (first) el.insertBefore(timg, first); else el.appendChild(timg); }
       el.appendChild(img); if (cut && !shadowsFirst.has(edge)) shadowsFirst.set(edge, img);
