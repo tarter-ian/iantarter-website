@@ -845,3 +845,7 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 .x-i.x-i.x-i .i-cases > .case.d-tarot .c-art.c-deck img { object-fit: contain; }
 .x-i.x-i.x-i .i-cases > .case h3, .x-i.x-i.x-i .i-cases > .case.d-hana h3, .x-i.x-i.x-i .i-cases > .case.d-tarot h3 { top: auto; bottom: 9%; translate: none; left: 11%; right: 11%; }
 .x-i.x-i.x-i .i-cases > .case.d-hana .c-index b { color: var(--ink); }
+/* The scan IS the card: full bleed, no inset frame or second border. */
+.x-i.x-i.x-i .i-cases > .case.d-trade .c-art.c-deck, .x-i.x-i.x-i .i-cases > .case.d-tarot .c-art.c-deck { inset: 0; border: 0; outline: 0; box-shadow: none; border-radius: inherit; overflow: hidden; }
+.x-i.x-i.x-i .i-cases > .case.d-trade .c-art.c-deck img, .x-i.x-i.x-i .i-cases > .case.d-tarot .c-art.c-deck img { object-fit: cover; position: static; z-index: auto; }
+.x-i.x-i.x-i .i-cases > .case h3 { box-shadow: none; }
