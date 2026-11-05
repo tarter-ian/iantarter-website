@@ -914,3 +914,31 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
   .x-i.x-i.x-i .i-cases > .k2 { grid-column: 5 / 9; margin: calc(var(--H) - (var(--col) * 4 + 72px) * 726 / 939) 0 0; }
   .x-i.x-i.x-i .i-cases > .k3 { grid-column: 10 / 13; margin: calc(var(--H) - (var(--col) * 3 + 48px) * 1.16) 0 0; }
 }
+/* Phone at the row's scale (Ian: "way too big"): its bottom is the row's baseline, a little taller than a 3-column card. */
+@media (min-width: 1001px) {
+  .x-i.x-i .i-cases { --B: calc(var(--H) * 1.12); }
+  .x-i.x-i.x-i.x-i .i-cases > .floor-phone { --mm: calc(var(--B) / 147.6); width: calc(var(--mm) * 71.6); grid-column: 1 / 4; justify-self: center; margin: 0; }
+  .x-i.x-i.x-i.x-i .i-cases > .k1.d-phone { grid-column: 1 / 4; justify-self: center; width: calc(var(--B) / 147.6 * 71.6); height: var(--B); }
+  .x-i.x-i.x-i.x-i .i-cases > .k1.d-phone h3 { left: 6%; right: 6%; }
+  .x-i.x-i.x-i.x-i .i-cases > .k2 { margin-top: calc(var(--B) - (var(--col) * 4 + 72px) * 726 / 939); }
+  .x-i.x-i.x-i.x-i .i-cases > .k3 { margin-top: calc(var(--B) - (var(--col) * 3 + 48px) * 1.16); }
+}
+/* Tokens: an even, centred row under each object, alternating small tilts. */
+.x-i.x-i .c-tokens { left: -40px; right: -40px; justify-content: center; gap: 10px; bottom: -50px; }
+.x-i.x-i .c-tokens li:nth-child(1) { rotate: -6deg; translate: 0 0; } .x-i.x-i .c-tokens li:nth-child(2) { rotate: 4deg; translate: 0 0; } .x-i.x-i .c-tokens li:nth-child(3) { rotate: -2deg; translate: 0 0; }
+/* Embedded in the scene: the sheet is the photo itself (no added margin), paper tone matched to the other stock, soft curl shading at the edges, lit by the same canopy light. */
+.x-i.x-i.x-i.x-i .i-cases > .case.d-sheet { aspect-ratio: 939 / 574; background: #f1efe8; }
+@media (min-width: 1001px) { .x-i.x-i.x-i.x-i .i-cases > .k2 { margin-top: calc(var(--B) - (var(--col) * 4 + 72px) * 574 / 939); } }
+.x-i.x-i.x-i .i-cases > .case.d-sheet .c-art.c-deck img { filter: sepia(.08) brightness(.97); }
+.x-i.x-i.x-i .i-cases > .case.d-fig .c-art.c-deck img { filter: none; }
+.x-i.x-i.x-i .i-cases > .case.d-sheet::after, .x-i.x-i.x-i .i-cases > .case.d-fig::after { z-index: 3; box-shadow: inset 0 0 0 1px rgba(0,0,0,.05), inset 0 -10px 16px -10px rgba(40,44,20,.22), inset 10px 0 16px -12px rgba(40,44,20,.16); background-image: linear-gradient(125deg, rgba(255,255,255,.12), rgba(255,255,255,0) 40%), url("tex/stock-grain.webp?v=2"); background-size: auto, 340px; mix-blend-mode: overlay; }
+/* Title plates sit across each object's bottom edge (half on the object, half on the moss) so they never cover the artifact; tokens lie below. */
+.x-i.x-i.x-i.x-i .i-cases > .case h3 { top: auto; bottom: -24px; translate: none; }
+.x-i.x-i.x-i.x-i .i-cases > .case.d-sheet h3 { left: 14%; right: 14%; }
+.x-i.x-i .c-tokens { bottom: -118px; }
+@media (min-width: 1001px) { .x-i.x-i.x-i .i-row.i-cases { margin-bottom: 200px; } }
+/* BIRDS: the figure is the whole printed page, no inset. */
+.x-i.x-i.x-i.x-i .i-cases > .case.d-fig { aspect-ratio: 558 / 519; }
+.x-i.x-i.x-i.x-i .i-cases > .case.d-fig .c-art.c-deck { inset: 0; border-radius: inherit; overflow: hidden; }
+.x-i.x-i.x-i .i-cases > .case.d-fig .c-art.c-deck img { mix-blend-mode: multiply; filter: sepia(.06) brightness(.98); }
+@media (min-width: 1001px) { .x-i.x-i.x-i.x-i .i-cases > .k3 { margin-top: calc(var(--B) - (var(--col) * 3 + 48px) * 519 / 558); } }
