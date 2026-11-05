@@ -462,7 +462,7 @@
   // Each lit piece gets its scene offset, so the shared light (baked into backgrounds in CSS) lines up across pieces.
   function relight() {
     const sc = scene(); PW = sc.offsetWidth; PH = sc.offsetHeight; sc.style.setProperty("--pw", PW + "px"); sc.style.setProperty("--ph", PH + "px");
-    document.querySelectorAll(".card, .hand a").forEach(el => { const o = offset(el); el.style.setProperty("--ox", o.x + "px"); el.style.setProperty("--oy", o.y + "px"); });
+    document.querySelectorAll(".card, .hand a, .c-tokens li").forEach(el => { const o = offset(el); el.style.setProperty("--ox", o.x + "px"); el.style.setProperty("--oy", o.y + "px"); });
   }
   // ---------- The pieces' lighting, drawn once ----------
   // Each card and menu card is lit by a stack of see-through layers (sun flecks, canopy shade, the page-wide falloff) blended
