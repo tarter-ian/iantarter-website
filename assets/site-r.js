@@ -1125,9 +1125,38 @@ document.addEventListener("click", e => {
   const a = c.querySelector("h3 a[href]"); if (!a) return;
   if (e.metaKey || e.ctrlKey || e.button === 1) open(a.href, "_blank"); else a.click();
 });
-// A sheet that was lifted keeps its grass rules for a second after the cursor leaves, while its grass eases back over the edge (dir-i.css .settle);
-// at rest the strips carry no clip (a clip on every strip made Chrome drop pieces while scrolling).
-document.addEventListener("pointerout", e => {
-  const c = e.target.closest && e.target.closest(".i-cases > .case"); if (!c || c.contains(e.relatedTarget)) return;
-  c.classList.add("settle"); clearTimeout(c._settle); c._settle = setTimeout(() => c.classList.remove("settle"), 1100);
-});
+// Lifting a sheet (Ian 23:09): a copy of the sheet, with no grass of its own, is laid over it and rises, so the grass around
+// the real sheet never moves or gets cut out; the copy simply lies on top of it. Once the copy has landed it fades away
+// over the real sheet, so the blades come back over the edge softly. (Hover devices only; keyboard focus keeps the old lift.)
+(() => {
+  if (!matchMedia("(hover: hover)").matches) return;
+  const lift = c => {
+    let k = c._copy;
+    // (a copy that has fully landed is made afresh, so it carries the sheet's current pictures of its light, tag and tape)
+    if (k && (k.classList.contains("gone") || !k.isConnected)) { k.remove(); k = c._copy = null; }
+    if (!k) {
+      k = c.cloneNode(true); c._copy = k;
+      k.querySelectorAll(".blade-strip, .grow-fx").forEach(n => n.remove());
+      k.classList.remove("lay"); k.classList.add("lift-copy"); k.setAttribute("aria-hidden", "true");
+      k.querySelectorAll("a, button").forEach(n => n.setAttribute("tabindex", "-1"));
+      k.addEventListener("pointerleave", e => { if (!c.contains(e.relatedTarget)) drop(c); });
+      k.addEventListener("transitionend", e => { if (e.target === k && e.propertyName === "transform" && !k.classList.contains("up")) land(c); });
+    }
+    for (const v of ["--ox", "--oy", "--kw", "--kh"]) k.style.setProperty(v, c.style.getPropertyValue(v));
+    Object.assign(k.style, { left: c.offsetLeft + "px", top: c.offsetTop + "px", width: c.offsetWidth + "px", height: c.offsetHeight + "px" });
+    if (!k.isConnected) c.after(k);
+    k.classList.remove("fade", "gone"); c.classList.add("lifted");
+    k.getBoundingClientRect(); k.classList.add("up");
+  };
+  const land = c => { const k = c._copy; if (k.classList.contains("up")) return; c.classList.remove("lifted"); k.classList.add("fade"); };
+  const drop = c => { const k = c._copy; if (!k || !k.classList.contains("up")) return; k.classList.remove("up");
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) { land(c); k.classList.add("gone"); } };
+  document.addEventListener("pointerover", e => {
+    const c = e.target.closest && e.target.closest(".i-cases > .case:is(.d-sheet, .d-fig):not(.lift-copy)"); if (c) lift(c);
+  });
+  document.addEventListener("pointerout", e => {
+    const c = e.target.closest && e.target.closest(".i-cases > .case:is(.d-sheet, .d-fig):not(.lift-copy)"); if (!c || !c._copy) return;
+    if (c.contains(e.relatedTarget) || c._copy.contains(e.relatedTarget)) return; drop(c);
+  });
+  document.addEventListener("animationend", e => { if (e.target.classList && e.target.classList.contains("lift-copy") && e.target.classList.contains("fade")) e.target.classList.add("gone"); });
+})();

@@ -511,6 +511,70 @@
       if (old) URL.revokeObjectURL(old);
       await new Promise(r => (!document.prerendering && window.requestIdleCallback || setTimeout)(r));
     }
+    await bakePieces(gen, dpr);
+  }
+  // Today's small pieces (Ian 23:05, "more optimized"): the case sheets' light layer, the title tags, the method tape and the wooden
+  // section signs each drew the canopy light live from a stack of blended page-sized layers, plus a cut-out and a drop shadow, on
+  // every repaint; on a big screen the browser couldn't keep up while scrolling and dropped whole pieces for a few frames. Each is
+  // drawn here once, with the same steps, into one picture (shape and shadow included) that its CSS then shows as a plain image.
+  const lightStack = (x, W, H, ox, oy, shade, sun) => {
+    const f = (st, mode) => { x.globalCompositeOperation = mode; x.fillStyle = st; x.fillRect(0, 0, W, H); };
+    { const g = lin(x, 150, PW, PH, -ox, -oy); g.addColorStop(0, "rgb(255,253,249)"); g.addColorStop(.55, "rgb(246,246,239)"); g.addColorStop(1, "rgb(232,234,223)"); f(g, "multiply"); }
+    { x.save(); x.translate(-ox + PW * .25, -oy + PH * .15); x.scale(PW * 1.4, PH); const g = x.createRadialGradient(0, 0, 0, 0, 0, 1);
+      g.addColorStop(.55, "rgba(40,48,30,0)"); g.addColorStop(1, "rgba(40,48,30,.27)"); x.globalCompositeOperation = "multiply"; x.fillStyle = g;
+      x.fillRect((ox - PW * .25) / (PW * 1.4), (oy - PH * .15) / PH, W / (PW * 1.4), H / PH); x.restore(); }
+    for (const [img, mode] of [[shade, "multiply"], [sun, "soft-light"]]) { const c = copy(img, 1600), pt = x.createPattern(c, "repeat");
+      pt.setTransform(new DOMMatrix().translate(-180 - ox - FX(), -120 - oy - FY()).scale(1600 / c.width)); f(pt, mode); }
+    x.globalCompositeOperation = "source-over";
+  };
+  const tileAt = (x, img, size, px, py, W, H, mode = "source-over") => { const c = copy(img, size), pt = x.createPattern(c, "repeat");
+    pt.setTransform(new DOMMatrix().translate(px, py).scale(size / c.width)); x.globalCompositeOperation = mode; x.fillStyle = pt; x.fillRect(0, 0, W, H); x.globalCompositeOperation = "source-over"; };
+  const canvasOf = (W, H, dpr) => { const cv = document.createElement("canvas"); cv.width = Math.ceil(W * dpr); cv.height = Math.ceil(H * dpr); const x = cv.getContext("2d", RW); x.scale(dpr, dpr); return [cv, x]; };
+  // draw a finished face onto a canvas pad px bigger all round, with its drop shadow
+  const withShadow = (face, W, H, pad, dpr, sh) => { const [cv, x] = canvasOf(W + pad * 2, H + pad * 2, dpr);
+    if (sh) Object.assign(x, { shadowColor: sh[0], shadowOffsetX: sh[1] * dpr, shadowOffsetY: sh[2] * dpr, shadowBlur: sh[3] * dpr });
+    x.setTransform(1, 0, 0, 1, 0, 0); x.drawImage(face, pad * dpr, pad * dpr); face.width = 0; return cv; };
+  async function bakePieces(gen, dpr) {
+    const T = n => tex(ROOT + "assets/tex/" + n);
+    const [sun, shadeC, shadeL, p006, wood] = await Promise.all([T("canopy-sun-2.webp"), T("canopy-shade-card.webp"), T("canopy-shade-L.webp"), T("paper006_tile-1024.webp"), T("wood095_tile-1024.webp")]);
+    if (!sun || !shadeC || !shadeL || !p006 || !wood || gen !== bakeGen) return;
+    const els = [...document.querySelectorAll(".x-i .i-cases > .case:is(.d-sheet, .d-fig):not(.lift-copy), .x-i .i-cases > .case:not(.lift-copy) h3, .x-i .i-cases > .case:not(.lift-copy) .c-tokens li, .x-i .i-label")];
+    for (const el of els) {
+      if (gen !== bakeGen) return;
+      const W = el.offsetWidth, H = el.offsetHeight, ox = parseFloat(el.style.getPropertyValue("--ox")) || 0, oy = parseFloat(el.style.getPropertyValue("--oy")) || 0;
+      const kind = el.matches(".case") ? "sheet" : el.matches("h3") ? "tag" : el.matches("li") ? "tape" : "sign";
+      const tapeSrc = kind === "tape" ? getComputedStyle(el).borderImageSource.replace(/^url\("?|"?\)$/g, "") : "";
+      const key = [kind, W, H, ox, oy, PW, PH, dpr, FX(), FY(), tapeSrc].join();
+      if (!W || !H || el._pieceKey === key) continue;
+      let cv;
+      if (kind === "sheet") { // the light layer alone (it multiplies over the paper), 14px past the sheet as its CSS box is
+        const P = 14, [c, x] = canvasOf(W + 2 * P, H + 2 * P, dpr); lightStack(x, W + 2 * P, H + 2 * P, ox - P, oy - P, shadeC, sun); cv = c;
+      } else if (kind === "sign") { // wood, a top-lit sheen, then the light
+        const [c, x] = canvasOf(W, H, dpr); tileAt(x, wood, 520, 0, (H - 520 * wood.height / wood.width) * .3, W, H);
+        const g = x.createLinearGradient(0, 0, 0, H); g.addColorStop(0, "rgba(255,255,255,.18)"); g.addColorStop(.4, "rgba(0,0,0,0)"); g.addColorStop(1, "rgba(0,0,0,.18)"); x.fillStyle = g; x.fillRect(0, 0, W, H);
+        lightStack(x, W, H, ox, oy, shadeL, sun); cv = c;
+      } else if (kind === "tag") { // manila card cut to a tag, its punched hole, the light, and its shadow
+        const [c, x] = canvasOf(W, H, dpr), th = 260 * p006.height / p006.width;
+        x.beginPath(); x.moveTo(11, 0); x.lineTo(W, 0); x.lineTo(W, H); x.lineTo(11, H); x.lineTo(0, H - 11); x.lineTo(0, 11); x.closePath(); x.clip();
+        tileAt(x, p006, 260, (W - 260) / 2, (H - th) / 2, W, H); x.globalCompositeOperation = "multiply"; x.fillStyle = "rgba(236,222,180,.55)"; x.fillRect(0, 0, W, H); x.globalCompositeOperation = "source-over";
+        x.beginPath(); x.arc(15, H / 2, 6.75, 0, 7); x.fillStyle = "#c9b98e"; x.fill(); x.beginPath(); x.arc(15, H / 2, 3.5, 0, 7); x.fillStyle = "#34402a"; x.fill();
+        lightStack(x, W, H, ox, oy, shadeC, sun); cv = withShadow(c, W, H, 6, dpr, ["rgba(10,14,4,.4)", 1, 2, 1.5]);
+      } else { // real tape: the torn ends kept, the middle stretched (as its border-image did), the light at 90% over its middle (as its ::after did), a faint shadow
+        const tp = await T(tapeSrc.split("/assets/tex/").pop()); if (!tp || gen !== bakeGen) return;
+        const [c, x] = canvasOf(W, H, dpr), iw = tp.naturalWidth, ih = tp.naturalHeight, e = 34;
+        x.drawImage(tp, 0, 0, e, ih, 0, 0, 13, H); x.drawImage(tp, iw - e, 0, e, ih, W - 13, 0, 13, H); x.drawImage(tp, e, 0, iw - 2 * e, ih, 13, 0, W - 26, H);
+        const [lc, lx] = canvasOf(W - 44, H - 2, dpr); lx.fillStyle = "#fff"; lx.fillRect(0, 0, W, H); lightStack(lx, W - 44, H - 2, ox + 22, oy + 1, shadeC, sun);
+        // multiply only where the tape is: draw the light into a copy masked by the tape's own alpha
+        const [mc, mx] = canvasOf(W, H, dpr); mx.drawImage(lc, 22, 1, W - 44, H - 2); lc.width = 0; mx.globalCompositeOperation = "destination-in"; mx.drawImage(c, 0, 0, W, H);
+        x.globalAlpha = .9; x.globalCompositeOperation = "multiply"; x.drawImage(mc, 0, 0, W, H); mc.width = 0; x.globalAlpha = 1; x.globalCompositeOperation = "source-over";
+        cv = withShadow(c, W, H, 4, dpr, ["rgba(10,14,4,.22)", 0, 1, .6]);
+      }
+      const blob = await new Promise(r => cv.toBlob(r)); cv.width = 0; if (!blob || gen !== bakeGen) return;
+      const url = URL.createObjectURL(blob), im = new Image(); im.src = url; await im.decode().catch(() => {});
+      if (gen !== bakeGen) { URL.revokeObjectURL(url); return; }
+      const old = el._pieceUrl; el._pieceUrl = url; el._pieceKey = key; el.style.setProperty("--bk", `url("${url}")`); el.classList.add("bk");
+      if (old) setTimeout(() => URL.revokeObjectURL(old), 3000);
+    }
   }
   // The ground: the canopy shade and the page-wide falloff only darken (multiply), so they are folded into one soft map
   // for the whole page (drawn at half size; it has no fine detail), and the moss gets its 20% shade mixed in once. The
@@ -555,6 +619,7 @@
   // the baked pictures of the light are dropped at once (the CSS underneath draws the same light from the new numbers,
   // so the pan shows it right away) and baked again later
   addEventListener("floor-moved", () => { bakeGen++;
+    for (const el of document.querySelectorAll(".x-i .bk")) { el._pieceKey = null; el.classList.remove("bk"); }
     for (const el of [scene(), ...document.querySelectorAll(".x-i .card, .x-i .hand a")]) { if (!el._bakeKey && !el._lightUrl) continue; el._bakeKey = null;
       for (const k of ["backgroundImage", "backgroundSize", "backgroundPosition", "backgroundRepeat", "backgroundBlendMode", "backgroundOrigin"]) el.style[k] = ""; }
     // (the grass is redone once the pan has landed: redoing it mid-slide made the slide stutter)
