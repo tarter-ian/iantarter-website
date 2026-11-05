@@ -763,3 +763,17 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 }
 @media (min-width: 1001px) { .x-i.x-i .i-hero { margin-bottom: 56px; } .x-i.x-i .i-row.i-cases { margin-bottom: 286px; } }
 .x-i.x-i .i-row.i-jobs { margin-bottom: 112px; } @media (max-width: 700px) { .x-i.x-i .i-row.i-jobs { margin-bottom: 64px; } }
+/* Real deck indices (Ian, 2026-11-05): rank over a real suit, tight in the corner, red or black; each section is one suit */
+.x-i.x-i .c-index { top: 10px; left: 12px; gap: 1px; }
+.x-i.x-i .c-index b { font-size: 22px; letter-spacing: -.04em; color: var(--ink); }
+.x-i.x-i .c-index i, .x-i.x-i .c-index.s-pine i, .x-i.x-i .c-index.s-acorn i { width: auto; height: auto; background: none; border: 0; border-radius: 0; transform: none; box-shadow: none; font-style: normal; font-size: 18px; line-height: 1; color: var(--ink); font-family: "Segoe UI Symbol", "Apple Symbols", "DejaVu Sans", sans-serif; }
+.x-i.x-i .c-index.s-red b, .x-i.x-i .c-index.s-red i { color: var(--link); }
+.x-i.x-i .c-index-b { top: auto; left: auto; bottom: 10px; right: 12px; transform: rotate(180deg); }
+/* The phone lies under the first case card again */
+@media (min-width: 1001px) { .x-i.x-i.x-i .i-cases > .floor-phone { width: calc(100% + 72px); --mm: calc(((100cqw - 11 * 24px) / 12 * 3 + 48px + 72px) / 71.6); } .x-i.x-i .i-cases > .floor-phone { z-index: 0; } .x-i.x-i .i-cases > .case { z-index: 1; } }
+/* Court-card faces for the case studies (Ian, 2026-11-05): a framed, double-ended print in red, black, gold and blue; the title rides a banner across the middle */
+.x-i.x-i.x-i .i-cases > .case .cf { padding: 0; position: relative; height: 100%; min-height: 0; }
+.x-i.x-i.x-i .i-cases > .case .c-art.c-court { position: absolute; left: 14%; right: 14%; top: 50%; translate: 0 -50%; height: auto; aspect-ratio: 200 / 280; margin: 0; background: none; display: block; }
+.x-i .c-court .court { display: block; width: 100%; height: 100%; }
+.x-i.x-i.x-i .i-cases > .case h3 { position: absolute; left: 10%; right: 10%; top: 50%; translate: 0 -50%; z-index: 3; margin: 0; padding: 8px 10px 9px; background: #fbf6e6; border: 2.5px solid var(--ink); border-radius: 3px; text-align: center; font-size: 17px; line-height: 1.15; box-shadow: 0 2px 0 rgba(23,22,18,.25); }
+.x-i.x-i.x-i .i-cases > .case .c-art.c-court { z-index: 1; } .x-i.x-i.x-i .i-cases > .case h3 { z-index: 8; }
