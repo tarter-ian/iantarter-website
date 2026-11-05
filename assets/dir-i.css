@@ -1143,3 +1143,5 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
     transition: transform .22s cubic-bezier(.4,0,.2,1) .07s, clip-path .14s linear .1s; animation: blade-slip .9s cubic-bezier(.3,.5,.4,1) both; }
 }
 @media (prefers-reduced-motion: reduce) { .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case > .blade-strip { animation: none !important; } }
+/* No spring (Ian 21:29): the blades just slide off the rising edge and settle, with no outward bounce or sway. */
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case > .blade-strip { animation: none; }
