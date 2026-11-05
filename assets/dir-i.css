@@ -995,3 +995,27 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 .x-i.x-i.x-i.x-i.x-i .c-tokens li { width: auto; height: auto; padding: 0; display: block; border-radius: 0; background: none; box-shadow: none; rotate: none; translate: none; color: #2b2720; font-family: var(--f-ui); font-weight: 600; font-size: 14px; line-height: 1.45; letter-spacing: 0; text-align: left; white-space: nowrap; }
 .x-i.x-i.x-i.x-i.x-i .c-tokens li svg { display: none; } .x-i.x-i.x-i.x-i.x-i .c-tokens li span { max-width: none; }
 .x-i.x-i.x-i.x-i.x-i .i-cases > .k2 .c-tokens { rotate: 3deg; }
+/* Masking tape v2 (Ian: "doesn't really look like tape"): straight long edges, torn short ends, translucent so what's under shows through, fine crepe across the width, flat on the surface. */
+.x-i { --tape-clip: polygon(3px 0, calc(100% - 4px) 0, 100% 14%, calc(100% - 3px) 27%, 100% 41%, calc(100% - 5px) 56%, calc(100% - 1px) 70%, calc(100% - 4px) 85%, calc(100% - 2px) 100%, 4px 100%, 0 87%, 4px 73%, 1px 58%, 5px 44%, 0 30%, 3px 15%);
+  --tape-bg: repeating-linear-gradient(91deg, rgba(90,70,30,.06) 0 1px, rgba(255,255,255,0) 1px 3px), linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,0) 45%, rgba(0,0,0,.04)), linear-gradient(rgba(236,224,190,.78), rgba(236,224,190,.78)); }
+.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3, .x-i.x-i.x-i.x-i.x-i.x-i .c-tokens li, .x-i.x-i.x-i .i-label {
+  clip-path: var(--tape-clip); background: var(--tape-bg); mix-blend-mode: multiply; filter: none; opacity: 1; color: #2b2720; border: 0; border-radius: 0; box-shadow: none; }
+.x-i.x-i.x-i .i-label::after { display: none; }
+.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3 { padding: 7px 20px 7px; }
+.x-i.x-i.x-i.x-i.x-i.x-i .c-tokens { background: none; clip-path: none; filter: none; padding: 0; gap: 5px; align-items: flex-end; rotate: none; right: -26px; bottom: -10px; }
+.x-i.x-i.x-i.x-i.x-i.x-i .c-tokens li { padding: 5px 14px 5px; line-height: 1.2; }
+.x-i.x-i.x-i.x-i.x-i.x-i .c-tokens li:nth-child(1) { rotate: -3deg; translate: -10px 0; } .x-i.x-i.x-i.x-i.x-i.x-i .c-tokens li:nth-child(2) { rotate: 2deg; translate: 4px 0; } .x-i.x-i.x-i.x-i.x-i.x-i .c-tokens li:nth-child(3) { rotate: -1.5deg; translate: -4px 0; }
+/* Real tape (ambientCG Tape005 scans, CC0): each label is drawn with a real torn piece as a border-image, the torn ends kept and the middle stretched to the label's length. */
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3, .x-i.x-i.x-i.x-i.x-i.x-i.x-i .c-tokens li, .x-i.x-i.x-i.x-i .i-label {
+  clip-path: none; background: none; mix-blend-mode: multiply; filter: none; opacity: .96;
+  border-style: solid; border-width: 0 13px; border-image-source: url("tex/tape/t02.webp"); border-image-slice: 0 34 fill; border-image-width: 0 13px; border-image-repeat: stretch; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k1 h3 { border-image-source: url("tex/tape/t01.webp"); }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k3 h3 { border-image-source: url("tex/tape/t04.webp"); }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i .c-tokens li:nth-child(1) { border-image-source: url("tex/tape/t05.webp"); }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i .c-tokens li:nth-child(2) { border-image-source: url("tex/tape/t06.webp"); }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i .c-tokens li:nth-child(3) { border-image-source: url("tex/tape/t07.webp"); }
+.x-i.x-i.x-i.x-i .i-label { border-image-source: url("tex/tape/t04.webp"); padding: 8px 12px 7px; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3 { padding: 7px 10px; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i .c-tokens li { padding: 5px 6px; }
+/* Titles and method tape stay legible: opaque enough to cover grass tips at an edge. */
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3, .x-i.x-i.x-i.x-i.x-i.x-i.x-i .c-tokens li { mix-blend-mode: normal; opacity: 1; filter: drop-shadow(0 1px .6px rgba(10,14,4,.22)); }
