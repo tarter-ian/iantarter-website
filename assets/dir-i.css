@@ -1235,3 +1235,10 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
   transition: scale .35s cubic-bezier(.2,.7,.3,1), translate .35s cubic-bezier(.2,.7,.3,1), clip-path .35s cubic-bezier(.2,.7,.3,1); }
 .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-sheet:hover::before, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-fig:hover::before, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-sheet:focus-within::before, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-fig:focus-within::before {
   clip-path: inset(calc(4px - (100% - 28px) * .025) calc(14px - (100% - 28px) * .025) calc(24px - (100% - 28px) * .025) calc(14px - (100% - 28px) * .025) round 2px); }
+/* Pieces vanishing while scrolling (Ian's recording 22:57): every grass strip around the sheets carried a clip-path at rest, and on a composited strip
+   that costs the graphics card a second full-size picture (a mask) per strip; with hundreds of strips Chrome ran out of room and dropped whole pieces
+   (the phone, a sheet) for a few frames. Strips carry no clip and no counter-move at rest; only while a sheet is lifted, or settling back (.settle,
+   set for a second by site-r.js), do its own strips get them. */
+@media (hover: hover) {
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone):not(:hover):not(:focus-within):not(.settle) > .blade-strip { clip-path: none; scale: none; translate: none; transition: none; }
+}

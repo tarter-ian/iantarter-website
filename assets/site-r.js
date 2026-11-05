@@ -1125,3 +1125,9 @@ document.addEventListener("click", e => {
   const a = c.querySelector("h3 a[href]"); if (!a) return;
   if (e.metaKey || e.ctrlKey || e.button === 1) open(a.href, "_blank"); else a.click();
 });
+// A sheet that was lifted keeps its grass rules for a second after the cursor leaves, while its grass eases back over the edge (dir-i.css .settle);
+// at rest the strips carry no clip (a clip on every strip made Chrome drop pieces while scrolling).
+document.addEventListener("pointerout", e => {
+  const c = e.target.closest && e.target.closest(".i-cases > .case"); if (!c || c.contains(e.relatedTarget)) return;
+  c.classList.add("settle"); clearTimeout(c._settle); c._settle = setTimeout(() => c.classList.remove("settle"), 1100);
+});
