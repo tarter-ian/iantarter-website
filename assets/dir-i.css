@@ -978,3 +978,20 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 .x-i.x-i .c-tokens li { width: 90px; height: 90px; }
 .x-i.x-i.x-i .c-tokens { bottom: -80px; }
 .x-i.x-i .c-tokens li { letter-spacing: 0; }
+/* Tokens v3 placement: a vertical stack straddling each object's right edge, centred on its height. */
+.x-i.x-i.x-i.x-i .c-tokens { flex-direction: column; flex-wrap: nowrap; gap: 6px; left: auto; right: -45px; top: 50%; bottom: auto; width: auto; translate: 0 -50%; justify-content: center; }
+.x-i.x-i.x-i.x-i .c-tokens li:nth-child(1) { rotate: -6deg; translate: -2px 0; } .x-i.x-i.x-i.x-i .c-tokens li:nth-child(2) { rotate: 5deg; translate: 3px 0; } .x-i.x-i.x-i.x-i .c-tokens li:nth-child(3) { rotate: -3deg; translate: -1px 0; }
+@media (min-width: 1001px) { .x-i.x-i .i-cases { --gapR: 80px; } .x-i.x-i.x-i .i-row.i-cases { margin-bottom: 96px; } }
+/* Tape (Ian 18:43): titles on a strip of the section-label tape across each object's top edge; methods on a shorter strip across a lower corner. */
+.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3 { top: -18px; padding: 8px 22px 7px; border: 0; border-radius: 0; box-shadow: none; rotate: -1.5deg;
+  color: #2b2720; background: rgba(226,214,180,.9) url("tex/paper001_tile-1024.webp") center / 300px; background-blend-mode: multiply;
+  clip-path: polygon(0 8%, 3% 0, 5% 12%, 8% 2%, 10% 0, 90% 0, 92% 6%, 95% 0, 97% 10%, 100% 4%, 98% 30%, 100% 55%, 97% 78%, 100% 100%, 94% 92%, 91% 100%, 88% 95%, 10% 100%, 7% 92%, 4% 100%, 2% 90%, 0 100%, 2% 70%, 0 45%, 3% 24%);
+  filter: drop-shadow(1px 2px 1.5px rgba(10,14,4,.35)) brightness(.95); }
+.x-i.x-i.x-i.x-i.x-i .i-cases > .k2 h3 { rotate: 1.2deg; } .x-i.x-i.x-i.x-i.x-i .i-cases > .k3 h3 { rotate: -.8deg; }
+.x-i.x-i.x-i.x-i.x-i .c-tokens { flex-direction: column; gap: 2px; left: auto; right: -22px; top: auto; bottom: -14px; width: auto; translate: none; rotate: -4deg; align-items: flex-start;
+  padding: 9px 20px 8px; color: #2b2720; background: rgba(226,214,180,.9) url("tex/paper001_tile-1024.webp") center / 300px; background-blend-mode: multiply;
+  clip-path: polygon(0 6%, 4% 0, 8% 5%, 12% 0, 88% 0, 92% 4%, 96% 0, 100% 5%, 97% 30%, 100% 60%, 97% 85%, 100% 100%, 93% 95%, 88% 100%, 12% 100%, 7% 95%, 3% 100%, 0 94%, 3% 65%, 0 35%, 3% 15%);
+  filter: drop-shadow(1px 2px 1.5px rgba(10,14,4,.35)) brightness(.95); }
+.x-i.x-i.x-i.x-i.x-i .c-tokens li { width: auto; height: auto; padding: 0; display: block; border-radius: 0; background: none; box-shadow: none; rotate: none; translate: none; color: #2b2720; font-family: var(--f-ui); font-weight: 600; font-size: 14px; line-height: 1.45; letter-spacing: 0; text-align: left; white-space: nowrap; }
+.x-i.x-i.x-i.x-i.x-i .c-tokens li svg { display: none; } .x-i.x-i.x-i.x-i.x-i .c-tokens li span { max-width: none; }
+.x-i.x-i.x-i.x-i.x-i .i-cases > .k2 .c-tokens { rotate: 3deg; }
