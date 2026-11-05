@@ -1145,3 +1145,9 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 @media (prefers-reduced-motion: reduce) { .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case > .blade-strip { animation: none !important; } }
 /* No spring (Ian 21:29): the blades just slide off the rising edge and settle, with no outward bounce or sway. */
 .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case > .blade-strip { animation: none; }
+/* Still bounced (Ian 21:33): the sway rule lost on specificity, and the brief ride-up then drop also read as a bounce. Now the grass never moves:
+   its counter-move runs on exactly the sheet's timing, so the two cancel, and the paper simply rises over it. */
+@media (hover: hover) {
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone) > .blade-strip, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone):hover > .blade-strip, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone):focus-within > .blade-strip {
+    animation: none; translate: none; transition: transform .35s cubic-bezier(.2,.7,.3,1) 0s, clip-path .35s cubic-bezier(.2,.7,.3,1) 0s; }
+}
