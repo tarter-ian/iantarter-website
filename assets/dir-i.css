@@ -1040,3 +1040,6 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
   .x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k4 { grid-row: 1; align-self: start; }
   .x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k5 { grid-column: 9 / 13; grid-row: 2; margin: 0; width: 100%; }
 }
+/* Method strips sit inside their own object's edge, so a neighbour's grass can't grow over them (Ian 19:37). */
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .c-tokens { right: 10px; bottom: 10px; }
+.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k4 h3 { max-width: 98%; }
