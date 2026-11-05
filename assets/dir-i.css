@@ -1025,3 +1025,10 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 @media (min-width: 1001px) { .x-i.x-i.x-i.x-i.x-i .i-cases > .k4 { grid-column: 9 / 13; grid-row: 1 / 3; align-self: center; margin: 0; width: 100%; } }
 .x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k4 h3 { border-image-source: url("tex/tape/t02.webp"); rotate: .6deg; }
 .x-i.x-i.x-i.x-i.x-i .i-cases > .d-cap .c-art.c-deck { aspect-ratio: 656 / 468; }
+/* Tape hierarchy (Ian 18:56): section labels > case titles > methods.
+   Section labels: kraft tape, 22px (section-head size). Titles: cream tape, 20px. Methods: small cream pieces, 14px, lighter weight, muted ink. */
+.x-i.x-i.x-i.x-i.x-i .i-label { border-image-source: url("tex/tape/k04.webp"); font-size: 22px; font-weight: 700; line-height: 1.1; padding: 10px 14px 9px; color: #2b2720; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3 { font-size: 20px; line-height: 1.15; padding: 8px 12px; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .c-tokens li { font-size: 14px; font-weight: 500; color: var(--muted); padding: 3px 4px; line-height: 1.2; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .c-tokens { gap: 3px; }
+.x-i.x-i.x-i.x-i.x-i .i-label { mix-blend-mode: normal; opacity: 1; position: relative; z-index: 6; filter: drop-shadow(0 1px .6px rgba(10,14,4,.22)); }
