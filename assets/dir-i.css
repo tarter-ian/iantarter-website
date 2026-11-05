@@ -1113,3 +1113,19 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3 { padding-bottom: 17px; }
 .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k4 .c-art.c-deck { top: 9%; bottom: auto; left: 0; right: 0; height: 88%; aspect-ratio: auto; }
 @media (min-width: 1001px) { .x-i.x-i.x-i.x-i.x-i.x-i .i-cases { padding-top: 64px; } }
+/* Tags, take 2 (Ian 21:21): the tag lies in front, on the object; its string runs from the punched hole up to the top edge and wraps over it, tied on behind. */
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3 { top: 16px; bottom: auto; clip-path: none; padding: 8px 14px 8px 30px; rotate: -1.5deg; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k2 h3 { rotate: 1.2deg; } .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k3 h3 { rotate: -.8deg; } .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k4 h3 { rotate: .6deg; } .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k5 h3 { rotate: -1deg; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3::after { left: 9px; top: -19px; bottom: calc(50% - 4px); width: 12px; height: auto; rotate: -6deg; transform-origin: 50% 100%;
+  background: none; border: 2px solid #a48c62; border-top: 0; border-radius: 0 0 7px 7px; box-shadow: 1px 1px 1px rgba(10,14,4,.25); z-index: -2; }
+/* where the string bends over the edge it catches a little light */
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3 > :first-child { position: relative; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3 { z-index: 7; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3::after { z-index: 1; border-color: #9c845a; }
+/* Hover, take 3 (Ian 21:21: still not right): nothing moves. The sheet stays where it lies; only the title underlines and the cursor shows it opens. */
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:hover, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:focus-within { translate: none; scale: none; box-shadow: var(--edge), var(--sh); }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k2:hover, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k2:focus-within { transform: rotate(1deg); }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k3:hover, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k3:focus-within { transform: rotate(-1deg); }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k4:hover, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k4:focus-within { transform: rotate(.8deg); }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k5:hover, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k5:focus-within { transform: rotate(-.7deg); }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:hover > .blade-strip, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:focus-within > .blade-strip { transform: none; clip-path: none; opacity: 1; }
