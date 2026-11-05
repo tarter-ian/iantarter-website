@@ -1019,3 +1019,9 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 .x-i.x-i.x-i.x-i.x-i.x-i.x-i .c-tokens li { padding: 5px 6px; }
 /* Titles and method tape stay legible: opaque enough to cover grass tips at an edge. */
 .x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3, .x-i.x-i.x-i.x-i.x-i.x-i.x-i .c-tokens li { mix-blend-mode: normal; opacity: 1; filter: drop-shadow(0 1px .6px rgba(10,14,4,.22)); }
+/* Capstone figure (Ian 18:50): the right-hand slot, columns 9-12, spanning both rows and centred between them. Placeholder title and methods until Ian gives the wording. */
+.x-i.x-i.x-i.x-i.x-i .i-cases > .k4 { transform: rotate(.8deg); }
+.x-i.x-i.x-i.x-i.x-i .i-cases > .d-cap { aspect-ratio: 656 / 468; }
+@media (min-width: 1001px) { .x-i.x-i.x-i.x-i.x-i .i-cases > .k4 { grid-column: 9 / 13; grid-row: 1 / 3; align-self: center; margin: 0; width: 100%; } }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k4 h3 { border-image-source: url("tex/tape/t02.webp"); rotate: .6deg; }
+.x-i.x-i.x-i.x-i.x-i .i-cases > .d-cap .c-art.c-deck { aspect-ratio: 656 / 468; }
