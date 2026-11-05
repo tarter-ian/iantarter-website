@@ -777,3 +777,15 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 .x-i .c-court .court { display: block; width: 100%; height: 100%; }
 .x-i.x-i.x-i .i-cases > .case h3 { position: absolute; left: 10%; right: 10%; top: 50%; translate: 0 -50%; z-index: 3; margin: 0; padding: 8px 10px 9px; background: #fbf6e6; border: 2.5px solid var(--ink); border-radius: 3px; text-align: center; font-size: 17px; line-height: 1.15; box-shadow: 0 2px 0 rgba(23,22,18,.25); }
 .x-i.x-i.x-i .i-cases > .case .c-art.c-court { z-index: 1; } .x-i.x-i.x-i .i-cases > .case h3 { z-index: 8; }
+/* Experience and game cards get the same printed-card anatomy (Ian, 2026-11-05): indices outside a framed face.
+   Experience = number-card frame with the text printed inside; games = a game card: name bar, art window, text box. */
+.x-i.x-i .job > .cf, .x-i.x-i .game > .cf, .x-i.x-i .g-card.g-pitch > .cf { position: relative; border: 0; padding: 56px 46px 56px; }
+.x-i.x-i .job > .cf::before, .x-i.x-i .game > .cf::before, .x-i.x-i .g-card.g-pitch > .cf::before { content: ""; position: absolute; inset: 38px 30px; border: 2.5px solid var(--ink); border-radius: 2px; background: rgba(251,246,230,.75); pointer-events: none; z-index: 0; }
+.x-i.x-i .job > .cf > *, .x-i.x-i .game > .cf > *, .x-i.x-i .g-card.g-pitch > .cf > * { position: relative; z-index: 1; }
+.x-i.x-i .job > .cf > .c-index, .x-i.x-i .game > .cf > .c-index, .x-i.x-i .g-card.g-pitch > .cf > .c-index { position: absolute; z-index: 2; }
+/* game card: name bar, framed art, framed text box */
+.x-i.x-i .g-pitch h3 { margin: -6px -6px 14px; padding: 8px 12px; background: #fbf6e6; border: 2px solid var(--ink); border-radius: 3px; }
+.x-i.x-i .g-pitch .g-photo, .x-i.x-i .g-pitch .art-dw { border: 2px solid var(--ink); border-radius: 2px; }
+.x-i.x-i .g-pitch .art-dw { background: #2f5d8a; overflow: hidden; }
+.x-i.x-i .g-pitch .g-facts { border: 2px solid var(--ink); border-radius: 2px; padding: 12px 14px; background: #fbf6e6; margin: 14px -6px 14px; }
+.x-i.x-i .c-index.c-kun b { font-size: 15px; letter-spacing: 0; writing-mode: vertical-rl; text-orientation: upright; }
