@@ -1169,3 +1169,19 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
   .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone):hover > .blade-strip, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone):focus-within > .blade-strip { transition: transform .35s cubic-bezier(.2,.7,.3,1) 0s, clip-path 0s; }
 }
 .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:has(h3 a[href]) { cursor: pointer; }
+/* The tag overlaps its object's top edge a little (Ian 21:47); the string runs from the hole to that edge and over it. */
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3 { bottom: calc(100% - 14px); }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3::after { bottom: 6px; }
+/* Setting a sheet down (Ian 21:48: the grass flickered back in). At rest the hidden area is a rectangle well inside the sheet, clear of every blade;
+   lifting snaps it out to the sheet's footprint, and after the sheet lands it shrinks back evenly from all four edges, so the blades ease back over the edge together. */
+@media (hover: hover) {
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone) > .blade-strip {
+    clip-path: polygon(evenodd, -50% -50%, 150% -50%, 150% 150%, -50% 150%, -50% -50%,
+      calc(var(--cx) + 90px) calc(var(--cy) + 90px), calc(var(--cx) + var(--cw) - 90px) calc(var(--cy) + 90px),
+      calc(var(--cx) + var(--cw) - 90px) calc(var(--cy) + var(--ch) - 90px), calc(var(--cx) + 90px) calc(var(--cy) + var(--ch) - 90px));
+    transition: transform .35s cubic-bezier(.2,.7,.3,1) 0s, clip-path .7s cubic-bezier(.3,0,.2,1) .3s; }
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone):hover > .blade-strip, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone):focus-within > .blade-strip { transition: transform .35s cubic-bezier(.2,.7,.3,1) 0s, clip-path 0s; }
+}
+/* A lifted sheet's shadow stays the size of the sheet (Ian 21:51): the same shadow as at rest, pulled in by the 5% the sheet grows, so on the ground it covers the same area. */
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-sheet:hover, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-fig:hover, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-sheet:focus-within, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-fig:focus-within {
+  box-shadow: 0 0 0 .5px rgba(60,55,40,.25), 0 1px 1px -1px rgba(10,14,4,.3), 3px 7px 9px -12px rgba(10,14,4,.38), 18px 22px 22px -25px rgba(10,14,4,.5); }
