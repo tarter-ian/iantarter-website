@@ -1119,3 +1119,9 @@
     } finally { btn.disabled = false; }
   });
 })();
+// The whole case object opens its case study (its title stays the keyboard link); text selection and other links are left alone.
+document.addEventListener("click", e => {
+  const c = e.target.closest(".i-cases > .case"); if (!c || e.target.closest("a, button") || String(getSelection())) return;
+  const a = c.querySelector("h3 a[href]"); if (!a) return;
+  if (e.metaKey || e.ctrlKey || e.button === 1) open(a.href, "_blank"); else a.click();
+});

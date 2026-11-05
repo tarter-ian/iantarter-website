@@ -1151,3 +1151,21 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
   .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone) > .blade-strip, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone):hover > .blade-strip, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone):focus-within > .blade-strip {
     animation: none; translate: none; transition: transform .35s cubic-bezier(.2,.7,.3,1) 0s, clip-path .35s cubic-bezier(.2,.7,.3,1) 0s; }
 }
+/* Critique pass (Ian 21:39). 1) Each tag lies on the grass just above its object's top-left corner, its string running down from the hole and over the edge to tie on behind,
+   so the artifact itself stays uncovered. 2) Method tape hangs off the lower corner, clear of chart labels and the app's button; earlier objects sit above
+   later neighbours so no neighbour's grass grows over that tape. 3) The space above the row only makes room for the tags. */
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3 { top: auto; bottom: calc(100% + 6px); left: 4px; max-width: calc(100% - 8px); }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3::after { left: 10px; right: auto; top: 50%; bottom: -20px; width: 10px; height: auto; rotate: 4deg; transform-origin: 50% 0;
+  border: 2px solid #9c845a; border-bottom: 0; border-radius: 6px 6px 0 0; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case .c-tokens { right: -14px; bottom: -20px; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k1 { z-index: 5; } .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k2, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k3 { z-index: 4; } .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k4, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k5 { z-index: 3; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:hover, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:focus-within { z-index: 8; }
+@media (min-width: 1001px) { .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases { padding-top: 76px; --gapR: 96px; } }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k1 .c-tokens { right: -64px; bottom: 6px; }
+/* The paper covers its grass all at once (Ian 21:41: blades were vanishing one by one as the hidden area swept across). The footprint now appears
+   the instant the sheet rises and goes the instant it lands; only the strips' counter-move is animated. */
+@media (hover: hover) {
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone) > .blade-strip { transition: transform .35s cubic-bezier(.2,.7,.3,1) 0s, clip-path .35s step-end 0s; }
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone):hover > .blade-strip, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone):focus-within > .blade-strip { transition: transform .35s cubic-bezier(.2,.7,.3,1) 0s, clip-path 0s; }
+}
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:has(h3 a[href]) { cursor: pointer; }
