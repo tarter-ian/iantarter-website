@@ -876,3 +876,24 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 @media (max-width: 1000px) { .x-i .c-tokens { right: -10px; } }
 .x-i .c-tokens { left: 7%; right: auto; bottom: -54px; gap: 6px; }
 @media (max-width: 1000px) { .x-i .c-tokens { left: 7%; right: auto; } }
+/* BIRDS: the study's own figure (from the public preprint) printed onto the card stock: ink multiplies into the paper instead of sitting on it. */
+.x-i.x-i.x-i .i-cases > .case.d-fig .c-art.c-deck { inset: 7% 7% auto; height: auto; aspect-ratio: 558 / 519; }
+.x-i.x-i.x-i .i-cases > .case.d-fig .c-art.c-deck img { object-fit: contain; mix-blend-mode: multiply; filter: contrast(1.05) saturate(.9); }
+/* EXACT is the phone alone: k1 is an invisible frame over the phone's upper part that holds the title plate and tokens, lined up with the cards. */
+@media (min-width: 1001px) {
+  .x-i.x-i.x-i .i-cases > .k1.d-phone { grid-column: 1 / 4; grid-row: 1; width: calc(100% + 72px); aspect-ratio: auto; align-self: start; height: calc((100cqw - 11 * 24px) / 12 * 3 * 1.4 + 48px * 1.4); z-index: 2; }
+  .x-i.x-i .i-cases > .k2 { grid-column: 6 / 9; } .x-i.x-i .i-cases > .k3 { grid-column: 10 / 13; }
+}
+.x-i.x-i.x-i .i-cases > .k1.d-phone { background: none; box-shadow: none; padding: 0; transform: none; }
+.x-i.x-i.x-i .i-cases > .k1.d-phone::after { display: none; }
+.x-i.x-i.x-i .i-cases > .k1.d-phone:hover, .x-i.x-i.x-i .i-cases > .k1.d-phone:focus-within { transform: none; translate: none; scale: none; box-shadow: none; }
+.x-i.x-i.x-i .i-cases > .k1.d-phone h3 { left: 14%; right: 14%; }
+/* Japan study: the real workshop table, photographed from above, printed edge to edge. */
+.x-i.x-i.x-i .i-cases > .case.d-photo { padding: 0; }
+.x-i.x-i.x-i .i-cases > .case.d-photo .c-art.c-deck { inset: 0; border-radius: inherit; overflow: hidden; }
+.x-i.x-i.x-i .i-cases > .case.d-photo::after { background-image: linear-gradient(125deg, rgba(255,255,255,.14) 0%, rgba(255,255,255,0) 35%, rgba(255,255,255,0) 70%, rgba(255,255,255,.06) 100%); }
+.x-i .c-tokens li { width: 80px; height: 80px; font-size: 12px; }
+.x-i .c-tokens { left: 2%; gap: 4px; } .x-i .c-tokens li:nth-child(3) { rotate: -3deg; translate: 0 8px; }
+@media (min-width: 1001px) { .x-i.x-i.x-i .i-cases > .k2 { margin-left: -40px; margin-right: 40px; } }
+.x-i.x-i.x-i .i-cases > .case.d-fig .c-art.c-deck { inset: 6% 5% auto; }
+.x-i.x-i.x-i .i-cases > .case.d-fig .c-art.c-deck img { filter: contrast(1.35) saturate(1.25); }
