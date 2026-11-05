@@ -897,3 +897,20 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 @media (min-width: 1001px) { .x-i.x-i.x-i .i-cases > .k2 { margin-left: -40px; margin-right: 40px; } }
 .x-i.x-i.x-i .i-cases > .case.d-fig .c-art.c-deck { inset: 6% 5% auto; }
 .x-i.x-i.x-i .i-cases > .case.d-fig .c-art.c-deck img { filter: contrast(1.35) saturate(1.25); }
+/* Each case object keeps its real shape (Ian 18:27): phone, a landscape letter sheet, a printed figure.
+   Bottoms line up on the line a 3-column 5:7 card would end at, so the title plates and tokens share one baseline. */
+.x-i.x-i.x-i .i-cases > .case.d-sheet, .x-i.x-i.x-i .i-cases > .case.d-fig { padding: 0; border-radius: 2px; background-color: #fbfaf6;
+  background-image: linear-gradient(rgba(251,250,246,.86), rgba(251,250,246,.86)), url("tex/paper001_tile-1024.webp"); background-size: auto, 420px; }
+.x-i.x-i.x-i .i-cases > .case.d-sheet { aspect-ratio: 939 / 726; }
+.x-i.x-i.x-i .i-cases > .case.d-sheet .c-art.c-deck { inset: 0; border-radius: inherit; overflow: hidden; }
+.x-i.x-i.x-i .i-cases > .case.d-sheet .c-art.c-deck img { mix-blend-mode: multiply; }
+.x-i.x-i.x-i .i-cases > .case.d-fig { aspect-ratio: 1 / 1.16; }
+.x-i.x-i.x-i .i-cases > .case.d-fig .c-art.c-deck { inset: 6% 6% auto; }
+.x-i.x-i.x-i .i-cases > .case.d-sheet::after, .x-i.x-i.x-i .i-cases > .case.d-fig::after { border-radius: inherit; background-image: none; box-shadow: none; }
+.x-i.x-i.x-i .i-cases > .case h3 { bottom: 30px; }
+.x-i.x-i.x-i .i-cases > .case.d-sheet h3 { bottom: 22px; left: 18%; right: 18%; }
+@media (min-width: 1001px) {
+  .x-i.x-i .i-cases { --col: calc((100cqw - 11 * 24px) / 12); --H: calc((var(--col) * 3 + 48px) * 1.4); }
+  .x-i.x-i.x-i .i-cases > .k2 { grid-column: 5 / 9; margin: calc(var(--H) - (var(--col) * 4 + 72px) * 726 / 939) 0 0; }
+  .x-i.x-i.x-i .i-cases > .k3 { grid-column: 10 / 13; margin: calc(var(--H) - (var(--col) * 3 + 48px) * 1.16) 0 0; }
+}
