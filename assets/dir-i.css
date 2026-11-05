@@ -1032,3 +1032,11 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .c-tokens li { font-size: 14px; font-weight: 500; color: var(--muted); padding: 3px 4px; line-height: 1.2; }
 .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .c-tokens { gap: 3px; }
 .x-i.x-i.x-i.x-i.x-i .i-label { mix-blend-mode: normal; opacity: 1; position: relative; z-index: 6; filter: drop-shadow(0 1px .6px rgba(10,14,4,.22)); }
+/* Bias plugin affinity diagram (Ian 19:33): a printout of the Figma board, under the capstone in columns 9-12; the capstone moves to the top slot. */
+.x-i.x-i.x-i.x-i.x-i .i-cases > .d-aff { aspect-ratio: 605 / 540; }
+.x-i.x-i.x-i.x-i.x-i .i-cases > .d-aff .c-art.c-deck { aspect-ratio: 605 / 540; }
+.x-i.x-i.x-i.x-i.x-i .i-cases > .k5 { transform: rotate(-.7deg); }
+@media (min-width: 1001px) {
+  .x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k4 { grid-row: 1; align-self: start; }
+  .x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k5 { grid-column: 9 / 13; grid-row: 2; margin: 0; width: 100%; }
+}
