@@ -857,3 +857,10 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 .x-i.x-i.x-i .i-cases > .case.d-trade .c-art.c-deck img { object-fit: fill; }
 @media (max-width: 1000px) { .x-i.x-i.x-i .i-cases > .case.d-trade { width: min(100%, 340px); justify-self: center; } }
 @media (min-width: 1001px) { .x-i.x-i .c-intro { grid-column: 1 / 8; } } /* 7 columns: hugs the tagline and buttons */
+/* Method tokens: punched chipboard tokens lying across each case card's foot, printed face up. */
+.x-i .c-tokens { position: absolute; left: 8%; right: 4%; bottom: -15px; z-index: 10; display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; pointer-events: none; }
+.x-i .c-tokens li { font-family: var(--f-ui); font-weight: 700; font-size: 14px; line-height: 1; color: var(--ink); padding: 7px 12px 8px; border-radius: 999px;
+  background-color: #f4efe2; background-image: linear-gradient(rgba(250,246,236,.82), rgba(250,246,236,.82)), url("tex/paper001_tile-1024.webp"); background-size: auto, 300px;
+  box-shadow: 0 1.5px 0 #b59a72, 0 3px 0 #8a6e48, 1px 4px 4px rgba(8,10,0,.35), 4px 9px 14px rgba(8,10,0,.25); }
+.x-i .c-tokens li:nth-child(1) { rotate: -3deg; } .x-i .c-tokens li:nth-child(2) { rotate: 2deg; translate: 0 3px; } .x-i .c-tokens li:nth-child(3) { rotate: -1deg; translate: 0 -1px; }
+.x-i .c-tokens { flex-wrap: nowrap; gap: 8px; } .x-i .c-tokens li { white-space: nowrap; }
