@@ -1185,3 +1185,21 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 /* A lifted sheet's shadow stays the size of the sheet (Ian 21:51): the same shadow as at rest, pulled in by the 5% the sheet grows, so on the ground it covers the same area. */
 .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-sheet:hover, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-fig:hover, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-sheet:focus-within, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-fig:focus-within {
   box-shadow: 0 0 0 .5px rgba(60,55,40,.25), 0 1px 1px -1px rgba(10,14,4,.3), 3px 7px 9px -12px rgba(10,14,4,.38), 18px 22px 22px -25px rgba(10,14,4,.5); }
+/* (fix) the lifted footprint rule was outranked by the resting one, so the grass was never hidden or let back out; restated here at full strength. */
+@media (hover: hover) {
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone):hover > .blade-strip, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone):focus-within > .blade-strip {
+    clip-path: polygon(evenodd, -50% -50%, 150% -50%, 150% 150%, -50% 150%, -50% -50%,
+      calc(var(--cx) - var(--cw) * .025) calc(var(--cy) - var(--ch) * .025 - 10px), calc(var(--cx) + var(--cw) * 1.025) calc(var(--cy) - var(--ch) * .025 - 10px),
+      calc(var(--cx) + var(--cw) * 1.025) calc(var(--cy) + var(--ch) * 1.025 - 10px), calc(var(--cx) - var(--cw) * .025) calc(var(--cy) + var(--ch) * 1.025 - 10px)); }
+}
+/* The canopy shade falling on a lifted sheet stays the size and place it is on the ground (Ian 21:58): the light is fixed in the world, so while the sheet
+   grows 5% and rises 10px its light layers are drawn 5% smaller and shifted back by the same amount. */
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-sheet, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-fig {
+  --L-size-h: calc(1600px / 1.05), calc(1600px / 1.05), calc(var(--pw, 100%) / 1.05) calc(var(--ph, 100%) / 1.05), calc(var(--pw, 100%) / 1.05) calc(var(--ph, 100%) / 1.05);
+  --L-pos-h: calc((-180px - var(--ox) - var(--wx, 0px) + var(--kw, 0px) * .025) / 1.05) calc((-120px - var(--oy) - var(--wy, 0px) + var(--kh, 0px) * .025 + 10px) / 1.05),
+    calc((-180px - var(--ox) - var(--wx, 0px) + var(--kw, 0px) * .025) / 1.05) calc((-120px - var(--oy) - var(--wy, 0px) + var(--kh, 0px) * .025 + 10px) / 1.05),
+    calc((0px - var(--ox) + var(--kw, 0px) * .025) / 1.05) calc((0px - var(--oy) + var(--kh, 0px) * .025 + 10px) / 1.05),
+    calc((0px - var(--ox) + var(--kw, 0px) * .025) / 1.05) calc((0px - var(--oy) + var(--kh, 0px) * .025 + 10px) / 1.05);
+  transition: transform .35s cubic-bezier(.2,.7,.3,1), box-shadow .35s cubic-bezier(.2,.7,.3,1), translate .35s cubic-bezier(.2,.7,.3,1), background-size .35s cubic-bezier(.2,.7,.3,1), background-position .35s cubic-bezier(.2,.7,.3,1); }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-sheet:hover, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-fig:hover, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-sheet:focus-within, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-fig:focus-within {
+  background-size: var(--L-size-h), auto, 360px; background-position: var(--L-pos-h), 0 0, 0 0; }
