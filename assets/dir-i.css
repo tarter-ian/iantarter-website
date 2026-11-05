@@ -772,10 +772,10 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 .x-i.x-i.x-i .i-cases > .case .c-art.c-court { z-index: 1; } .x-i.x-i.x-i .i-cases > .case h3 { z-index: 8; }
 .x-i.x-i .c-index.c-kun b { font-size: 15px; letter-spacing: 0; writing-mode: vertical-rl; text-orientation: upright; }
 /* Experience = employee ID badges (Ian, 2026-11-05): CR80 landscape plastic, a punched slot, a colour band per employer */
-.x-i.x-i .job { aspect-ratio: 85.6 / 54; border-radius: 12px; padding: 0; overflow: hidden;
+.x-i.x-i .job { aspect-ratio: 85.6 / 54; border-radius: 12px; padding: 0;
   background-image: linear-gradient(160deg, rgba(255,255,255,.7), rgba(255,255,255,0) 45%), linear-gradient(#f7f6f2, #f1efe9); }
 .x-i.x-i .job > .cf { border: 0; border-radius: 0; padding: 0 22px 18px; display: flex; flex-direction: column; gap: 4px; height: 100%; box-sizing: border-box; }
-.x-i.x-i .job .c-org { order: -1; margin: 0 -22px 10px; padding: 26px 22px 9px; background: var(--band, var(--ink)); color: #fff; font-family: var(--f-heading); font-weight: 700; font-size: var(--t17, 17px); letter-spacing: .01em; position: relative; }
+.x-i.x-i .job .c-org { order: -1; margin: 0 -22px 10px; padding: 26px 22px 9px; background: var(--band, var(--ink)); color: #fff; border-radius: 12px 12px 0 0; font-family: var(--f-heading); font-weight: 700; font-size: var(--t17, 17px); letter-spacing: .01em; position: relative; }
 .x-i.x-i .job .c-org::before { content: ""; position: absolute; top: 9px; left: 50%; width: 46px; height: 8px; margin-left: -23px; border-radius: 4px; background: #24301b; box-shadow: inset 0 1px 2px rgba(0,0,0,.6), 0 1px 0 rgba(255,255,255,.35); }
 .x-i.x-i .job h3 { order: 0; margin: 0; } .x-i.x-i .job .c-type { order: 1; margin: 0; } .x-i.x-i .job .c-text { order: 2; margin-top: 8px; }
 .x-i .j1, .x-i .j6 { --band: #b5371f; } .x-i .j2 { --band: #2f5d8a; } .x-i .j3 { --band: #7a5a1e; } .x-i .j4 { --band: #3f6b4a; } .x-i .j5 { --band: #171612; }
@@ -790,3 +790,28 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 /* Badges on a real CC0 PVC scan (ambientCG Plastic013A); the band is tinted by multiplying the same plastic */
 .x-i.x-i .job { background-image: linear-gradient(160deg, rgba(255,255,255,.35), rgba(255,255,255,0) 45%), url("tex/plastic013a_tile-1024.webp"); background-size: auto, 320px; background-color: #f4f3ef; }
 .x-i.x-i .job .c-org { background-image: url("tex/plastic013a_tile-1024.webp"); background-size: 320px; background-blend-mode: multiply; background-color: var(--band, var(--ink)); }
+/* Notes from Ian, 2026-11-05 17:00 */
+/* 1) one rule under a sell sheet's title, not two */
+.x-i.x-i .g-pitch .g-facts { border-top: 0; padding-top: 4px; }
+/* 3) the phone takes its own height in the case row, so About never runs into it */
+@media (min-width: 1001px) {
+  .x-i.x-i.x-i .i-cases > .floor-phone { margin-bottom: 0; }
+  .x-i.x-i .i-cases { align-items: start; }
+  .x-i.x-i .i-row.i-cases { margin-bottom: 96px; }
+}
+/* 4) hovering picks the card up: it straightens, grows a little and its shadow spreads and softens */
+.x-i.x-i.x-i .i-cases > .case { transition: transform .35s cubic-bezier(.2,.7,.3,1), box-shadow .35s cubic-bezier(.2,.7,.3,1), translate .35s cubic-bezier(.2,.7,.3,1); }
+.x-i.x-i.x-i .i-cases > .case:hover, .x-i.x-i.x-i .i-cases > .case:focus-within { transform: rotate(0deg) scale(1.05); translate: 0 -10px; z-index: 6;
+  box-shadow: 0 2px 2px rgba(8,10,0,.3), 6px 14px 18px rgba(8,10,0,.28), 18px 36px 48px rgba(8,10,0,.3); }
+@media (prefers-reduced-motion: reduce) { .x-i.x-i.x-i .i-cases > .case { transition: none; } }
+/* 5) every sell sheet the same size: letter-shaped, rows share one height; the Daily Weather wallet lies over its title */
+.x-i.x-i .i-games, .x-i.x-i.games-i .g-grid { align-items: start; }
+.x-i.x-i .g-pitch .g-facts { gap: 12px 20px; }
+.x-i.x-i .g1.g-pitch h3 { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.x-i.x-i .g1.g-pitch .art-dw { margin-top: -6px; }
+/* Sell sheets: at least letter-shaped, and every sheet on a page the same height (rows share the tallest) */
+.x-i.x-i .i-games, .x-i.x-i.games-i .g-grid { container-type: inline-size; align-items: stretch; grid-auto-rows: 1fr; }
+.x-i.x-i .game.g-pitch, .x-i.x-i .g-card.g-pitch { aspect-ratio: auto; min-height: calc((100cqw - 40px) / 2 * 11 / 8.5); }
+@media (max-width: 700px) { .x-i.x-i .game.g-pitch, .x-i.x-i .g-card.g-pitch { min-height: calc(100cqw * 11 / 8.5); } }
+@media (min-width: 701px) { .x-i.x-i.games-i .g-card.g-pitch { min-height: 660px; } }
+.x-i.x-i.games-i .g-card.g-pitch { margin-top: 0; }
