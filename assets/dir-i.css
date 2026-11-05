@@ -1057,3 +1057,59 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
   clip-path: polygon(11px 0, 100% 0, 100% 100%, 11px 100%, 0 calc(100% - 11px), 0 11px); filter: drop-shadow(1px 2px 1.5px rgba(10,14,4,.4)); }
 .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3::after { content: ""; display: block; position: absolute; left: -38px; top: 50%; width: 54px; height: 2px; z-index: -2;
   background: repeating-linear-gradient(60deg, #b9a27a 0 2px, #8c7752 2px 3px); border-radius: 2px; rotate: -14deg; transform-origin: right center; box-shadow: 0 1px 1px rgba(0,0,0,.3); }
+/* One face for every label (Ian 20:54): titles were mixing Bricolage 20px (no link) and Plus Jakarta 17px (linked). All labels: Plus Jakarta Sans 700, one ink; sizes 22 / 20 / 14. */
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-label, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3 a { font-family: var(--f-ui); font-weight: 700; letter-spacing: 0; color: #2b2720; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3 a { font-size: inherit; line-height: inherit; }
+/* Printed sheets read as paper, not pasted images (Ian 20:54): the canopy light and shade fall on them like every other piece, real paper grain shows through the ink, ink sits slightly soft in the fibres, and one corner lifts with its own shadow and curl. */
+.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-sheet, .x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-fig {
+  background-color: #f3f0e6;
+  background-image: var(--L-img), linear-gradient(rgba(246,243,233,.62), rgba(246,243,233,.62)), url("tex/paper001_tile-1024.webp");
+  background-size: var(--L-size), auto, 360px; background-position: var(--L-pos), 0 0, 0 0; background-blend-mode: var(--L-blend), normal, normal; background-repeat: repeat;
+  box-shadow: 0 0 0 .5px rgba(60,55,40,.25), 0 1px 1px rgba(10,14,4,.3), 3px 7px 9px -3px rgba(10,14,4,.38), 18px 22px 22px -16px rgba(10,14,4,.5); }
+.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-sheet .c-art.c-deck img, .x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-fig .c-art.c-deck img { mix-blend-mode: multiply; opacity: .93; filter: blur(.25px) contrast(.94) sepia(.05); }
+.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-sheet::after, .x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-fig::after { z-index: 3; mix-blend-mode: overlay; opacity: 1;
+  background-image: linear-gradient(318deg, rgba(10,14,4,.16) 0, rgba(255,255,255,.34) 2.2%, rgba(255,255,255,.08) 7%, rgba(255,255,255,0) 14%), linear-gradient(112deg, rgba(0,0,0,.05), rgba(0,0,0,0) 12%), url("tex/stock-grain.webp?v=2");
+  background-size: auto, auto, 340px; background-blend-mode: normal, normal, normal;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.04), inset 0 -8px 14px -10px rgba(40,44,20,.25); }
+/* The art box must not form its own layer, or the multiply print blends with nothing and skips the canopy light and paper beneath (Ian 20:56: "not sensitive to the shadows"). */
+.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-sheet .c-art.c-deck, .x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-fig .c-art.c-deck { z-index: auto; }
+/* Labels take the canopy light too (offsets set per label by blades.js relight()). */
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-label::before { background-image: var(--L-img), linear-gradient(180deg, rgba(255,255,255,.18), rgba(0,0,0,0) 40%, rgba(0,0,0,.18)), url("tex/wood095_tile-1024.webp");
+  background-size: var(--L-size), auto, 520px; background-position: var(--L-pos), 0 0, 0 30%; background-blend-mode: var(--L-blend), normal, normal; background-repeat: repeat; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3::before { background-image: var(--L-img), radial-gradient(circle at 15px 50%, #34402a 0 3.5px, #c9b98e 3.5px 6.5px, rgba(0,0,0,0) 7px), linear-gradient(rgba(236,222,180,.55), rgba(236,222,180,.55)), url("tex/paper006_tile-1024.webp");
+  background-size: var(--L-size), auto, auto, 260px; background-position: var(--L-pos), 0 0, 0 0, center; background-blend-mode: var(--L-blend), normal, multiply, normal; background-repeat: repeat; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .c-tokens li { position: relative; isolation: isolate; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .c-tokens li::after { content: ""; position: absolute; inset: 1px 9px; z-index: -1; pointer-events: none; mix-blend-mode: multiply;
+  background-image: var(--L-img); background-size: var(--L-size); background-position: var(--L-pos); background-blend-mode: var(--L-blend); background-repeat: repeat; opacity: .9; }
+/* Hover (Ian 20:56): the sheets no longer lift, so the grass around them never vanishes; the sheet only straightens a touch and its shadow deepens. */
+
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k2:hover, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k2:focus-within { transform: rotate(1deg) scale(1.05); }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k3:hover, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k3:focus-within { transform: rotate(-1deg) scale(1.05); }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k4:hover, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k4:focus-within { transform: rotate(.8deg) scale(1.05); }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k5:hover, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k5:focus-within { transform: rotate(-.7deg) scale(1.05); }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:hover > .blade-strip, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:focus-within > .blade-strip { opacity: 1; }
+
+/* Picking a sheet up, as it would really go (Ian 20:59): the paper lifts and grows a touch; the grass is rooted, so it stays exactly where it was
+   (each strip is moved back by the inverse of the lift), and the part of it now under the raised paper is hidden by the paper's footprint. */
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone) > .blade-strip { transform-origin: calc(var(--cx) + var(--cw) / 2) calc(var(--cy) + var(--ch) / 2); transition: transform .35s cubic-bezier(.2,.7,.3,1), clip-path .35s cubic-bezier(.2,.7,.3,1);
+  clip-path: polygon(evenodd, -50% -50%, 150% -50%, 150% 150%, -50% 150%, -50% -50%, var(--cx) var(--cy), var(--cx) var(--cy), var(--cx) var(--cy), var(--cx) var(--cy)); }
+@media (hover: hover) {
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone):hover > .blade-strip, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone):focus-within > .blade-strip { opacity: 1; transform: scale(calc(1 / 1.05)) translate(0, 10px);
+    clip-path: polygon(evenodd, -50% -50%, 150% -50%, 150% 150%, -50% 150%, -50% -50%,
+      calc(var(--cx) - var(--cw) * .025) calc(var(--cy) - var(--ch) * .025 - 10px), calc(var(--cx) + var(--cw) * 1.025) calc(var(--cy) - var(--ch) * .025 - 10px),
+      calc(var(--cx) + var(--cw) * 1.025) calc(var(--cy) + var(--ch) * 1.025 - 10px), calc(var(--cx) - var(--cw) * .025) calc(var(--cy) + var(--ch) * 1.025 - 10px)); }
+}
+/* Rows match (Ian 21:00): the two top sheets share one shape (the prompt sheet's), the two lower sheets share one, and the phone spans both rows exactly.
+   A chart printed on a page of another shape keeps its proportions, centred with a paper margin. */
+@media (min-width: 1001px) {
+  .x-i.x-i .i-cases { --hS: calc(var(--w4) * 574 / 939); --hG: calc(var(--w4) / 1.1); }
+}
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k4.d-cap, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k4.d-cap .c-art.c-deck { aspect-ratio: 939 / 574; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k3.d-fig, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k5.d-aff, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k3.d-fig .c-art.c-deck, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k5.d-aff .c-art.c-deck { aspect-ratio: 1.1; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k4 .c-art.c-deck img, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k3 .c-art.c-deck img, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k5 .c-art.c-deck img { object-fit: contain; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k4 .c-art.c-deck { inset: 9% 0 3%; height: auto; aspect-ratio: auto; }
+/* Tags tied on behind (Ian 21:01): each tag sits under the object's top edge, so the object hides its lower part. */
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3 { top: auto; bottom: calc(100% - 9px); clip-path: inset(-30px -30px 9px -70px); }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3 { padding-bottom: 17px; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k4 .c-art.c-deck { top: 9%; bottom: auto; left: 0; right: 0; height: 88%; aspect-ratio: auto; }
+@media (min-width: 1001px) { .x-i.x-i.x-i.x-i.x-i.x-i .i-cases { padding-top: 64px; } }

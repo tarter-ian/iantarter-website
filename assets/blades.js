@@ -430,7 +430,9 @@
         return [c, m]; };
       const [tcv, timg] = cut ? mk() : [null, null];
       for (const n of [cv, img, tcv, timg]) { if (!n) continue; n.className = cut ? "blade-strip side" : "blade-strip"; n.setAttribute("aria-hidden", "true"); n.alt = "";
-        Object.assign(n.style, { left: x0 + "px", top: y0 + "px", width: cv.width / DPR + "px", height: cv.height / DPR + "px" }); }
+        Object.assign(n.style, { left: x0 + "px", top: y0 + "px", width: cv.width / DPR + "px", height: cv.height / DPR + "px" });
+        // where the piece lies, in the strip's own box: a lifted piece hides the grass under its footprint (dir-i.css)
+        n.style.setProperty("--cx", -x0 + "px"); n.style.setProperty("--cy", -y0 + "px"); n.style.setProperty("--cw", el.offsetWidth + "px"); n.style.setProperty("--ch", el.offsetHeight + "px"); }
       if (cut) { // the edge's shadow layers go in front of its first sprig layer, in order
         const first = shadowsFirst.get(edge); if (first) el.insertBefore(timg, first); else el.appendChild(timg); }
       el.appendChild(img); if (cut && !shadowsFirst.has(edge)) shadowsFirst.set(edge, img);
@@ -462,7 +464,7 @@
   // Each lit piece gets its scene offset, so the shared light (baked into backgrounds in CSS) lines up across pieces.
   function relight() {
     const sc = scene(); PW = sc.offsetWidth; PH = sc.offsetHeight; sc.style.setProperty("--pw", PW + "px"); sc.style.setProperty("--ph", PH + "px");
-    document.querySelectorAll(".card, .hand a, .c-tokens li").forEach(el => { const o = offset(el); el.style.setProperty("--ox", o.x + "px"); el.style.setProperty("--oy", o.y + "px"); });
+    document.querySelectorAll(".card, .hand a, .c-tokens li, .i-label, .case h3").forEach(el => { const o = offset(el); el.style.setProperty("--ox", o.x + "px"); el.style.setProperty("--oy", o.y + "px"); });
   }
   // ---------- The pieces' lighting, drawn once ----------
   // Each card and menu card is lit by a stack of see-through layers (sun flecks, canopy shade, the page-wide falloff) blended
