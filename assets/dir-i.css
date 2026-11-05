@@ -815,3 +815,25 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 @media (max-width: 700px) { .x-i.x-i .game.g-pitch, .x-i.x-i .g-card.g-pitch { min-height: calc(100cqw * 11 / 8.5); } }
 @media (min-width: 701px) { .x-i.x-i.games-i .g-card.g-pitch { min-height: 660px; } }
 .x-i.x-i.games-i .g-card.g-pitch { margin-top: 0; }
+/* Three decks: poker (EXACT), hanafuda (Japan study), tarot (BIRDS). Equal heights, each card keeps its own deck's proportions. */
+.x-i.x-i.x-i .i-cases > .case.d-hana { aspect-ratio: 33 / 54; width: 85.6%; justify-self: center; border-radius: 5px; background: #2a1712; background-image: none; }
+.x-i.x-i.x-i .i-cases > .case.d-tarot { aspect-ratio: 7 / 12; width: 81.7%; justify-self: center; border-radius: 8px; }
+@media (max-width: 1000px) {
+  .x-i.x-i.x-i .i-cases > .case.d-hana { width: min(85.6%, 257px); }
+  .x-i.x-i.x-i .i-cases > .case.d-tarot { width: min(81.7%, 245px); }
+}
+.x-i.x-i.x-i .i-cases > .case .c-art.c-deck { position: absolute; inset: 0; translate: none; height: auto; aspect-ratio: auto; margin: 0; background: none; display: block; z-index: 1; }
+.x-i.x-i.x-i .i-cases > .case.d-hana .c-art.c-deck { inset: 6px; border-radius: 2px; overflow: hidden; }
+.x-i .c-deck .deck { display: block; width: 100%; height: 100%; }
+.x-i.x-i.x-i .i-cases > .case.d-hana .c-index { z-index: 3; top: 14px; left: 15px; }
+.x-i.x-i.x-i .i-cases > .case.d-hana .c-index b { color: #fbf6e6; }
+.x-i.x-i.x-i .i-cases > .case.d-hana .c-index-b { top: auto; left: auto; bottom: 16px; right: 15px; }
+.x-i.x-i.x-i .i-cases > .case.d-hana .c-index-b b { color: #fbf6e6; }
+.x-i.x-i.x-i .i-cases > .case.d-hana .c-index i, .x-i.x-i.x-i .i-cases > .case.d-hana .c-index-b i { display: none; }
+/* Tarot: the title is the card's own name plate at the foot. */
+.x-i.x-i.x-i .i-cases > .case.d-tarot h3 { top: auto; bottom: 3.6%; left: 7.4%; right: 7.4%; translate: none; min-height: 13%; display: flex; align-items: center; justify-content: center; box-shadow: none; border-radius: 0; text-transform: uppercase; letter-spacing: .06em; font-size: 15px; }
+.x-i.x-i.x-i .i-cases > .case.d-hana h3 { top: 71%; }
+.x-i.x-i.x-i .i-cases > .case.d-hana .c-index-b { bottom: 44px; right: 16px; }
+.x-i.x-i.x-i .i-cases > .case.d-hana .c-index-b b { color: var(--ink); }
+.x-i.x-i.x-i .i-cases > .case.d-hana .c-index-b { top: 14px; bottom: auto; right: 15px; transform: none; }
+.x-i.x-i.x-i .i-cases > .case.d-hana .c-index-b b { color: #fbf6e6; }
