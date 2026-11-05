@@ -1043,3 +1043,17 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 /* Method strips sit inside their own object's edge, so a neighbour's grass can't grow over them (Ian 19:37). */
 .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .c-tokens { right: 10px; bottom: 10px; }
 .x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k4 h3 { max-width: 98%; }
+/* Label mix (Ian 19:05-20:51): each level is its own material. Section labels: wooden signs (ambientCG Wood095, CC0). Case titles: manila specimen tags (Paper006, CC0) tied on with twine. Methods: real tape (above). */
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-label, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3 { border: 0; border-image: none; background: none; clip-path: none; filter: none; mix-blend-mode: normal; opacity: 1; isolation: isolate; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-label { position: relative; display: inline-block; padding: 10px 18px 9px; color: #3a2412; text-shadow: 0 1px 0 rgba(255,240,210,.45); }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-label::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: 3px;
+  background: linear-gradient(180deg, rgba(255,255,255,.18), rgba(0,0,0,0) 40%, rgba(0,0,0,.18)), url("tex/wood095_tile-1024.webp") 0 30% / 520px;
+  box-shadow: inset 0 0 0 1px rgba(70,45,20,.35), 1px 3px 3px rgba(10,14,4,.45); }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-label::after { display: none; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3 { padding: 8px 14px 8px 30px; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3::before { content: ""; position: absolute; inset: 0; z-index: -1;
+  background: radial-gradient(circle at 15px 50%, #34402a 0 3.5px, #c9b98e 3.5px 6.5px, rgba(0,0,0,0) 7px), linear-gradient(rgba(236,222,180,.55), rgba(236,222,180,.55)), url("tex/paper006_tile-1024.webp") center / 260px;
+  background-blend-mode: normal, multiply, normal;
+  clip-path: polygon(11px 0, 100% 0, 100% 100%, 11px 100%, 0 calc(100% - 11px), 0 11px); filter: drop-shadow(1px 2px 1.5px rgba(10,14,4,.4)); }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3::after { content: ""; display: block; position: absolute; left: -38px; top: 50%; width: 54px; height: 2px; z-index: -2;
+  background: repeating-linear-gradient(60deg, #b9a27a 0 2px, #8c7752 2px 3px); border-radius: 2px; rotate: -14deg; transform-origin: right center; box-shadow: 0 1px 1px rgba(0,0,0,.3); }
