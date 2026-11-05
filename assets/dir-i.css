@@ -787,3 +787,6 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 .x-i.x-i .g-pitch h3 { font-size: var(--t26, 26px); margin: 0 0 16px; padding: 0 0 12px; border-bottom: 2.5px solid var(--ink); }
 .x-i.x-i .g-pitch .g-facts { border-top: 1px solid rgba(23,22,18,.25); border-bottom: 1px solid rgba(23,22,18,.25); padding: 12px 0; margin: 16px 0; }
 .x-i.x-i .job { background-image: linear-gradient(160deg, rgba(255,255,255,.55), rgba(255,255,255,0) 45%), linear-gradient(rgba(247,246,242,.93), rgba(247,246,242,.93)), url("tex/paper001_tile-1024.webp"); background-size: auto, auto, 360px; }
+/* Badges on a real CC0 PVC scan (ambientCG Plastic013A); the band is tinted by multiplying the same plastic */
+.x-i.x-i .job { background-image: linear-gradient(160deg, rgba(255,255,255,.35), rgba(255,255,255,0) 45%), url("tex/plastic013a_tile-1024.webp"); background-size: auto, 320px; background-color: #f4f3ef; }
+.x-i.x-i .job .c-org { background-image: url("tex/plastic013a_tile-1024.webp"); background-size: 320px; background-blend-mode: multiply; background-color: var(--band, var(--ink)); }
