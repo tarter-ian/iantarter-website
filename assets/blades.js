@@ -480,7 +480,7 @@
   async function bakeLight() {
     const gen = ++bakeGen, dpr = Math.min(2, devicePixelRatio || 1);
     await bakeGround(gen);
-    const els = [...document.querySelectorAll(".x-i .card, .x-i .hand a")];
+    const els = [...document.querySelectorAll(".x-i .card:not(.d-sheet):not(.d-fig), .x-i .hand a")]; // (printed sheets keep their live light layers: the bake is for linen cards, and swapping between the two flickered)
     for (const el of els) {
       if (gen !== bakeGen) return;
       const kind = el.matches(".hand a") ? (el.classList.contains("r") ? "handR" : "hand") : "card", [shadeSrc, paperSrc, paperW, paperBlend, bg, sheen] = BAKE[kind];
