@@ -734,15 +734,8 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 .x-i .c-index-b { top: auto; left: auto; bottom: 14px; right: 16px; transform: rotate(180deg); }
 @media (min-width: 1001px) { .x-i.x-i .i-hero + #work, .x-i.x-i #work { margin: 48px 0 24px; } }
 @media (max-width: 1000px) { .x-i.x-i.x-i .i-cases > .case { width: min(100%, 300px); justify-self: center; } }
-/* Every card is a real playing card: 5:7 (grows if the text needs it), corner indices; each section is a suit (case = leaf, experience = pine, games = acorn) */
-.x-i.x-i .job, .x-i.x-i .game, .x-i.x-i .g-card.g-pitch { aspect-ratio: 5 / 7; position: relative; }
-.x-i.x-i .job > .cf, .x-i.x-i .game > .cf, .x-i.x-i .g-card.g-pitch > .cf { padding-top: 48px; padding-bottom: 48px; padding-left: 28px; padding-right: 28px; height: 100%; box-sizing: border-box; }
-.x-i.x-i .i-jobs { align-items: start; } .x-i.x-i .i-jobs .cf { height: 100%; }
-.x-i .c-index.s-pine i { width: 0; height: 0; background: none; border-radius: 0; transform: none; border-left: 6px solid transparent; border-right: 6px solid transparent; border-bottom: 11px solid var(--link); }
-.x-i .c-index.s-acorn i { width: 10px; height: 11px; border-radius: 45% 45% 50% 50% / 35% 35% 65% 65%; transform: none; box-shadow: inset 0 3px 0 rgba(0,0,0,.28); }
 /* Real cards keep their 5:7 shape and grow when the text needs it */
 .x-i.x-i.x-i .i-cases > .case { align-self: start; }
-.x-i.x-i .job > .cf, .x-i.x-i .game > .cf, .x-i.x-i .g-card.g-pitch > .cf { height: auto; min-height: 100%; }
 /* Text-heavy pieces are paper, not cards: About is a letter, Contact a note and a printed form */
 .x-i.x-i .c-about, .x-i.x-i .c-contact, .x-i.x-i .c-form { border-radius: 2px;
   background-image: linear-gradient(rgba(251,249,242,.86), rgba(251,249,242,.86)), url("tex/paper001_tile-1024.webp"); background-size: auto, 420px; }
@@ -777,15 +770,20 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 .x-i .c-court .court { display: block; width: 100%; height: 100%; }
 .x-i.x-i.x-i .i-cases > .case h3 { position: absolute; left: 10%; right: 10%; top: 50%; translate: 0 -50%; z-index: 3; margin: 0; padding: 8px 10px 9px; background: #fbf6e6; border: 2.5px solid var(--ink); border-radius: 3px; text-align: center; font-size: 17px; line-height: 1.15; box-shadow: 0 2px 0 rgba(23,22,18,.25); }
 .x-i.x-i.x-i .i-cases > .case .c-art.c-court { z-index: 1; } .x-i.x-i.x-i .i-cases > .case h3 { z-index: 8; }
-/* Experience and game cards get the same printed-card anatomy (Ian, 2026-11-05): indices outside a framed face.
-   Experience = number-card frame with the text printed inside; games = a game card: name bar, art window, text box. */
-.x-i.x-i .job > .cf, .x-i.x-i .game > .cf, .x-i.x-i .g-card.g-pitch > .cf { position: relative; border: 0; padding: 56px 46px 56px; }
-.x-i.x-i .job > .cf::before, .x-i.x-i .game > .cf::before, .x-i.x-i .g-card.g-pitch > .cf::before { content: ""; position: absolute; inset: 38px 30px; border: 2.5px solid var(--ink); border-radius: 2px; background: rgba(251,246,230,.75); pointer-events: none; z-index: 0; }
-.x-i.x-i .job > .cf > *, .x-i.x-i .game > .cf > *, .x-i.x-i .g-card.g-pitch > .cf > * { position: relative; z-index: 1; }
-.x-i.x-i .job > .cf > .c-index, .x-i.x-i .game > .cf > .c-index, .x-i.x-i .g-card.g-pitch > .cf > .c-index { position: absolute; z-index: 2; }
-/* game card: name bar, framed art, framed text box */
-.x-i.x-i .g-pitch h3 { margin: -6px -6px 14px; padding: 8px 12px; background: #fbf6e6; border: 2px solid var(--ink); border-radius: 3px; }
-.x-i.x-i .g-pitch .g-photo, .x-i.x-i .g-pitch .art-dw { border: 2px solid var(--ink); border-radius: 2px; }
-.x-i.x-i .g-pitch .art-dw { background: #2f5d8a; overflow: hidden; }
-.x-i.x-i .g-pitch .g-facts { border: 2px solid var(--ink); border-radius: 2px; padding: 12px 14px; background: #fbf6e6; margin: 14px -6px 14px; }
 .x-i.x-i .c-index.c-kun b { font-size: 15px; letter-spacing: 0; writing-mode: vertical-rl; text-orientation: upright; }
+/* Experience = employee ID badges (Ian, 2026-11-05): CR80 landscape plastic, a punched slot, a colour band per employer */
+.x-i.x-i .job { aspect-ratio: 85.6 / 54; border-radius: 12px; padding: 0; overflow: hidden;
+  background-image: linear-gradient(160deg, rgba(255,255,255,.7), rgba(255,255,255,0) 45%), linear-gradient(#f7f6f2, #f1efe9); }
+.x-i.x-i .job > .cf { border: 0; border-radius: 0; padding: 0 22px 18px; display: flex; flex-direction: column; gap: 4px; height: 100%; box-sizing: border-box; }
+.x-i.x-i .job .c-org { order: -1; margin: 0 -22px 10px; padding: 26px 22px 9px; background: var(--band, var(--ink)); color: #fff; font-family: var(--f-heading); font-weight: 700; font-size: var(--t17, 17px); letter-spacing: .01em; position: relative; }
+.x-i.x-i .job .c-org::before { content: ""; position: absolute; top: 9px; left: 50%; width: 46px; height: 8px; margin-left: -23px; border-radius: 4px; background: #24301b; box-shadow: inset 0 1px 2px rgba(0,0,0,.6), 0 1px 0 rgba(255,255,255,.35); }
+.x-i.x-i .job h3 { order: 0; margin: 0; } .x-i.x-i .job .c-type { order: 1; margin: 0; } .x-i.x-i .job .c-text { order: 2; margin-top: 8px; }
+.x-i .j1, .x-i .j6 { --band: #b5371f; } .x-i .j2 { --band: #2f5d8a; } .x-i .j3 { --band: #7a5a1e; } .x-i .j4 { --band: #3f6b4a; } .x-i .j5 { --band: #171612; }
+@media (min-width: 701px) { .x-i.x-i .i-jobs { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px 40px; } }
+/* Games = sell sheets: one printed page each (letter, portrait), paper not card */
+.x-i.x-i .game.g-pitch, .x-i.x-i .g-card.g-pitch { aspect-ratio: 8.5 / 11; border-radius: 2px; padding: 0;
+  background-image: linear-gradient(rgba(251,249,242,.9), rgba(251,249,242,.9)), url("tex/paper001_tile-1024.webp"); background-size: auto, 420px; }
+.x-i.x-i .game.g-pitch > .cf, .x-i.x-i .g-card.g-pitch > .cf { border: 0; border-radius: 0; padding: 32px 32px 32px; display: block; height: auto; }
+.x-i.x-i .g-pitch h3 { font-size: var(--t26, 26px); margin: 0 0 16px; padding: 0 0 12px; border-bottom: 2.5px solid var(--ink); }
+.x-i.x-i .g-pitch .g-facts { border-top: 1px solid rgba(23,22,18,.25); border-bottom: 1px solid rgba(23,22,18,.25); padding: 12px 0; margin: 16px 0; }
+.x-i.x-i .job { background-image: linear-gradient(160deg, rgba(255,255,255,.55), rgba(255,255,255,0) 45%), linear-gradient(rgba(247,246,242,.93), rgba(247,246,242,.93)), url("tex/paper001_tile-1024.webp"); background-size: auto, auto, 360px; }
