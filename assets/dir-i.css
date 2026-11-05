@@ -748,3 +748,18 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
   background-image: linear-gradient(rgba(251,249,242,.86), rgba(251,249,242,.86)), url("tex/paper001_tile-1024.webp"); background-size: auto, 420px; }
 .x-i.x-i .c-about > .cf, .x-i.x-i .c-contact > .cf, .x-i.x-i .c-form > .cf { border: 0; border-radius: 0; }
 .x-i.x-i .i-games, .x-i.x-i.games-i .g-grid { align-items: start; }
+/* Section rhythm (Ian, 2026-11-05): the gap between sections is clearly bigger than the gap from a label to its content.
+   Desktop: 96px between sections, 24px label to content. Phone: 64px and 16px. */
+.x-i.x-i .i-label { margin-top: 0; margin-bottom: 24px; }
+.x-i.x-i .i-hero { padding-bottom: 0; margin-bottom: 96px; }
+.x-i.x-i .i-row, .x-i.x-i .i-more { margin-top: 0; }
+.x-i.x-i .i-row { margin-bottom: 96px; }
+.x-i.x-i #work, .x-i.x-i #about, .x-i.x-i #exp, .x-i.x-i #skills, .x-i.x-i #games, .x-i.x-i #contact { margin-top: 0; margin-bottom: 24px; }
+.x-i.x-i .i-row.i-games { margin-bottom: 24px; } .x-i.x-i .i-more { margin-bottom: 96px; }
+@media (min-width: 1001px) { .x-i.x-i .i-row.i-cases { margin-bottom: 256px; } }
+@media (max-width: 700px) {
+  .x-i.x-i .i-label, .x-i.x-i #work, .x-i.x-i #about, .x-i.x-i #exp, .x-i.x-i #skills, .x-i.x-i #games, .x-i.x-i #contact { margin-bottom: 16px; }
+  .x-i.x-i .i-hero { margin-bottom: 64px; } .x-i.x-i .i-row { margin-bottom: 64px; } .x-i.x-i .i-more { margin-bottom: 64px; } .x-i.x-i .i-row.i-games { margin-bottom: 16px; }
+}
+@media (min-width: 1001px) { .x-i.x-i .i-hero { margin-bottom: 56px; } .x-i.x-i .i-row.i-cases { margin-bottom: 286px; } }
+.x-i.x-i .i-row.i-jobs { margin-bottom: 112px; } @media (max-width: 700px) { .x-i.x-i .i-row.i-jobs { margin-bottom: 64px; } }
