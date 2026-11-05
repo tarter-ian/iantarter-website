@@ -1129,3 +1129,7 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k4:hover, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k4:focus-within { transform: rotate(.8deg); }
 .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k5:hover, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k5:focus-within { transform: rotate(-.7deg); }
 .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:hover > .blade-strip, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:focus-within > .blade-strip { transform: none; clip-path: none; opacity: 1; }
+/* Tags, take 3 (Ian 21:24): the string loops out to the LEFT, round the object's left edge. Tags sit near the left edge so the string is short. */
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3 { left: 30px; right: auto; translate: none; max-width: calc(100% - 52px); }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3::after { left: -36px; right: auto; top: calc(50% - 6px); bottom: auto; width: 53px; height: 12px; rotate: 0deg; transform-origin: 100% 50%;
+  border: 2px solid #9c845a; border-left: 0; border-radius: 0 7px 7px 0; background: none; }
