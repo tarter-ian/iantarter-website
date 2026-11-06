@@ -472,106 +472,53 @@
   // Each card and menu card is lit by a stack of see-through layers (sun flecks, canopy shade, the page-wide falloff) blended
   // over its paper (dir-i.css). The browser redid that blending for every bit of every card it drew, which on a fast
   // scroll couldn't keep up (bare green showed until the cards came in). So once the layout settles, each piece's stack is
-  // blended here, with the same blend steps, into one picture that then stands in for it. Redone when the layout changes.
-  const texs = new Map(), tex = src => texs.get(src) || (texs.set(src, load(src)), texs.get(src));
-  const BAKE = { card: ["tex/canopy-shade-card.webp", "tex/linen-n.webp", 512, "normal", [246, 246, 243], true], hand: ["tex/canopy-shade-L.webp", "tex/linen-n.webp", 512, "normal", [243, 243, 239], false],
-    handR: ["tex/canopy-shade-L.webp", "tex/paper006_tile-1024.webp", 220, "multiply", [34, 33, 29], false] };
+  // blended once, with the same blend steps, into one picture that then stands in for it. Redone when the layout changes.
+  // The drawing itself runs in a worker (assets/bake-worker.js), off the page's main thread: drawn here, the ground's map
+  // alone took about half a second in one go right after loading, and a fast scroll outran the page and showed bare olive
+  // (Ian, 2026-11-06). Where a browser can't draw in a worker the pieces keep their live CSS light, which looks the same.
+  let baker = null; const asked = new Map(); let jobN = 0;
+  try { if (window.Worker && window.OffscreenCanvas && new OffscreenCanvas(1, 1).getContext("2d")) {
+    baker = new Worker(ROOT + "assets/bake-worker.js?v=20261106a");
+    baker.onmessage = e => { const r = asked.get(e.data.id); asked.delete(e.data.id); if (r) r(e.data.blobs); };
+    baker.onerror = () => { baker = null; for (const r of asked.values()) r(null); asked.clear(); }; } } catch (e) { baker = null; }
+  const bakeJob = job => baker ? new Promise(r => { const id = ++jobN; asked.set(id, r); baker.postMessage({ id, job: { root: ROOT, PW, PH, fx: FX(), fy: FY(), ...job } }); }) : Promise.resolve(null);
+  // swap a finished picture in only once it's decoded, so nothing blinks
+  const ready = async blob => { const url = URL.createObjectURL(blob), im = new Image(); im.src = url; await im.decode().catch(() => {}); return url; };
+  const BAKE = { card: ["card", "tex/linen-n.webp", 512, "normal", [246, 246, 243], true], hand: ["L", "tex/linen-n.webp", 512, "normal", [243, 243, 239], false],
+    handR: ["L", "tex/paper006_tile-1024.webp", 220, "multiply", [34, 33, 29], false] };
   let bakeGen = 0;
   async function bakeLight() {
     const gen = ++bakeGen, dpr = Math.min(2, devicePixelRatio || 1);
+    if (!baker) return;
     await bakeGround(gen);
-    const els = [...document.querySelectorAll(".x-i .card:not(.d-sheet):not(.d-fig), .x-i .hand a")]; // (printed sheets keep their live light layers: the bake is for linen cards, and swapping between the two flickered)
+    // Each card and menu card is lit by a stack of see-through layers (sun flecks, canopy shade, the page-wide falloff)
+    // blended over its paper (dir-i.css); the browser redid that blending for every bit of every card it drew. So each
+    // piece's stack is blended once, with the same steps, into one picture that then stands in for it.
+    const els = [...document.querySelectorAll(".x-i .card:not(.d-sheet):not(.d-fig), .x-i .hand a")]; // (printed sheets get only their light layer, below)
     for (const el of els) {
       if (gen !== bakeGen) return;
-      const kind = el.matches(".hand a") ? (el.classList.contains("r") ? "handR" : "hand") : "card", [shadeSrc, paperSrc, paperW, paperBlend, bg, sheen] = BAKE[kind];
-      const W = el.offsetWidth, H = el.offsetHeight, o = { x: parseFloat(el.style.getPropertyValue("--ox")) || 0, y: parseFloat(el.style.getPropertyValue("--oy")) || 0 }, key = [W, H, o.x, o.y, PW, PH, dpr, FX(), FY()].join();
+      const kind = el.matches(".hand a") ? (el.classList.contains("r") ? "handR" : "hand") : "card", [shade, paper, paperW, paperBlend, bg, sheen] = BAKE[kind];
+      const W = el.offsetWidth, H = el.offsetHeight, ox = parseFloat(el.style.getPropertyValue("--ox")) || 0, oy = parseFloat(el.style.getPropertyValue("--oy")) || 0, key = [W, H, ox, oy, PW, PH, dpr, FX(), FY()].join();
       if (!W || !H || el._bakeKey === key) continue;
-      const [sun, shade, paper] = await Promise.all([tex(ROOT + "assets/tex/canopy-sun-2.webp"), tex(ROOT + "assets/" + shadeSrc), tex(ROOT + "assets/" + paperSrc)]);
-      if (!sun || !shade || !paper || gen !== bakeGen) return;
-      const cv = document.createElement("canvas"); cv.width = Math.ceil(W * dpr); cv.height = Math.ceil(H * dpr);
-      const x = cv.getContext("2d", RW); x.scale(dpr, dpr);
-      const tile = (img, size, px, py, mode) => { img = copy(img, size); const pt = x.createPattern(img, "repeat"); pt.setTransform(new DOMMatrix().translate(px, py).scale(size / img.width));
-        x.globalCompositeOperation = mode; x.fillStyle = pt; x.fillRect(0, 0, W, H); };
-      const fill = (st, mode) => { x.globalCompositeOperation = mode; x.fillStyle = st; x.fillRect(0, 0, W, H); };
-      // bottom up, as CSS stacks them: the colour, the paper, (cards: a pale wash and a sheen), then the light
-      fill(`rgb(${bg})`, "source-over"); tile(paper, paperW, 0, 0, paperBlend);
-      if (sheen) { fill("rgba(248,248,246,.78)", "source-over");
-        const g = lin(x, 125, W, H, 0, 0); g.addColorStop(0, "rgba(255,255,255,.35)"); g.addColorStop(.4, "rgba(255,255,255,0)"); g.addColorStop(.65, "rgba(255,255,255,0)"); g.addColorStop(1, "rgba(255,255,255,.12)"); fill(g, "source-over"); }
-      { const g = lin(x, 150, PW, PH, -o.x, -o.y); g.addColorStop(0, "rgb(255,253,249)"); g.addColorStop(.55, "rgb(246,246,239)"); g.addColorStop(1, "rgb(232,234,223)"); fill(g, "multiply"); }
-      // (CSS blends gradient colours premultiplied: fading from clear white to the shade is fading the shade's own colour in)
-      { x.save(); x.translate(-o.x + PW * .25, -o.y + PH * .15); x.scale(PW * 1.4, PH); const g = x.createRadialGradient(0, 0, 0, 0, 0, 1);
-        g.addColorStop(.55, "rgba(40,48,30,0)"); g.addColorStop(1, "rgba(40,48,30,.27)"); x.globalCompositeOperation = "multiply"; x.fillStyle = g;
-        x.fillRect((o.x - PW * .25) / (PW * 1.4), (o.y - PH * .15) / PH, W / (PW * 1.4), H / PH); x.restore(); }
-      tile(shade, 1600, -180 - o.x - FX(), -120 - o.y - FY(), "multiply"); tile(sun, 1600, -180 - o.x - FX(), -120 - o.y - FY(), "soft-light");
-      const blob = await new Promise(r => cv.toBlob(r)); cv.width = 0; if (!blob || gen !== bakeGen) return;
-      const url = URL.createObjectURL(blob), im = new Image(); im.src = url; await im.decode().catch(() => {});
-      if (gen !== bakeGen) { URL.revokeObjectURL(url); return; }
+      const blobs = await bakeJob({ kind: "card", W, H, dpr, ox, oy, shade, paper, paperW, paperBlend, bg, sheen }); if (!blobs || gen !== bakeGen) return;
+      const url = await ready(blobs[0]); if (gen !== bakeGen) { URL.revokeObjectURL(url); return; }
       const old = el._bakeUrl; el._bakeUrl = url; el._bakeKey = key;
       Object.assign(el.style, { backgroundImage: `url("${url}")`, backgroundSize: "100% 100%", backgroundPosition: "0 0", backgroundRepeat: "no-repeat", backgroundBlendMode: "normal", backgroundOrigin: "border-box" });
       if (old) URL.revokeObjectURL(old);
-      await new Promise(r => (!document.prerendering && window.requestIdleCallback || setTimeout)(r));
     }
-    await bakePieces(gen, dpr);
-  }
-  // Today's small pieces (Ian 23:05, "more optimized"): the case sheets' light layer, the title tags, the method tape and the wooden
-  // section signs each drew the canopy light live from a stack of blended page-sized layers, plus a cut-out and a drop shadow, on
-  // every repaint; on a big screen the browser couldn't keep up while scrolling and dropped whole pieces for a few frames. Each is
-  // drawn here once, with the same steps, into one picture (shape and shadow included) that its CSS then shows as a plain image.
-  const lightStack = (x, W, H, ox, oy, shade, sun) => {
-    const f = (st, mode) => { x.globalCompositeOperation = mode; x.fillStyle = st; x.fillRect(0, 0, W, H); };
-    { const g = lin(x, 150, PW, PH, -ox, -oy); g.addColorStop(0, "rgb(255,253,249)"); g.addColorStop(.55, "rgb(246,246,239)"); g.addColorStop(1, "rgb(232,234,223)"); f(g, "multiply"); }
-    { x.save(); x.translate(-ox + PW * .25, -oy + PH * .15); x.scale(PW * 1.4, PH); const g = x.createRadialGradient(0, 0, 0, 0, 0, 1);
-      g.addColorStop(.55, "rgba(40,48,30,0)"); g.addColorStop(1, "rgba(40,48,30,.27)"); x.globalCompositeOperation = "multiply"; x.fillStyle = g;
-      x.fillRect((ox - PW * .25) / (PW * 1.4), (oy - PH * .15) / PH, W / (PW * 1.4), H / PH); x.restore(); }
-    for (const [img, mode] of [[shade, "multiply"], [sun, "soft-light"]]) { const c = copy(img, 1600), pt = x.createPattern(c, "repeat");
-      pt.setTransform(new DOMMatrix().translate(-180 - ox - FX(), -120 - oy - FY()).scale(1600 / c.width)); f(pt, mode); }
-    x.globalCompositeOperation = "source-over";
-  };
-  const tileAt = (x, img, size, px, py, W, H, mode = "source-over") => { const c = copy(img, size), pt = x.createPattern(c, "repeat");
-    pt.setTransform(new DOMMatrix().translate(px, py).scale(size / c.width)); x.globalCompositeOperation = mode; x.fillStyle = pt; x.fillRect(0, 0, W, H); x.globalCompositeOperation = "source-over"; };
-  const canvasOf = (W, H, dpr) => { const cv = document.createElement("canvas"); cv.width = Math.ceil(W * dpr); cv.height = Math.ceil(H * dpr); const x = cv.getContext("2d", RW); x.scale(dpr, dpr); return [cv, x]; };
-  // draw a finished face onto a canvas pad px bigger all round, with its drop shadow
-  const withShadow = (face, W, H, pad, dpr, sh) => { const [cv, x] = canvasOf(W + pad * 2, H + pad * 2, dpr);
-    if (sh) Object.assign(x, { shadowColor: sh[0], shadowOffsetX: sh[1] * dpr, shadowOffsetY: sh[2] * dpr, shadowBlur: sh[3] * dpr });
-    x.setTransform(1, 0, 0, 1, 0, 0); x.drawImage(face, pad * dpr, pad * dpr); face.width = 0; return cv; };
-  async function bakePieces(gen, dpr) {
-    const T = n => tex(ROOT + "assets/tex/" + n);
-    const [sun, shadeC, shadeL, p006, wood] = await Promise.all([T("canopy-sun-2.webp"), T("canopy-shade-card.webp"), T("canopy-shade-L.webp"), T("paper006_tile-1024.webp"), T("wood095_tile-1024.webp")]);
-    if (!sun || !shadeC || !shadeL || !p006 || !wood || gen !== bakeGen) return;
-    const els = [...document.querySelectorAll(".x-i .i-cases > .case:is(.d-sheet, .d-fig):not(.lift-copy), .x-i .i-cases > .case:not(.lift-copy) h3, .x-i .i-cases > .case:not(.lift-copy) .c-tokens li, .x-i .i-label")];
-    for (const el of els) {
+    // The case sheets' light layer, the title tags, the method tape and the wooden section signs: each drew the canopy light
+    // live from a stack of blended page-sized layers, plus a cut-out and a drop shadow, on every repaint (pieces dropped out
+    // while scrolling, Ian 2026-11-05). Each is drawn once into one picture (shape and shadow included) shown as a plain image.
+    const pieces = [...document.querySelectorAll(".x-i .i-cases > .case:is(.d-sheet, .d-fig):not(.lift-copy), .x-i .i-cases > .case:not(.lift-copy) h3, .x-i .i-cases > .case:not(.lift-copy) .c-tokens li, .x-i .i-label")];
+    for (const el of pieces) {
       if (gen !== bakeGen) return;
       const W = el.offsetWidth, H = el.offsetHeight, ox = parseFloat(el.style.getPropertyValue("--ox")) || 0, oy = parseFloat(el.style.getPropertyValue("--oy")) || 0;
       const kind = el.matches(".case") ? "sheet" : el.matches("h3") ? "tag" : el.matches("li") ? "tape" : "sign";
-      const tapeSrc = kind === "tape" ? getComputedStyle(el).borderImageSource.replace(/^url\("?|"?\)$/g, "") : "";
-      const key = [kind, W, H, ox, oy, PW, PH, dpr, FX(), FY(), tapeSrc].join();
+      const tape = kind === "tape" ? getComputedStyle(el).borderImageSource.replace(/^url\("?|"?\)$/g, "") : "";
+      const key = [kind, W, H, ox, oy, PW, PH, dpr, FX(), FY(), tape].join();
       if (!W || !H || el._pieceKey === key) continue;
-      let cv;
-      if (kind === "sheet") { // the light layer alone (it multiplies over the paper), 14px past the sheet as its CSS box is
-        const P = 14, [c, x] = canvasOf(W + 2 * P, H + 2 * P, dpr); lightStack(x, W + 2 * P, H + 2 * P, ox - P, oy - P, shadeC, sun); cv = c;
-      } else if (kind === "sign") { // wood, a top-lit sheen, then the light
-        const [c, x] = canvasOf(W, H, dpr); tileAt(x, wood, 520, 0, (H - 520 * wood.height / wood.width) * .3, W, H);
-        const g = x.createLinearGradient(0, 0, 0, H); g.addColorStop(0, "rgba(255,255,255,.18)"); g.addColorStop(.4, "rgba(0,0,0,0)"); g.addColorStop(1, "rgba(0,0,0,.18)"); x.fillStyle = g; x.fillRect(0, 0, W, H);
-        lightStack(x, W, H, ox, oy, shadeL, sun); cv = c;
-      } else if (kind === "tag") { // manila card cut to a tag, its punched hole, the light, and its shadow
-        const [c, x] = canvasOf(W, H, dpr), th = 260 * p006.height / p006.width;
-        x.beginPath(); x.moveTo(11, 0); x.lineTo(W, 0); x.lineTo(W, H); x.lineTo(11, H); x.lineTo(0, H - 11); x.lineTo(0, 11); x.closePath(); x.clip();
-        tileAt(x, p006, 260, (W - 260) / 2, (H - th) / 2, W, H); x.globalCompositeOperation = "multiply"; x.fillStyle = "rgba(236,222,180,.55)"; x.fillRect(0, 0, W, H); x.globalCompositeOperation = "source-over";
-        x.beginPath(); x.arc(15, H / 2, 6.75, 0, 7); x.fillStyle = "#c9b98e"; x.fill(); x.beginPath(); x.arc(15, H / 2, 3.5, 0, 7); x.fillStyle = "#34402a"; x.fill();
-        lightStack(x, W, H, ox, oy, shadeC, sun); cv = withShadow(c, W, H, 6, dpr, ["rgba(10,14,4,.4)", 1, 2, 1.5]);
-      } else { // real tape: the torn ends kept, the middle stretched (as its border-image did), the light at 90% over its middle (as its ::after did), a faint shadow
-        const tp = await T(tapeSrc.split("/assets/tex/").pop()); if (!tp || gen !== bakeGen) return;
-        const [c, x] = canvasOf(W, H, dpr), iw = tp.naturalWidth, ih = tp.naturalHeight, e = 34;
-        x.drawImage(tp, 0, 0, e, ih, 0, 0, 13, H); x.drawImage(tp, iw - e, 0, e, ih, W - 13, 0, 13, H); x.drawImage(tp, e, 0, iw - 2 * e, ih, 13, 0, W - 26, H);
-        const [lc, lx] = canvasOf(W - 44, H - 2, dpr); lx.fillStyle = "#fff"; lx.fillRect(0, 0, W, H); lightStack(lx, W - 44, H - 2, ox + 22, oy + 1, shadeC, sun);
-        // multiply only where the tape is: draw the light into a copy masked by the tape's own alpha
-        const [mc, mx] = canvasOf(W, H, dpr); mx.drawImage(lc, 22, 1, W - 44, H - 2); lc.width = 0; mx.globalCompositeOperation = "destination-in"; mx.drawImage(c, 0, 0, W, H);
-        x.globalAlpha = .9; x.globalCompositeOperation = "multiply"; x.drawImage(mc, 0, 0, W, H); mc.width = 0; x.globalAlpha = 1; x.globalCompositeOperation = "source-over";
-        cv = withShadow(c, W, H, 4, dpr, ["rgba(10,14,4,.22)", 0, 1, .6]);
-      }
-      const blob = await new Promise(r => cv.toBlob(r)); cv.width = 0; if (!blob || gen !== bakeGen) return;
-      const url = URL.createObjectURL(blob), im = new Image(); im.src = url; await im.decode().catch(() => {});
-      if (gen !== bakeGen) { URL.revokeObjectURL(url); return; }
+      const blobs = await bakeJob({ kind, W, H, dpr, ox, oy, tape }); if (!blobs || gen !== bakeGen) return;
+      const url = await ready(blobs[0]); if (gen !== bakeGen) { URL.revokeObjectURL(url); return; }
       const old = el._pieceUrl; el._pieceUrl = url; el._pieceKey = key; el.style.setProperty("--bk", `url("${url}")`); el.classList.add("bk");
       if (old) setTimeout(() => URL.revokeObjectURL(old), 3000);
     }
@@ -581,28 +528,12 @@
   // ground is then the moss, that map and the sun flecks: three layers to draw instead of seven.
   async function bakeGround(gen) {
     const sc = scene(), fx = FX(), fy = FY(), key = [PW, PH, fx, fy].join(); if (!PW || !PH || sc._bakeKey === key) return;
-    const [shade, moss] = await Promise.all([tex(ROOT + "assets/tex/canopy-shade-L.webp"), tex(ROOT + "assets/tex/moss-quiet-2k.webp")]); if (!shade || !moss || gen !== bakeGen) return;
-    const k = .5, cv = document.createElement("canvas"); cv.width = Math.ceil(PW * k); cv.height = Math.ceil(PH * k); const x = cv.getContext("2d", RW); x.scale(k, k);
-    const fill = (st, mode) => { x.globalCompositeOperation = mode; x.fillStyle = st; x.fillRect(0, 0, PW, PH); };
-    fill("#fff", "source-over");
-    { const g = lin(x, 150, PW, PH, 0, 0); g.addColorStop(0, "rgb(255,253,249)"); g.addColorStop(.55, "rgb(246,246,239)"); g.addColorStop(1, "rgb(232,234,223)"); fill(g, "multiply"); }
-    { x.save(); x.translate(PW * .25, PH * .15); x.scale(PW * 1.4, PH); const g = x.createRadialGradient(0, 0, 0, 0, 0, 1);
-      g.addColorStop(.55, "rgba(40,48,30,0)"); g.addColorStop(1, "rgba(40,48,30,.27)"); x.globalCompositeOperation = "multiply"; x.fillStyle = g; x.fillRect(-.25 / 1.4, -.15, 1 / 1.4, 1); x.restore(); }
-    { const pt = x.createPattern(shade, "repeat"); pt.setTransform(new DOMMatrix().translate(-180 - fx, -120 - fy).scale(1600 / shade.width)); fill(pt, "multiply"); }
-    const m = document.createElement("canvas"); m.width = moss.width; m.height = moss.height; const mx = m.getContext("2d", RW); mx.drawImage(moss, 0, 0); mx.fillStyle = "rgba(22,28,12,.2)"; mx.fillRect(0, 0, m.width, m.height);
-    const [b1, b2] = await Promise.all([new Promise(r => cv.toBlob(r)), sc._mossUrl ? null : new Promise(r => m.toBlob(r, "image/webp", 1))]); cv.width = m.width = 0;
-    if (!b1 || gen !== bakeGen) return;
-    const u1 = URL.createObjectURL(b1), u2 = sc._mossUrl || URL.createObjectURL(b2);
-    await Promise.all([u1, u2].map(u => { const im = new Image(); im.src = u; return im.decode().catch(() => {}); })); if (gen !== bakeGen) return;
+    const blobs = await bakeJob({ kind: "ground", moss: !sc._mossUrl }); if (!blobs || gen !== bakeGen) return;
+    const [u1, u2] = await Promise.all([ready(blobs[0]), sc._mossUrl || ready(blobs[1])]); if (gen !== bakeGen) return;
     const old = sc._lightUrl; sc._lightUrl = u1; sc._mossUrl = u2; sc._bakeKey = key;
     Object.assign(sc.style, { backgroundImage: `url("${ROOT}assets/tex/canopy-sun-2.webp"), url("${u1}"), url("${u2}")`, backgroundSize: `1600px, ${PW}px ${PH}px, 900px`,
       backgroundPosition: `${-180 - fx}px ${-120 - fy}px, 0 0, ${-fx}px ${-fy}px`, backgroundRepeat: "repeat, no-repeat, repeat", backgroundBlendMode: "soft-light, multiply, normal" });
     if (old) URL.revokeObjectURL(old);
-  }
-  // a CSS linear-gradient at angle a over a w x h box whose top-left is at (bx, by)
-  function lin(x, a, w, h, bx, by) {
-    const r = a * Math.PI / 180, dx = Math.sin(r), dy = -Math.cos(r), L = Math.abs(w * dx) + Math.abs(h * dy), cx = bx + w / 2, cy = by + h / 2;
-    return x.createLinearGradient(cx - dx * L / 2, cy - dy * L / 2, cx + dx * L / 2, cy + dy * L / 2);
   }
   // (baked while the grass is still coming in: the baked ground is a level or two off the CSS one, and once the page had
   // settled that swap showed as the moss flicking, Ian's "flips to the image")
