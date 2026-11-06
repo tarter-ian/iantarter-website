@@ -31,11 +31,6 @@
     n.alt = ""; n.className = img.className; n.setAttribute("aria-hidden", "true"); n.dataset.src = img.dataset.src; n.dataset.key = k; n.style.cssText = img.style.cssText;
     asBaked(n, url, w, h, left, top); img.replaceWith(n);
   }
-  // (each bake is a filtered draw on the main thread: run during a fast scroll right after loading, they held up the scroll
-  // and the page showed bare olive, Ian 2026-11-06)
-  let lastScroll = -1e9; addEventListener("scroll", () => { lastScroll = performance.now(); }, { passive: true });
-  const whenCalm = f => { const idle = window.requestIdleCallback || setTimeout;
-    const go = () => performance.now() - lastScroll < 400 ? setTimeout(go, 150) : idle(() => performance.now() - lastScroll < 400 ? go() : f(), { timeout: 3000 }); go(); };
   function piece(parent, sp, x, y, len, ang, cls) {
     // wide sprites (needles, some leaves) are turned upright so len is always the long side
     // a relayout reuses the pieces already on the page (same seed, same order), so they move instead of blinking out and back
@@ -50,7 +45,7 @@
     img.dataset.key = k; const url = baked.get(k);
     if (url) asBaked(img, url, bw, bh, bl, bt); else if (img.getAttribute("src") !== sp.src) img.src = sp.src;
     parent.appendChild(img);
-    if (!url) whenCalm(() => bake(img, sp.src, cls, bw, bh, bl, bt)); // baked when the page is idle and not scrolling
+    if (!url) (window.requestIdleCallback || setTimeout)(() => bake(img, sp.src, cls, bw, bh, bl, bt), { timeout: 3000 }); // baked when the page is idle
   }
   function edgeBits(el, under) {
     const w = el.offsetWidth, h = el.offsetHeight, n = 2 + (rnd() < .4);

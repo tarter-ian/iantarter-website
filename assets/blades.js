@@ -212,7 +212,7 @@
     // While the page scrolls only grass that's coming into view is painted, a little a frame; the rest waits until the
     // scroll has stopped (painting ahead mid-scroll was most of what slowed scrolling down)
     const scrolling = performance.now() - lastScroll < 300;
-    const end = performance.now() + (scrolling ? 4 : !grassGo ? 40 : active.size ? 5 : 14); // (small bites whenever the page is scrolling, even before the grass starts: 40ms bites held up a fast scroll right after loading)
+    const end = performance.now() + (!grassGo ? 40 : scrolling ? 4 : active.size ? 5 : 14);
     while (prep.length && performance.now() < end) { const job = prep[0], [st] = job;
       if (scrolling && strips.has(st) && !growing.has(st)) break;
       if (!strips.has(st)) { prep.shift(); continue; }
@@ -476,10 +476,6 @@
   const texs = new Map(), tex = src => texs.get(src) || (texs.set(src, load(src)), texs.get(src));
   const BAKE = { card: ["tex/canopy-shade-card.webp", "tex/linen-n.webp", 512, "normal", [246, 246, 243], true], hand: ["tex/canopy-shade-L.webp", "tex/linen-n.webp", 512, "normal", [243, 243, 239], false],
     handR: ["tex/canopy-shade-L.webp", "tex/paper006_tile-1024.webp", 220, "multiply", [34, 33, 29], false] };
-  // one-off drawing (the baked light, the ground) waits until scrolling has paused and the page has a moment, so it never
-  // competes with a scroll (Ian 2026-11-06: a fast scroll right after loading showed bare olive while this ran)
-  const calm = () => new Promise(r => { const go = () => performance.now() - lastScroll < 400 ? setTimeout(go, 150)
-    : (!document.prerendering && window.requestIdleCallback ? requestIdleCallback(() => performance.now() - lastScroll < 400 ? go() : r(), { timeout: 800 }) : setTimeout(r, 0)); go(); });
   let bakeGen = 0;
   async function bakeLight() {
     const gen = ++bakeGen, dpr = Math.min(2, devicePixelRatio || 1);
@@ -490,7 +486,6 @@
       const kind = el.matches(".hand a") ? (el.classList.contains("r") ? "handR" : "hand") : "card", [shadeSrc, paperSrc, paperW, paperBlend, bg, sheen] = BAKE[kind];
       const W = el.offsetWidth, H = el.offsetHeight, o = { x: parseFloat(el.style.getPropertyValue("--ox")) || 0, y: parseFloat(el.style.getPropertyValue("--oy")) || 0 }, key = [W, H, o.x, o.y, PW, PH, dpr, FX(), FY()].join();
       if (!W || !H || el._bakeKey === key) continue;
-      await calm(); if (gen !== bakeGen) return;
       const [sun, shade, paper] = await Promise.all([tex(ROOT + "assets/tex/canopy-sun-2.webp"), tex(ROOT + "assets/" + shadeSrc), tex(ROOT + "assets/" + paperSrc)]);
       if (!sun || !shade || !paper || gen !== bakeGen) return;
       const cv = document.createElement("canvas"); cv.width = Math.ceil(W * dpr); cv.height = Math.ceil(H * dpr);
@@ -551,7 +546,6 @@
       const tapeSrc = kind === "tape" ? getComputedStyle(el).borderImageSource.replace(/^url\("?|"?\)$/g, "") : "";
       const key = [kind, W, H, ox, oy, PW, PH, dpr, FX(), FY(), tapeSrc].join();
       if (!W || !H || el._pieceKey === key) continue;
-      await calm(); if (gen !== bakeGen) return;
       let cv;
       if (kind === "sheet") { // the light layer alone (it multiplies over the paper), 14px past the sheet as its CSS box is
         const P = 14, [c, x] = canvasOf(W + 2 * P, H + 2 * P, dpr); lightStack(x, W + 2 * P, H + 2 * P, ox - P, oy - P, shadeC, sun); cv = c;
@@ -590,19 +584,11 @@
     const [shade, moss] = await Promise.all([tex(ROOT + "assets/tex/canopy-shade-L.webp"), tex(ROOT + "assets/tex/moss-quiet-2k.webp")]); if (!shade || !moss || gen !== bakeGen) return;
     const k = .5, cv = document.createElement("canvas"); cv.width = Math.ceil(PW * k); cv.height = Math.ceil(PH * k); const x = cv.getContext("2d", RW); x.scale(k, k);
     const fill = (st, mode) => { x.globalCompositeOperation = mode; x.fillStyle = st; x.fillRect(0, 0, PW, PH); };
-    // (drawn a band at a time, each band in its own short task once scrolling has paused: in one go this took about half a
-    // second on Ian's screen while the page was loading, and a fast scroll then outran the drawing and showed bare olive)
-    for (let y0 = 0; y0 < PH; y0 += 600) {
-      await calm(); if (gen !== bakeGen) { cv.width = 0; return; }
-      x.save(); x.beginPath(); x.rect(0, y0, PW, Math.min(600, PH - y0)); x.clip();
-      fill("#fff", "source-over");
-      { const g = lin(x, 150, PW, PH, 0, 0); g.addColorStop(0, "rgb(255,253,249)"); g.addColorStop(.55, "rgb(246,246,239)"); g.addColorStop(1, "rgb(232,234,223)"); fill(g, "multiply"); }
-      { x.save(); x.translate(PW * .25, PH * .15); x.scale(PW * 1.4, PH); const g = x.createRadialGradient(0, 0, 0, 0, 0, 1);
-        g.addColorStop(.55, "rgba(40,48,30,0)"); g.addColorStop(1, "rgba(40,48,30,.27)"); x.globalCompositeOperation = "multiply"; x.fillStyle = g; x.fillRect(-.25 / 1.4, -.15, 1 / 1.4, 1); x.restore(); }
-      { const pt = x.createPattern(shade, "repeat"); pt.setTransform(new DOMMatrix().translate(-180 - fx, -120 - fy).scale(1600 / shade.width)); fill(pt, "multiply"); }
-      x.restore();
-    }
-    await calm(); if (gen !== bakeGen) { cv.width = 0; return; }
+    fill("#fff", "source-over");
+    { const g = lin(x, 150, PW, PH, 0, 0); g.addColorStop(0, "rgb(255,253,249)"); g.addColorStop(.55, "rgb(246,246,239)"); g.addColorStop(1, "rgb(232,234,223)"); fill(g, "multiply"); }
+    { x.save(); x.translate(PW * .25, PH * .15); x.scale(PW * 1.4, PH); const g = x.createRadialGradient(0, 0, 0, 0, 0, 1);
+      g.addColorStop(.55, "rgba(40,48,30,0)"); g.addColorStop(1, "rgba(40,48,30,.27)"); x.globalCompositeOperation = "multiply"; x.fillStyle = g; x.fillRect(-.25 / 1.4, -.15, 1 / 1.4, 1); x.restore(); }
+    { const pt = x.createPattern(shade, "repeat"); pt.setTransform(new DOMMatrix().translate(-180 - fx, -120 - fy).scale(1600 / shade.width)); fill(pt, "multiply"); }
     const m = document.createElement("canvas"); m.width = moss.width; m.height = moss.height; const mx = m.getContext("2d", RW); mx.drawImage(moss, 0, 0); mx.fillStyle = "rgba(22,28,12,.2)"; mx.fillRect(0, 0, m.width, m.height);
     const [b1, b2] = await Promise.all([new Promise(r => cv.toBlob(r)), sc._mossUrl ? null : new Promise(r => m.toBlob(r, "image/webp", 1))]); cv.width = m.width = 0;
     if (!b1 || gen !== bakeGen) return;
