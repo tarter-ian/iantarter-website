@@ -478,7 +478,7 @@
   // (Ian, 2026-11-06). Where a browser can't draw in a worker the pieces keep their live CSS light, which looks the same.
   let baker = null; const asked = new Map(); let jobN = 0;
   try { if (window.Worker && window.OffscreenCanvas && new OffscreenCanvas(1, 1).getContext("2d")) {
-    baker = new Worker(ROOT + "assets/bake-worker.js?v=20261107b");
+    baker = new Worker(ROOT + "assets/bake-worker.js?v=20261107c");
     baker.onmessage = e => { const r = asked.get(e.data.id); asked.delete(e.data.id); if (r) r(e.data.blobs); };
     baker.onerror = () => { baker = null; for (const r of asked.values()) r(null); asked.clear(); }; } } catch (e) { baker = null; }
   const bakeJob = job => baker ? new Promise(r => { const id = ++jobN; asked.set(id, r); baker.postMessage({ id, job: { root: ROOT, PW, PH, fx: FX(), fy: FY(), ...job } }); }) : Promise.resolve(null);

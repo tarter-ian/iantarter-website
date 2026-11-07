@@ -46,7 +46,7 @@ function gloss(x, W, H, ox, oy, j, sun) {
   x.save(); r(s.x - 1.5, s.y - 1.5, s.w + 3, s.h + 3, s.h / 2 + 1.5); x.clip();
   { const g = x.createLinearGradient(0, s.y - 1.5, 0, s.y + s.h + 1.5); g.addColorStop(0, "rgba(40,36,28,.55)"); g.addColorStop(.5, "rgba(40,36,28,.1)"); g.addColorStop(1, "rgba(255,255,255,.85)"); x.fillStyle = g; x.fillRect(s.x - 2, s.y - 2, s.w + 4, s.h + 4); }
   x.restore();
-  x.globalCompositeOperation = "destination-out"; r(s.x, s.y, s.w, s.h, s.h / 2); x.fill(); x.globalCompositeOperation = "source-over";
+  x.globalCompositeOperation = "destination-out"; x.fillStyle = "#000"; r(s.x, s.y, s.w, s.h, s.h / 2); x.fill(); x.globalCompositeOperation = "source-over";
 }
 // a finished face onto a canvas// a finished face onto a canvas pad px bigger all round, with its drop shadow
 function withShadow(face, pad, dpr, sh) { const c = new OffscreenCanvas(face.width + Math.ceil(2 * pad * dpr), face.height + Math.ceil(2 * pad * dpr)), x = c.getContext("2d");
