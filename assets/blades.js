@@ -478,14 +478,15 @@
   // (Ian, 2026-11-06). Where a browser can't draw in a worker the pieces keep their live CSS light, which looks the same.
   let baker = null; const asked = new Map(); let jobN = 0;
   try { if (window.Worker && window.OffscreenCanvas && new OffscreenCanvas(1, 1).getContext("2d")) {
-    baker = new Worker(ROOT + "assets/bake-worker.js?v=20261107a");
+    baker = new Worker(ROOT + "assets/bake-worker.js?v=20261107b");
     baker.onmessage = e => { const r = asked.get(e.data.id); asked.delete(e.data.id); if (r) r(e.data.blobs); };
     baker.onerror = () => { baker = null; for (const r of asked.values()) r(null); asked.clear(); }; } } catch (e) { baker = null; }
   const bakeJob = job => baker ? new Promise(r => { const id = ++jobN; asked.set(id, r); baker.postMessage({ id, job: { root: ROOT, PW, PH, fx: FX(), fy: FY(), ...job } }); }) : Promise.resolve(null);
   // swap a finished picture in only once it's decoded, so nothing blinks
   const ready = async blob => { const url = URL.createObjectURL(blob), im = new Image(); im.src = url; await im.decode().catch(() => {}); return url; };
   const BAKE = { card: ["card", "tex/linen-n.webp", 512, "normal", [246, 246, 243], true], hand: ["L", "tex/linen-n.webp", 512, "normal", [243, 243, 239], false],
-    handR: ["L", "tex/paper006_tile-1024.webp", 220, "multiply", [34, 33, 29], false] };
+    handR: ["L", "tex/paper006_tile-1024.webp", 220, "multiply", [34, 33, 29], false],
+    badge: ["card", "tex/plastic013a_tile-1024.webp", 320, "multiply", [255, 255, 255], false] }; // (Experience badges: white PVC, with the extras below)
   let bakeGen = 0;
   async function bakeLight() {
     const gen = ++bakeGen, dpr = Math.min(2, devicePixelRatio || 1);
@@ -497,13 +498,19 @@
     const els = [...document.querySelectorAll(".x-i .card:not(.d-sheet):not(.d-fig), .x-i .hand a")]; // (printed sheets get only their light layer, below)
     for (const el of els) {
       if (gen !== bakeGen) return;
-      const kind = el.matches(".hand a") ? (el.classList.contains("r") ? "handR" : "hand") : "card", [shade, paper, paperW, paperBlend, bg, sheen] = BAKE[kind];
-      const W = el.offsetWidth, H = el.offsetHeight, ox = parseFloat(el.style.getPropertyValue("--ox")) || 0, oy = parseFloat(el.style.getPropertyValue("--oy")) || 0, key = [W, H, ox, oy, PW, PH, dpr, FX(), FY()].join();
+      const kind = el.matches(".hand a") ? (el.classList.contains("r") ? "handR" : "hand") : el.matches(".job") ? "badge" : "card", [shade, paper, paperW, paperBlend, bg, sheen] = BAKE[kind];
+      // an ID badge's colour band and lanyard slot go into its picture, so the light and the gloss lie over them too and the slot is a real hole
+      let extra = {};
+      if (kind === "badge") { const org = el.querySelector(".c-org"), sl = org && getComputedStyle(org, "::before"), sw = sl ? parseFloat(sl.width) || 46 : 46, sh = sl ? parseFloat(sl.height) || 8 : 8;
+        if (org) extra = { band: { h: org.offsetHeight, color: getComputedStyle(org).getPropertyValue("--band").trim() || "#171612" },
+          slot: { x: (el.offsetWidth - sw) / 2, y: (parseFloat(sl.top) || 9) + org.offsetTop, w: sw, h: sh }, gloss: { glint: 1 } }; }
+      const W = el.offsetWidth, H = el.offsetHeight, ox = parseFloat(el.style.getPropertyValue("--ox")) || 0, oy = parseFloat(el.style.getPropertyValue("--oy")) || 0, key = [W, H, ox, oy, PW, PH, dpr, FX(), FY(), JSON.stringify(extra)].join();
       if (!W || !H || el._bakeKey === key) continue;
-      const blobs = await bakeJob({ kind: "card", W, H, dpr, ox, oy, shade, paper, paperW, paperBlend, bg, sheen }); if (!blobs || gen !== bakeGen) return;
+      const blobs = await bakeJob({ kind: "card", W, H, dpr, ox, oy, shade, paper, paperW, paperBlend, bg, sheen, ...extra }); if (!blobs || gen !== bakeGen) return;
       const url = await ready(blobs[0]); if (gen !== bakeGen) { URL.revokeObjectURL(url); return; }
       const old = el._bakeUrl; el._bakeUrl = url; el._bakeKey = key;
       Object.assign(el.style, { backgroundImage: `url("${url}")`, backgroundSize: "100% 100%", backgroundPosition: "0 0", backgroundRepeat: "no-repeat", backgroundBlendMode: "normal", backgroundOrigin: "border-box" });
+      if (kind === "badge") el.classList.add("bk-pl");
       if (old) URL.revokeObjectURL(old);
     }
     // The case sheets' light layer, the title tags, the method tape and the wooden section signs: each drew the canopy light

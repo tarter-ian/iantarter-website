@@ -1288,3 +1288,12 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
   .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k5 { grid-column: 1; grid-row: 5; }
   .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k1 .c-tokens { right: -30%; bottom: 10%; }
 }
+/* Experience badges as real PVC (Ian 2026-11-07: "doesn't totally look like plastic"). Once baked (blades.js, .bk-pl) the picture
+   carries the white plastic, the printed band, the canopy light, a gloss with glints where the sun lands, and the lanyard slot
+   punched clean through to the moss. Plastic has no paper vignette: a crisp polished rim instead, and a thin card edge under it. */
+.x-i.x-i .job { --edge: 0 1px 0 #d6d3cb, 0 1.6px 0 #aaa597; box-shadow: var(--edge), var(--sh); border-radius: 10px; }
+.x-i.x-i .job::after { box-shadow: inset 1px 1px 0 rgba(255,255,255,.85), inset -1px -1px 0 rgba(60,55,40,.18); }
+.x-i.x-i .job.bk-pl { background-color: transparent; }
+.x-i.x-i .job.bk-pl .c-org { background: none; }
+.x-i.x-i .job.bk-pl .c-org::before { display: none; }
+.x-i.x-i .job .c-org { border-radius: 10px 10px 0 0; }

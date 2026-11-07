@@ -29,7 +29,26 @@ function lightStack(x, W, H, ox, oy, j, shade, sun) {
     x.fillRect((ox - PW * .25) / (PW * 1.4), (oy - PH * .15) / PH, W / (PW * 1.4), H / PH); x.restore(); }
   tileAt(x, shade, 1600, -180 - ox - fx, -120 - oy - fy, W, H, "multiply"); tileAt(x, sun, 1600, -180 - ox - fx, -120 - oy - fy, W, H, "soft-light");
 }
-// a finished face onto a canvas pad px bigger all round, with its drop shadow
+// PVC: a glossy face. Where the sun flecks land they glint (specular, so it sits over the colour rather than lighting it), a
+// soft laminate sheen runs across from the upper left, and the lanyard slot is punched clean through with its cut wall showing.
+function gloss(x, W, H, ox, oy, j, sun) {
+  const dpr = j.dpr, [sc, sx] = canvasOf(W, H, dpr);
+  tileAt(sx, sun, 1600, -180 - ox - j.fx, -120 - oy - j.fy, W, H); tileAt(sx, sun, 1600, -180 - ox - j.fx, -120 - oy - j.fy, W, H, "destination-in");
+  x.save(); x.setTransform(1, 0, 0, 1, 0, 0); x.globalCompositeOperation = "lighter"; x.globalAlpha = .35 * j.gloss.glint; x.drawImage(sc, 0, 0); x.restore();
+  const f = (st, mode) => { x.globalCompositeOperation = mode; x.fillStyle = st; x.fillRect(0, 0, W, H); };
+  // the sheen: the sky's glow off the top-left corner, then one crisp-edged streak across, as a laminated card throws back a bright gap in the canopy
+  { const g = lin(x, 118, W, H, 0, 0); g.addColorStop(0, "rgba(255,255,255,.3)"); g.addColorStop(.22, "rgba(255,255,255,.08)"); g.addColorStop(.34, "rgba(255,255,255,0)");
+    g.addColorStop(.5, "rgba(255,255,255,0)"); g.addColorStop(.515, "rgba(255,255,255,.2)"); g.addColorStop(.6, "rgba(255,255,255,.13)"); g.addColorStop(.615, "rgba(255,255,255,0)"); f(g, "screen"); }
+  const s = j.slot; if (!s) return;
+  const r = (x0, y0, w, h, rad) => { x.beginPath(); x.roundRect(x0, y0, w, h, rad); };
+  x.globalCompositeOperation = "source-over";
+  // the lip round the hole: the cut catches light on its lower edge and is shaded along its upper one
+  x.save(); r(s.x - 1.5, s.y - 1.5, s.w + 3, s.h + 3, s.h / 2 + 1.5); x.clip();
+  { const g = x.createLinearGradient(0, s.y - 1.5, 0, s.y + s.h + 1.5); g.addColorStop(0, "rgba(40,36,28,.55)"); g.addColorStop(.5, "rgba(40,36,28,.1)"); g.addColorStop(1, "rgba(255,255,255,.85)"); x.fillStyle = g; x.fillRect(s.x - 2, s.y - 2, s.w + 4, s.h + 4); }
+  x.restore();
+  x.globalCompositeOperation = "destination-out"; r(s.x, s.y, s.w, s.h, s.h / 2); x.fill(); x.globalCompositeOperation = "source-over";
+}
+// a finished face onto a canvas// a finished face onto a canvas pad px bigger all round, with its drop shadow
 function withShadow(face, pad, dpr, sh) { const c = new OffscreenCanvas(face.width + Math.ceil(2 * pad * dpr), face.height + Math.ceil(2 * pad * dpr)), x = c.getContext("2d");
   Object.assign(x, { shadowColor: sh[0], shadowOffsetX: sh[1] * dpr, shadowOffsetY: sh[2] * dpr, shadowBlur: sh[3] * dpr }); x.drawImage(face, pad * dpr, pad * dpr); return c; }
 const png = c => c.convertToBlob();
@@ -63,7 +82,11 @@ async function draw(j) {
     fill(`rgb(${j.bg})`, "source-over"); tileAt(x, paper, j.paperW, 0, 0, W, H, j.paperBlend);
     if (j.sheen) { fill("rgba(248,248,246,.78)", "source-over");
       const g = lin(x, 125, W, H, 0, 0); g.addColorStop(0, "rgba(255,255,255,.35)"); g.addColorStop(.4, "rgba(255,255,255,0)"); g.addColorStop(.65, "rgba(255,255,255,0)"); g.addColorStop(1, "rgba(255,255,255,.12)"); fill(g, "source-over"); }
-    lightStack(x, W, H, ox, oy, j, j.shade === "L" ? shadeL : shadeC, sun); return [await png(c)];
+    if (j.band) { // (ID badges) the employer's colour printed across the top, under the same light
+      const b = j.band; x.globalCompositeOperation = "multiply"; x.fillStyle = b.color; x.fillRect(0, 0, W, b.h); x.globalCompositeOperation = "source-over"; }
+    lightStack(x, W, H, ox, oy, j, j.shade === "L" ? shadeL : shadeC, sun);
+    if (j.gloss) gloss(x, W, H, ox, oy, j, sun);
+    return [await png(c)];
   }
   if (j.kind === "sheet") { // the light layer alone (it multiplies over the paper), 14px past the sheet as its CSS box is
     const P = 14, [c, x] = canvasOf(W + 2 * P, H + 2 * P, dpr); lightStack(x, W + 2 * P, H + 2 * P, ox - P, oy - P, j, shadeC, sun); return [await png(c)];
