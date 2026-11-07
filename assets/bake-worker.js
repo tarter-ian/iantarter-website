@@ -36,6 +36,10 @@ const png = c => c.convertToBlob();
 
 async function draw(j) {
   const { W, H, dpr, ox, oy } = j, T = (n, size) => copy(j.root + "assets/" + n, size, dpr);
+  if (j.kind === "litter") { // (forest.js; first, as it needs none of the light textures below) a fallen leaf or frond with its look (a little desaturated and darkened, a soft shadow) baked in, P px bigger all round for the shadow
+    const img = await tex(j.src); if (!img) return null;
+    const [c, x] = canvasOf(j.w + 2 * j.P, j.h + 2 * j.P, dpr); x.filter = j.filter; x.drawImage(img, j.P, j.P, j.w, j.h); return [await png(c)];
+  }
   if (j.kind === "ground") { // the shade and the falloff folded into one soft map for the whole page (half size), and the moss with its 20% shade
     const k = .5, PW = j.PW, PH = j.PH, [shade, mossImg] = await Promise.all([tex(j.root + "assets/tex/canopy-shade-L.webp"), j.moss ? tex(j.root + "assets/tex/moss-quiet-2k.webp") : null]);
     if (!shade || (j.moss && !mossImg)) return null;
@@ -87,10 +91,6 @@ async function draw(j) {
     const [mc, mx] = canvasOf(W, H, dpr); mx.drawImage(lc, 22, 1, W - 44, H - 2); mx.globalCompositeOperation = "destination-in"; mx.setTransform(1, 0, 0, 1, 0, 0); mx.drawImage(c, 0, 0);
     x.globalAlpha = .9; x.globalCompositeOperation = "multiply"; x.setTransform(1, 0, 0, 1, 0, 0); x.drawImage(mc, 0, 0); x.globalAlpha = 1; x.globalCompositeOperation = "source-over";
     return [await png(withShadow(c, 4, dpr, ["rgba(10,14,4,.22)", 0, 1, .6]))];
-  }
-  if (j.kind === "litter") { // a fallen leaf or frond with its look (a little desaturated and darkened, a soft shadow) baked in, P px bigger all round for the shadow
-    const img = await tex(j.src); if (!img) return null;
-    const [c, x] = canvasOf(j.w + 2 * j.P, j.h + 2 * j.P, dpr); x.filter = j.filter; x.drawImage(img, j.P, j.P, j.w, j.h); return [await png(c)];
   }
   return null;
 }

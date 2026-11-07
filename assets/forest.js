@@ -18,7 +18,7 @@
   }
   let worker = null; const asked = new Map(); let jobN = 0;
   try { if (window.Worker && window.OffscreenCanvas && "filter" in new OffscreenCanvas(1, 1).getContext("2d")) {
-    worker = new Worker(ROOT + "assets/bake-worker.js?v=20261106a");
+    worker = new Worker(ROOT + "assets/bake-worker.js?v=20261107a");
     worker.onmessage = e => { const r = asked.get(e.data.id); asked.delete(e.data.id); if (r) r(e.data.blobs); };
     worker.onerror = () => { worker = null; for (const r of asked.values()) r(null); asked.clear(); }; } } catch (e) { worker = null; }
   async function bake(img, src, cls, w, h, left, top) {
