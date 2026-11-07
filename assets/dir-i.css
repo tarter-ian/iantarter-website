@@ -1261,3 +1261,30 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .c-tokens li.bk { border-image: none; border-color: transparent; filter: none; }
 .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .c-tokens li.bk::after { content: ""; display: block; position: absolute; inset: -4px -17px; z-index: -1; mix-blend-mode: normal; opacity: 1;
   background: var(--bk) 0 0 / 100% 100% no-repeat; }
+/* Case row below desktop width (2026-11-07). Tablet: the phone stands in the left column across two rows, the language and
+   allyship sheets beside it, the capstone and bias sheets side by side under it. Phone width: one column, phone first.
+   The phone (.floor-phone) and its invisible frame (.k1, which holds its tag and tape) always share one box. */
+@media (max-width: 1000px) {
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases { container-type: inline-size; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 24px; row-gap: 72px;
+    align-items: start; padding-top: 56px; margin-bottom: 96px; translate: none; --phw: calc((100cqw - 24px) / 2 * .8); }
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .floor-phone,
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k1.d-phone { grid-column: 1; grid-row: 1 / 3; justify-self: center; align-self: start; position: relative; left: auto; top: auto;
+    width: var(--phw); height: calc(var(--phw) * 147.6 / 71.6); aspect-ratio: auto; margin: 0; transform: none; rotate: -1.5deg; --mm: calc(var(--phw) / 71.6); }
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone) { width: 100%; justify-self: stretch; margin: 0; }
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k2 { grid-column: 2; grid-row: 1; }
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k3 { grid-column: 2; grid-row: 2; }
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k4 { grid-column: 1; grid-row: 3; }
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k5 { grid-column: 2; grid-row: 3; }
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case .c-tokens { right: -6px; }
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k1 .c-tokens { right: -14px; bottom: 8%; }
+}
+@media (max-width: 700px) {
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases { grid-template-columns: minmax(0, 1fr); row-gap: 96px; --phw: min(62cqw, 240px); }
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .floor-phone,
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k1.d-phone { grid-row: 1; }
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k2 { grid-column: 1; grid-row: 2; }
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k3 { grid-column: 1; grid-row: 3; }
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k4 { grid-column: 1; grid-row: 4; }
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k5 { grid-column: 1; grid-row: 5; }
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k1 .c-tokens { right: -30%; bottom: 10%; }
+}
