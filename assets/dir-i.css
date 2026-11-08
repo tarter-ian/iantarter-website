@@ -1297,3 +1297,5 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 .x-i.x-i .job.bk-pl .c-org { background: none; }
 .x-i.x-i .job.bk-pl .c-org::before { display: none; }
 .x-i.x-i .job .c-org { border-radius: 10px 10px 0 0; }
+/* Claude's best-guess draft lines on the new case pages: read as normal text, with a dotted underline so Ian can find them to check */
+.ph.draft { color: inherit; font-style: inherit; text-decoration: underline dotted #b07a3c 1.5px; text-underline-offset: 4px; text-decoration-skip-ink: none; }
