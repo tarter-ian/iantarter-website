@@ -1300,6 +1300,6 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 /* Claude's best-guess draft lines on the new case pages: read as normal text, with a dotted underline so Ian can find them to check */
 .ph.draft { color: inherit; font-style: inherit; text-decoration: underline dotted #b07a3c 1.5px; text-underline-offset: 4px; text-decoration-skip-ink: none; }
 /* More breathing room between homepage sections (Ian 2026-11-08: "a little tight"): 144px desktop, 96px phone, still on the
-   8/16/24/48/96 scale's rhythm (96 x 1.5). The gap under the hero stays as it was, so the case row still starts on the first screen. */
-.x-i .i-scene > :is(.i-cases, .i-about, .i-jobs, .i-skills, .i-more) { margin-bottom: 144px !important; }
-@media (max-width: 700px) { .x-i .i-scene > :is(.i-cases, .i-about, .i-jobs, .i-skills, .i-more) { margin-bottom: 96px !important; } }
+   8/16/24/48/96 scale's rhythm (96 x 1.5). The hero gets the same gap: Ian no longer needs the case row on the first screen. */
+.x-i .i-scene > :is(.i-hero, .i-cases, .i-about, .i-jobs, .i-skills, .i-more) { margin-bottom: 144px !important; }
+@media (max-width: 700px) { .x-i .i-scene > :is(.i-hero, .i-cases, .i-about, .i-jobs, .i-skills, .i-more) { margin-bottom: 96px !important; } }
