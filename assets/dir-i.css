@@ -1321,3 +1321,14 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 /* TL;DR box: its padding was being zeroed by .s-inner, so the text ran into the box's edges (Ian 2026-11-08) */
 .x-i.x-i.x-i .s-inner.s-tldr { padding: 24px 28px 26px; border-radius: 4px; box-sizing: border-box; }
 @media (max-width: 700px) { .x-i.x-i.x-i .s-inner.s-tldr { padding: 18px 18px 20px; } }
+/* A middle ground for the first screen (Ian 2026-11-08: missed how clean the live one is, but projects should show a bit
+   earlier): the live hero's scale and calm back (big name, roomy intro card, a larger photo card, moss above), and the
+   Case studies sign with the tops of the first tags peeking in at the bottom of a laptop screen as the hint to scroll. */
+@media (min-width: 1001px) {
+  .x-i.x-i.x-i .i-hero { margin-top: 64px; row-gap: 32px; }
+  .x-i.x-i.x-i .i-hero h1 { font-size: 120px; }
+  .x-i.x-i.x-i .c-intro { grid-column: 1 / 8; }
+  .x-i.x-i.x-i .c-intro > .cf { padding: 32px; }
+  .x-i.x-i.x-i .c-me { grid-column: 10 / 13; }
+  .x-i .i-scene > .i-hero { margin-bottom: max(48px, 100vh - 770px) !important; }
+}
