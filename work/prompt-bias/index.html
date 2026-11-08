@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Mitigating AI Prompt Bias · Ian Tarter</title>
-<meta name="description" content="Case study: research into how bias gets into the prompts people write to AI, and where people and AI each miss it.">
+<meta name="description" content="Case study: user research toward a Chrome extension that helps students catch bias in their AI prompts before the AI repeats it.">
 <link rel="canonical" href="https://iantarter.com/work/prompt-bias/">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Mitigating AI Prompt Bias · Ian Tarter">
-<meta property="og:description" content="Case study: research into how bias gets into the prompts people write to AI, and where people and AI each miss it.">
+<meta property="og:description" content="Case study: user research toward a Chrome extension that helps students catch bias in their AI prompts before the AI repeats it.">
 <meta property="og:url" content="https://iantarter.com/work/prompt-bias/">
 <meta property="og:image" content="https://iantarter.com/assets/img/og/og-home.jpg">
 <meta property="og:image:width" content="1200">
@@ -87,24 +87,24 @@
 <a class="i-label c-back" href="../../#work">All case studies</a>
 <article class="card lay c-doc" aria-labelledby="case-title"><div class="cf">
   <div class="s-inner s-case-head">
-    <p class="s-case-meta">Carnegie Mellon University, Master of HCI, <span class="ph draft">Fall 2026</span></p>
+    <p class="s-case-meta">Carnegie Mellon University, Master of HCI, User-Centered Research and Evaluation, Fall 2026</p>
     <h1 class="s-case-title" id="case-title">Mitigating AI Prompt Bias</h1>
-    <p class="s-case-lede"><span class="ph draft">I researched how bias slips into the prompts people write to AI, toward a plugin that would flag it before a prompt is sent.</span></p>
+    <p class="s-case-lede">In a team of five, I researched how bias in generative AI reaches people, which led us to a Chrome extension that helps students catch bias in their own prompts.</p>
     <dl class="s-case-facts">
-      <div><dt>Role</dt><dd><span class="ph draft">UX researcher</span></dd></div><div><dt>Methods</dt><dd>Interviews, literature review, autoethnography, affinity diagramming, usability testing</dd></div><div><dt>Tools</dt><dd>Figma, ChatGPT</dd></div><div><dt>Status</dt><dd>Concept only, never built</dd></div>
+      <div><dt>Role</dt><dd>Researcher and team editor</dd></div><div><dt>Methods</dt><dd>Interviews, autoethnography, survey analysis, usability testing, contextual inquiry, affinity diagramming</dd></div><div><dt>Tools</dt><dd>Figma, FigJam, ChatGPT, Claude</dd></div><div><dt>Status</dt><dd>In progress: research done, concept pitched</dd></div>
     </dl>
   </div>
   <div class="s-inner s-tldr">
     <h2 class="s-label s-tldr-h">TL;DR</h2>
-    <dl><div><dt>The question</dt><dd><span class="ph draft">Can a tool help people catch bias in their AI prompts before it reaches the output?</span></dd></div><div><dt>What I did</dt><dd><span class="ph draft">Interviewed a practitioner, read research on AI bias and governance, logged my own ChatGPT use, and sorted it all into one affinity diagram.</span></dd></div><div><dt>What came out of it</dt><dd>Two insights about where people and AI each miss risk, and a plugin concept.</dd></div></dl>
+    <dl><div><dt>The question</dt><dd>How might we help students catch bias in their prompts before generative AI amplifies it?</dd></div><div><dt>What I did</dt><dd>Ran my own background research, analyzed free-text answers from a 2,179-person survey, co-wrote the research guide and piloted it, and edited every team deliverable.</dd></div><div><dt>What came out of it</dt><dd>A pitched concept: a Chrome extension that pauses on loaded wording without policing how people write.</dd></div></dl>
   </div>
 
   <figure class="s-inner s-flow" aria-labelledby="flow-cap">
     <ol class="s-flow-steps">
-      <li><b>Gather</b><span><span class="ph draft">An interview, papers on AI bias, and a log of my own ChatGPT use</span></span></li>
-      <li><b>Sort the notes</b><span>An affinity diagram in Figma, one colour per source</span></li>
-      <li><b>Find insights</b><span>Two insights about human and AI error</span></li>
-      <li><b>Test the idea</b><span><span class="ph draft">A plugin concept, tried out with a few classmates</span></span></li>
+      <li><b>Background research</b><span>Interviews, papers and AI autoethnography, sorted in an affinity diagram</span></li>
+      <li><b>Survey analysis</b><span>2,179 people rated biased image search results</span></li>
+      <li><b>Usability testing</b><span>Adobe Firefly, to see how people steer a GenAI tool</span></li>
+      <li><b>Contextual inquiry</b><span>Students wrote real prompts and thought aloud</span></li>
     </ol>
     <figcaption id="flow-cap">How the project ran.</figcaption>
   </figure>
@@ -113,39 +113,44 @@
     <div class="s-inner">
       <h2 class="s-label">The problem</h2>
       <div class="s-body">
-        <p><span class="ph draft">AI tools repeat the bias in what they are asked. Most guidance on AI bias is written for the companies that build the models, not for the people typing prompts, who often can&rsquo;t tell when a request is loaded.</span></p><p class="s-case-q"><span class="ph draft">How might people catch bias in a prompt before the AI acts on it?</span></p>
+        <p>Most talk about AI bias blames the training data or the algorithm. But a prompt can carry bias in before the model does anything. Ask &ldquo;I don&rsquo;t know who&rsquo;s interviewing me for my internship. What should I ask him?&rdquo; and the answer echoes the assumption back, which makes it feel more normal.</p><p class="s-case-q">How might we help students catch bias in their prompts before generative AI amplifies it?</p>
       </div>
     </div>
   </section>
 
   <section class="s-section">
     <div class="s-inner">
-      <h2 class="s-label">My approach</h2>
+      <h2 class="s-label">Our approach</h2>
       <div class="s-body">
-        <p><b>Three kinds of evidence.</b> <span class="ph draft">An interview with someone who uses AI at work, research papers on AI bias, fairness and regulation, and an autoethnography: a log of my own prompts to ChatGPT and where they went wrong.</span></p><p><b>Affinity diagram.</b> I grouped every note in Figma under seven themes: regulation and frameworks, risk detection, bias and unfairness, opaque data, human with AI, what AI is bad at, and human error. These rolled up into two insights.</p><p><b>Usability testing.</b> <span class="ph draft">I walked people through a rough prototype of the plugin and watched where its warnings helped and where they got in the way.</span></p>
-      </div>
-    </div>
-  </section>
-
-  <section class="s-section">
-    <div class="s-inner">
-      <h2 class="s-label">What I found</h2>
-      <div class="s-body">
-        <p><b>Neither people nor AI are good at spotting risky situations.</b> Both need a framework that helps them notice and deal with risk.</p><p><b>Harm rises sharply where both sides are error-prone.</b> A human-AI pair works best when at least one of them is reliable and can catch the other's mistakes.</p><p><span class="ph draft">The concept: a browser plugin that reads a prompt before it is sent, points out loaded wording and offers a more neutral rewrite. It stayed a concept, because the project ended at the research stage.</span></p>
+        <p><b>Background research.</b> Each of us talked to someone who uses AI at work and read up on AI harms. I interviewed a startup&rsquo;s chief operating officer about automating their work, read research on how model makers, end users and workers each think about harm, and kept an autoethnography of asking ChatGPT and Claude to do risky tasks. I sorted it all into the affinity diagram below.</p><p><b>Survey analysis.</b> We analyzed 2,179 responses to a CMU survey on bias in image search results. I took the free-text answers, coding them with ChatGPT&rsquo;s help to see how people explained what they saw.</p><p><b>Usability testing.</b> We ran a heuristic evaluation and usability tests of Adobe Firefly. People found prompting easy but rarely used the controls beyond the prompt box, even typing &ldquo;undo&rdquo; into it.</p><p><b>Contextual inquiry.</b> Students wrote prompts for everyday tasks while thinking aloud, without being told we were looking for bias. I co-wrote the guide and the consent form, then piloted the guide. My pilot showed the tasks let people copy our wording, so I pushed to rewrite them to force real word choices.</p><p><b>My part on the team.</b> Besides my own research, I was the team&rsquo;s editor: I revised every deliverable and split up work that hadn&rsquo;t been assigned.</p>
       </div>
     </div>
   </section>
 
   <figure class="s-inner s-artifact">
     <div class="s-artifact-box"><img src="../../assets/img/cards/bias-affinity.webp" alt="Affinity diagram from Figma: notes grouped under Regulation and frameworks, Risk detection, Bias and unfairness, Opaque data, Human with AI, What AI is bad at, and Human error, rolling up into two insights about human and AI error." width="605" height="540" loading="lazy" decoding="async"></div>
-    <figcaption>Part of the affinity diagram in Figma (the column naming an interviewee is cropped out).</figcaption>
+    <figcaption>My affinity diagram of the background research (the column naming my interviewee is cropped out).</figcaption>
+  </figure>
+
+  <section class="s-section">
+    <div class="s-inner">
+      <h2 class="s-label">What we found</h2>
+      <div class="s-body">
+        <p><b>Awareness matters more than exposure.</b> People who knew algorithms well were far more likely to say they were very aware of societal bias (71% versus 19%). People who rated biased results harmless mostly described the images as nice (&ldquo;love,&rdquo; &ldquo;happy,&rdquo; &ldquo;variety&rdquo;) rather than defending the bias. They hadn&rsquo;t noticed it.</p><p><b>Harm depends on who is looking.</b> Women and trans or non-binary respondents saw far more harm in the gender scenario than men did, and knowing someone in an affected group shifted ratings too.</p><p><b>Neither people nor AI spot risk well.</b> My own synthesis found that harm rises where both sides are error-prone, and a human-AI pair works best when one of them can catch the other&rsquo;s mistakes.</p><p>Together these pointed to the moment of writing a prompt: catch the assumption there, and the person stays in charge of the choice.</p>
+      </div>
+    </div>
+  </section>
+
+  <figure class="s-inner s-artifact">
+    <div class="s-artifact-box"><img src="../../assets/img/cards/bias-extension-mock.webp" alt="Concept mock-up of the Chrome extension: the prompt “I don’t know who’s interviewing me for my internship. What should I ask him?” with “him” highlighted and a note asking “Could this be an assumption?”, with buttons “Use ‘them’” and “Keep as written”. Below: Notice, Reflect, Choose." width="1030" height="926" loading="lazy" decoding="async"></div>
+    <figcaption>The concept we pitched: notice the assumption, explain it without judging, and leave the choice to the student.</figcaption>
   </figure>
 
   <section class="s-section">
     <div class="s-inner">
       <h2 class="s-label">What I took from it</h2>
       <div class="s-body">
-        <p><span class="ph draft">Bias isn&rsquo;t only in the model. It lives in the hand-off between a person and the machine, so a good tool helps whichever side is more reliable catch the other&rsquo;s mistakes.</span></p>
+        <p><span class="ph draft">Bias is easiest to fix where it starts, and that is often the person, not the model. A good nudge points it out and then gets out of the way.</span></p>
         <p><a class="s-more" href="../../#case-studies">Back to all case studies</a></p>
       </div>
     </div>
