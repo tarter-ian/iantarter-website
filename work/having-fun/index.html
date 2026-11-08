@@ -89,31 +89,31 @@
   <div class="s-inner s-case-head">
     <p class="s-case-meta">Carleton College, Cognitive Science senior capstone, Fall 2025 to Winter 2026</p>
     <h1 class="s-case-title" id="case-title">Beyond Predictive Processing in Play</h1>
-    <p class="s-case-lede">I designed and ran an experiment testing whether play is fun because we beat our own predictions.</p>
+    <p class="s-case-lede">I designed and ran an experiment testing whether prediction error rate reduction was indicative of fun.</p>
     <dl class="s-case-facts">
-      <div><dt>Role</dt><dd>Sole researcher, with a faculty advisor</dd></div><div><dt>Methods</dt><dd>Literature review, controlled experiment, Bayesian analysis</dd></div><div><dt>Built with</dt><dd>R, a custom game website, paper surveys</dd></div><div><dt>Outcome</dt><dd>Senior capstone talk and paper</dd></div>
+      <div><dt>Role</dt><dd>Researcher</dd></div><div><dt>Methods</dt><dd>Literature review, controlled experiment, Bayesian analysis</dd></div><div><dt>Built with</dt><dd>R, Likert-scale surveys, custom website</dd></div><div><dt>Outcome</dt><dd>Senior capstone talk and paper</dd></div>
     </dl>
   </div>
   <div class="s-inner s-tldr">
     <h2 class="s-label s-tldr-h">TL;DR</h2>
-    <dl><div><dt>The question</dt><dd>Is play fun because our prediction errors shrink faster than we expect, as predictive processing claims?</dd></div><div><dt>What I did</dt><dd>Reviewed play research, designed a rigged rock-paper-scissors study, ran it with 30 students and analyzed it in R.</dd></div><div><dt>What came out of it</dt><dd>Evidence that how often you win doesn&rsquo;t change how much fun you have, which challenges the theory.</dd></div></dl>
+    <dl><div><dt>The question</dt><dd>Is play fun because our prediction errors shrink faster than we expect, as predictive processing experts claim?</dd></div><div><dt>What I did</dt><dd>Reviewed play research, designed a rigged rock-paper-scissors study, ran it with 30 students and analyzed it in R.</dd></div><div><dt>What came out of it</dt><dd>Evidence that how often you win doesn't affect how much fun you have, challenging the theory.</dd></div></dl>
   </div>
 
   <figure class="s-inner s-flow" aria-labelledby="flow-cap">
     <ol class="s-flow-steps">
-      <li><b>Read the theory</b><span>Andersen et al. (2023) say fun comes from mistakes shrinking faster than expected</span></li>
-      <li><b>Rig the game</b><span>A website set how often each player won</span></li>
-      <li><b>Run sessions</b><span>Pairs played 60 games, rating their fun every 20</span></li>
-      <li><b>Analyze</b><span>Bayesian tests checked whether the groups really differed</span></li>
+      <li><b>Read the theory</b><span>Andersen et al. (2023) assert that fun comes from mistakes shrinking faster than expected</span></li>
+      <li><b>Rig the game</b><span>I built a website that manipulated people's likelihood of winning, which meant fewer perceived mistakes.</span></li>
+      <li><b>Run sessions</b><span>Pairs were led to believe they were playing rock-paper-scissors against each other, and rated a variety of questions, including fun.</span></li>
+      <li><b>Analyze</b><span>I used a variety of Bayesian tests which varied in strength of the hypothesis to test whether differing winrates really made the activity feel more fun.</span></li>
     </ol>
-    <figcaption id="flow-cap">How the project ran.</figcaption>
+    <figcaption id="flow-cap">Part of my research.</figcaption>
   </figure>
 
   <section class="s-section">
     <div class="s-inner">
       <h2 class="s-label">The problem</h2>
       <div class="s-body">
-        <p>Play is a big part of our lives, from make-believe as kids to sports and hobbies as adults, but it&rsquo;s hard to explain why it&rsquo;s fun. Most research explains what play does for us, like exercise, learning or passing on culture, not what it feels like.</p><p>Predictive processing, the theory that the brain is constantly making predictions, offers an answer: play is fun when your mistakes shrink faster than you expected. Nobody had tested it.</p><p class="s-case-q">If fun comes from beating your own predictions, will people who win more, or win more and more often, have more fun?</p>
+        <p>Play is a big part of our lives, from make-believe as kids, to sports and hobbies as adults, but it’s hard to explain why play is fun. Most research explains what play does for us, like exercise, learning, or transmitting culture. It's less common for play research to focus on what happens during the activity of play.</p><p>Predictive processing is a cognitive science framework that makes the assumptions that the brain is constantly making predictions. A paper by Andersen et al. does provide a potential deeper understanding for the activity of play. They assert that play is fun when you get better at making predictions about the world (whether it be a make-believe world, or a competition) better than you expect.</p><p class="s-case-q">If fun comes from beating your own predictions, will people who win increasingly more over time have more fun?</p>
       </div>
     </div>
   </section>
@@ -122,21 +122,21 @@
     <div class="s-inner">
       <h2 class="s-label">My approach</h2>
       <div class="s-body">
-        <p>In rock-paper-scissors, winning a round means you predicted your opponent correctly, which makes it a simple way to control how often someone&rsquo;s predictions come true. Participants came in pairs and played from separate rooms, believing they were playing each other. In fact, a website I built with AI assistance decided every outcome: one group won about a third of the time, one about two thirds, and one started low and climbed. Short pauses made it feel like waiting on a real person.</p><p>Every 20 games, players rated how much fun they were having, hidden among decoy questions. Because a small sample can&rsquo;t prove that groups are the same with ordinary tests, I used Bayesian methods in R, which can weigh the evidence for no difference.</p><p><b>My part.</b> I ran the whole project, from the literature review to the final talk, with guidance from my advisor.</p>
+        <p>In rock-paper-scissors, winning a round means you predicted your opponent's choice correctly. For instance, if you predict your opponent will pick rock, but they actually pick scissors, that is a prediction error, and would result in a loss. This makes rock-paper-scissors a simple way to operationalize how often someone’s predictions come true. Participants came in pairs and played from separate rooms, believing they were playing each other. In fact, a website I built decided every outcome: one group won about a third of the time (Average), one about two thirds (High), and one started low and gradually won more over time (Increasing). I also built in a variety of features, including intentional delay, to make the website feel real.</p><p>Every 20 games, players rated how much fun they were having, hidden among decoy questions. Because a small sample can’t prove that multiple groups are the same with ordinary tests, I used Bayes factors and Regions of Practical Equivalence to see if the results more likely came from distinct or similar groups.</p><p><b>My part.</b> I managed the whole project, from the literature review, to the final paper, to the final talk, with guidance from my advisor.</p>
       </div>
     </div>
   </section>
 
   <figure class="s-inner s-artifact">
     <div class="s-artifact-box"><img src="../../assets/img/cards/capstone-rps-site.webp" alt="The rock-paper-scissors game site: Rock, Paper and Scissors buttons, You and Opponent cards, with the opponent shown as waiting, Round 5 of 60, Wins 3, Losses 0, Ties 2." width="1282" height="875" loading="lazy" decoding="async"></div>
-    <figcaption>The game mid-session. The &ldquo;opponent&rdquo; was the website, and the pause sold the idea of a real player in the next room.</figcaption>
+    <figcaption>The game mid-session.</figcaption>
   </figure>
 
   <section class="s-section">
     <div class="s-inner">
       <h2 class="s-label">What I found</h2>
       <div class="s-body">
-        <p>Every group had fun, and about the same amount: average ratings ranged from 5.3 to 5.9 out of 7. The data were about three times more likely if the winning rate made no difference at all. The group whose wins climbed, which the theory says should enjoy it most, didn&rsquo;t have more fun than the group that won all along.</p><p>What did matter was competitiveness. More competitive players had more fun, no matter how often they won. That fits a different idea: we chase the win because it&rsquo;s part of the game, not because we need it to enjoy playing. My paper proposes treating fun as an aesthetic emotion aimed at the play itself.</p>
+        <p>Every group had fun, and about the same amount: the averages of all three groups ranged from 5.3 to 5.9 out of 7. The resulting data was three times more likely to come from a group in which the winrate wasn't a factor compared to one where it was a factor. The Increasing group, that improved winrates over time, didn’t have more fun than the High group that consistently won more over time.</p><p>In contrast, competitiveness did impact fun. More competitive players had more fun, regardless of how often they won. That fits a different idea: we strive for victory because it’s part of the game, not because we need it to enjoy playing. My paper proposes treating fun as an aesthetic emotion aimed at the activity of play itself.</p>
       </div>
     </div>
   </section>
@@ -150,7 +150,7 @@
     <div class="s-inner">
       <h2 class="s-label">What I took from it</h2>
       <div class="s-body">
-        <p>I presented the study as my senior capstone and wrote it up as a paper.</p><p><span class="ph draft">Next time, I&rsquo;d recruit beyond one college&rsquo;s students and measure fun with several questions instead of one. Those two limits kept the evidence moderate rather than strong.</span></p>
+        <p>I presented the study as my senior capstone and wrote it up as a paper.</p><p>Next time, I would challenge my assumptions that rock-paper-scissors is a fair measurement of prediction error by validating that assumption with survey methods. Although statistically random rock-paper-scissors leads to an expected winrate of 33%, it's possible that these assumptions differ based on your opponent or beliefs about your own luck.</p>
         <p><a class="s-more" href="../../#case-studies">Back to all case studies</a></p>
       </div>
     </div>
