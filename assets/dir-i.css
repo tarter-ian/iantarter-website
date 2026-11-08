@@ -1332,3 +1332,9 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
   .x-i.x-i.x-i .c-me { grid-column: 10 / 13; }
   .x-i .i-scene > .i-hero { margin-bottom: max(48px, 100vh - 770px) !important; }
 }
+/* ...and its tag and tape rise with it (Ian 2026-11-08: the tag stayed down). The invisible frame's copy, which carries them,
+   moves exactly like the phone's copy: same box, same scale and lift, same timing; no shadow of its own. */
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k1.d-phone.lift-copy {
+  transition: transform .35s cubic-bezier(.2,.7,.3,1), translate .35s cubic-bezier(.2,.7,.3,1); }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k1.d-phone.lift-copy.up { transform: scale(1.05); translate: 0 -10px; box-shadow: none; }
+@media (prefers-reduced-motion: reduce) { .x-i .i-cases > .k1.d-phone.lift-copy { transition: none; } }
