@@ -1305,3 +1305,6 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 @media (max-width: 700px) { .x-i .i-scene > :is(.i-hero, .i-cases, .i-about, .i-jobs, .i-skills, .i-more) { margin-bottom: 96px !important; } }
 /* (the first label's own 48px top margin adds to the hero's here, so the hero's share is smaller to land on the same 144px) */
 @media (min-width: 701px) { .x-i .i-scene > .i-hero { margin-bottom: 96px !important; } }
+/* the case row's first tags sat ~45-65px under the "Case studies" sign while every other section's content starts ~16-20px
+   under its sign (Ian 2026-11-08); the row's top padding (room for the tags) comes down to match */
+@media (min-width: 1001px) { .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases { padding-top: 52px; } }
