@@ -661,3 +661,674 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 .g-photo.mock, .s-artifact.mock, .g-facts > div:has(.ph) { display: none; }
 .g-facts.mock { outline: none; }
 .g-facts.mock::before { display: none; }
+/* Everything on the homepage centered (Ian, 2026-11-01) */
+@media (min-width: 701px) {
+  .x-i .i-about { margin-left: auto; margin-right: auto; justify-content: center; }
+  .x-i #about { margin-left: max(0px, calc((100% - 700px) / 2)); }
+  .x-i .i-skills { margin-left: 0; grid-template-columns: minmax(0,1fr); justify-items: center; }
+  .x-i #skills { margin-left: max(0px, calc((100% - var(--mm) * 152) / 2)); }
+  .x-i .i-more { max-width: 760px; margin-left: auto; margin-right: auto; }
+  .x-i .i-cases { translate: 10px 0; }
+}
+/* One shared 900px column for About, Experience, Skills, Games, Contact; hero and case row stay wide (Ian, 2026-11-01) */
+@media (min-width: 701px) {
+  .x-i { --col: 900px; }
+  .x-i .i-about, .x-i .i-jobs, .x-i .i-skills, .x-i .i-games, .x-i .i-more, .x-i .i-contact { max-width: var(--col); margin-left: auto; margin-right: auto; }
+  .x-i #about, .x-i #exp, .x-i #skills, .x-i #games, .x-i #contact { margin-left: max(0px, calc((100% - var(--col)) / 2)); }
+  .x-i .i-about { grid-template-columns: minmax(0, 1fr); }
+  .x-i .c-about .cf { display: block; columns: 2; column-gap: 44px; }
+  .x-i .c-about .cf > * { break-inside: avoid; margin: 0 0 14px; }
+  .x-i .i-games { gap: 40px; }
+}
+@media (min-width: 701px) and (max-width: 860px) { .x-i .c-about .cf { columns: 1; } }
+/* Case card titles on one line across the row (Ian, 2026-11-01): same picture height, meta line reserves two lines and sits on the title */
+@media (min-width: 1001px) {
+  .x-i .i-cases > .card .c-art { height: 256px; aspect-ratio: auto; }
+  .x-i .i-cases > .card .c-type { min-height: 46px; display: flex; align-items: flex-end; }
+  .x-i .i-cases > .k1, .x-i .i-cases > .k2, .x-i .i-cases > .k3 { margin-top: 110px; translate: none; }
+  .x-i .i-cases > .k1 { transform: rotate(-1.6deg); } .x-i .i-cases > .k2 { transform: rotate(.9deg); } .x-i .i-cases > .k3 { transform: rotate(-.5deg); }
+}
+/* Class feedback (2026-11-05): work comes sooner, and the hero line splits into a headline and a tagline */
+.x-i .i-hero { padding-bottom: 30px; }
+.x-i.x-i .c-pitch .c-role { display: block; font-family: var(--f-heading); font-weight: 700; font-size: var(--t26); line-height: 1.2; letter-spacing: -.01em; margin-bottom: 8px; }
+.x-i.x-i .c-pitch .c-tag { display: block; font-size: var(--t20); font-weight: 400; line-height: 1.4; }
+@media (max-width: 700px) { .x-i .i-hero { padding-bottom: 20px; } }
+/* First screen on a 12-column grid (Ian, 2026-11-05): name, headline, tagline and the case studies on one laptop screen.
+   One gutter (24px) and one spacing scale (8 / 16 / 24 / 32 / 48). */
+@media (min-width: 1001px) {
+  .x-i.x-i .i-hero { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; row-gap: 16px; align-items: start; margin-top: -40px; padding: 0; }
+  .x-i.x-i .i-name { grid-column: 1 / 10; grid-row: 1; align-self: end; margin: 0; }
+  .x-i.x-i .i-hero h1 { font-size: 88px; }
+  .x-i.x-i .c-intro { grid-column: 1 / 9; grid-row: 2; margin: 0; max-width: none; align-self: start; }
+  .x-i.x-i .c-intro > .cf { height: auto; min-height: 0; padding: 24px 24px 24px; }
+  .x-i.x-i .c-intro .s-actions { margin-top: 16px; }
+  .x-i.x-i .c-me { grid-column: 11 / 13; grid-row: 1 / 3; width: auto; margin: 0; align-self: end; }
+  .x-i.x-i #work { margin: 32px 0 16px; }
+  .x-i.x-i .i-cases { container-type: inline-size; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; padding-top: 0; margin: 0 0 256px; translate: none; align-items: stretch; }
+  .x-i.x-i .i-cases > .floor-phone { --mm: calc(((100cqw - 11 * 24px) / 12 * 3 + 48px) / 71.6); grid-column: 1 / 4; grid-row: 1; width: 100%; height: auto; aspect-ratio: 71.6 / 147.6; margin: 0 0 -100cqw; align-self: start; }
+  .x-i.x-i .i-cases > .k1 { grid-column: 4 / 7; } .x-i.x-i .i-cases > .k2 { grid-column: 7 / 10; } .x-i.x-i .i-cases > .k3 { grid-column: 10 / 13; }
+  .x-i.x-i .i-cases > .k1, .x-i.x-i .i-cases > .k2, .x-i.x-i .i-cases > .k3 { grid-row: 1; margin: 0; }
+  .x-i.x-i .i-cases > .card .cf { padding: 24px; }
+  .x-i.x-i .i-cases > .card .c-art { height: 112px; overflow: visible; align-items: start; margin-bottom: 16px; }
+  .x-i.x-i .i-cases > .card .c-art .slip { transform-origin: 50% 0; scale: .66; }
+  .x-i.x-i .i-cases > .card .c-text { display: none; }
+  .x-i.x-i .i-cases > .card a:not(.s-btn) { padding-top: 8px; }
+}
+/* The shared column below the fold sits on the same 12-column grid: columns 2 to 11 */
+@media (min-width: 1001px) { .x-i { --col: calc(100% - 2 * ((100% - 264px) / 12 + 24px)); } }
+/* Case studies as real playing cards (Ian, 2026-11-05): 5:7, corner indices, only the graphic and the title, the whole card is the link */
+.x-i.x-i.x-i .i-cases > .case { aspect-ratio: 5 / 7; position: relative; cursor: pointer; transition: translate .25s cubic-bezier(.3,0,.3,1); }
+.x-i.x-i.x-i .i-cases > .case .cf { height: 100%; display: flex; flex-direction: column; padding: 40px 28px 40px; box-sizing: border-box; }
+.x-i.x-i.x-i .i-cases > .case .c-art { flex: 1; height: auto; min-height: 0; margin: 0 0 24px; display: flex; align-items: center; justify-content: center; overflow: visible; }
+.x-i.x-i.x-i .i-cases > .case .c-art .slip { scale: .86; transform-origin: 50% 50%; }
+.x-i.x-i.x-i .i-cases > .case .c-type, .x-i.x-i.x-i .i-cases > .case .c-text, .x-i.x-i.x-i .i-cases > .case .c-more { display: none; }
+.x-i.x-i.x-i .i-cases > .case h3 { margin: 0; text-align: center; }
+.x-i.x-i.x-i .i-cases > .case h3 a { color: var(--ink); text-decoration: none; }
+.x-i.x-i.x-i .i-cases > .case h3 a::after { content: ""; position: absolute; inset: 0; z-index: 5; border-radius: inherit; }
+.x-i.x-i.x-i .i-cases > .case.up { translate: 0 -6px; }
+.x-i.x-i.x-i .i-cases > .case.up h3 a, .x-i.x-i.x-i .i-cases > .case h3 a:focus-visible { text-decoration: underline; text-underline-offset: 4px; }
+.x-i.x-i.x-i .i-cases > .case:focus-within { outline: 3px solid var(--link); outline-offset: 4px; }
+.x-i .c-index { position: absolute; top: 14px; left: 16px; display: flex; flex-direction: column; align-items: center; gap: 4px; z-index: 2; pointer-events: none; }
+.x-i .c-index b { font-family: var(--f-heading); font-weight: 700; font-size: 22px; line-height: 1; color: var(--link); }
+.x-i .c-index i { width: 11px; height: 11px; background: var(--link); border-radius: 0 100% 0 100%; transform: rotate(45deg); }
+.x-i .c-index-b { top: auto; left: auto; bottom: 14px; right: 16px; transform: rotate(180deg); }
+@media (min-width: 1001px) { .x-i.x-i .i-hero + #work, .x-i.x-i #work { margin: 48px 0 24px; } }
+@media (max-width: 1000px) { .x-i.x-i.x-i .i-cases > .case { width: min(100%, 300px); justify-self: center; } }
+/* Real cards keep their 5:7 shape and grow when the text needs it */
+.x-i.x-i.x-i .i-cases > .case { align-self: start; }
+/* Text-heavy pieces are paper, not cards: About is a letter, Contact a note and a printed form */
+.x-i.x-i .c-about, .x-i.x-i .c-contact, .x-i.x-i .c-form { border-radius: 2px;
+  background-image: linear-gradient(rgba(251,249,242,.86), rgba(251,249,242,.86)), url("tex/paper001_tile-1024.webp"); background-size: auto, 420px; }
+.x-i.x-i .c-about > .cf, .x-i.x-i .c-contact > .cf, .x-i.x-i .c-form > .cf { border: 0; border-radius: 0; }
+.x-i.x-i .i-games, .x-i.x-i.games-i .g-grid { align-items: start; }
+/* Section rhythm (Ian, 2026-11-05): the gap between sections is clearly bigger than the gap from a label to its content.
+   Desktop: 96px between sections, 24px label to content. Phone: 64px and 16px. */
+.x-i.x-i .i-label { margin-top: 0; margin-bottom: 24px; }
+.x-i.x-i .i-hero { padding-bottom: 0; margin-bottom: 96px; }
+.x-i.x-i .i-row, .x-i.x-i .i-more { margin-top: 0; }
+.x-i.x-i .i-row { margin-bottom: 96px; }
+.x-i.x-i #work, .x-i.x-i #about, .x-i.x-i #exp, .x-i.x-i #skills, .x-i.x-i #games, .x-i.x-i #contact { margin-top: 0; margin-bottom: 24px; }
+.x-i.x-i .i-row.i-games { margin-bottom: 24px; } .x-i.x-i .i-more { margin-bottom: 96px; }
+@media (min-width: 1001px) { .x-i.x-i .i-row.i-cases { margin-bottom: 256px; } }
+@media (max-width: 700px) {
+  .x-i.x-i .i-label, .x-i.x-i #work, .x-i.x-i #about, .x-i.x-i #exp, .x-i.x-i #skills, .x-i.x-i #games, .x-i.x-i #contact { margin-bottom: 16px; }
+  .x-i.x-i .i-hero { margin-bottom: 64px; } .x-i.x-i .i-row { margin-bottom: 64px; } .x-i.x-i .i-more { margin-bottom: 64px; } .x-i.x-i .i-row.i-games { margin-bottom: 16px; }
+}
+@media (min-width: 1001px) { .x-i.x-i .i-hero { margin-bottom: 56px; } .x-i.x-i .i-row.i-cases { margin-bottom: 286px; } }
+.x-i.x-i .i-row.i-jobs { margin-bottom: 112px; } @media (max-width: 700px) { .x-i.x-i .i-row.i-jobs { margin-bottom: 64px; } }
+/* Real deck indices (Ian, 2026-11-05): rank over a real suit, tight in the corner, red or black; each section is one suit */
+.x-i.x-i .c-index { top: 10px; left: 12px; gap: 1px; }
+.x-i.x-i .c-index b { font-size: 22px; letter-spacing: -.04em; color: var(--ink); }
+.x-i.x-i .c-index i, .x-i.x-i .c-index.s-pine i, .x-i.x-i .c-index.s-acorn i { width: auto; height: auto; background: none; border: 0; border-radius: 0; transform: none; box-shadow: none; font-style: normal; font-size: 18px; line-height: 1; color: var(--ink); font-family: "Segoe UI Symbol", "Apple Symbols", "DejaVu Sans", sans-serif; }
+.x-i.x-i .c-index.s-red b, .x-i.x-i .c-index.s-red i { color: var(--link); }
+.x-i.x-i .c-index-b { top: auto; left: auto; bottom: 10px; right: 12px; transform: rotate(180deg); }
+/* The phone lies under the first case card again */
+@media (min-width: 1001px) { .x-i.x-i.x-i .i-cases > .floor-phone { width: calc(100% + 72px); --mm: calc(((100cqw - 11 * 24px) / 12 * 3 + 48px + 72px) / 71.6); } .x-i.x-i .i-cases > .floor-phone { z-index: 0; } .x-i.x-i .i-cases > .case { z-index: 1; } }
+/* Court-card faces for the case studies (Ian, 2026-11-05): a framed, double-ended print in red, black, gold and blue; the title rides a banner across the middle */
+.x-i.x-i.x-i .i-cases > .case .cf { padding: 0; position: relative; height: 100%; min-height: 0; }
+.x-i.x-i.x-i .i-cases > .case .c-art.c-court { position: absolute; left: 14%; right: 14%; top: 50%; translate: 0 -50%; height: auto; aspect-ratio: 200 / 280; margin: 0; background: none; display: block; }
+.x-i .c-court .court { display: block; width: 100%; height: 100%; }
+.x-i.x-i.x-i .i-cases > .case h3 { position: absolute; left: 10%; right: 10%; top: 50%; translate: 0 -50%; z-index: 3; margin: 0; padding: 8px 10px 9px; background: #fbf6e6; border: 2.5px solid var(--ink); border-radius: 3px; text-align: center; font-size: 17px; line-height: 1.15; box-shadow: 0 2px 0 rgba(23,22,18,.25); }
+.x-i.x-i.x-i .i-cases > .case .c-art.c-court { z-index: 1; } .x-i.x-i.x-i .i-cases > .case h3 { z-index: 8; }
+.x-i.x-i .c-index.c-kun b { font-size: 15px; letter-spacing: 0; writing-mode: vertical-rl; text-orientation: upright; }
+/* Experience = employee ID badges (Ian, 2026-11-05): CR80 landscape plastic, a punched slot, a colour band per employer */
+.x-i.x-i .job { aspect-ratio: 85.6 / 54; border-radius: 12px; padding: 0;
+  background-image: linear-gradient(160deg, rgba(255,255,255,.7), rgba(255,255,255,0) 45%), linear-gradient(#f7f6f2, #f1efe9); }
+.x-i.x-i .job > .cf { border: 0; border-radius: 0; padding: 0 22px 18px; display: flex; flex-direction: column; gap: 4px; height: 100%; box-sizing: border-box; }
+.x-i.x-i .job .c-org { order: -1; margin: 0 -22px 10px; padding: 26px 22px 9px; background: var(--band, var(--ink)); color: #fff; border-radius: 12px 12px 0 0; font-family: var(--f-heading); font-weight: 700; font-size: var(--t17, 17px); letter-spacing: .01em; position: relative; }
+.x-i.x-i .job .c-org::before { content: ""; position: absolute; top: 9px; left: 50%; width: 46px; height: 8px; margin-left: -23px; border-radius: 4px; background: #24301b; box-shadow: inset 0 1px 2px rgba(0,0,0,.6), 0 1px 0 rgba(255,255,255,.35); }
+.x-i.x-i .job h3 { order: 0; margin: 0; } .x-i.x-i .job .c-type { order: 1; margin: 0; } .x-i.x-i .job .c-text { order: 2; margin-top: 8px; }
+.x-i .j1, .x-i .j6 { --band: #b5371f; } .x-i .j2 { --band: #2f5d8a; } .x-i .j3 { --band: #7a5a1e; } .x-i .j4 { --band: #3f6b4a; } .x-i .j5 { --band: #171612; }
+@media (min-width: 701px) { .x-i.x-i .i-jobs { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px 40px; } }
+/* Games = sell sheets: one printed page each (letter, portrait), paper not card */
+.x-i.x-i .game.g-pitch, .x-i.x-i .g-card.g-pitch { aspect-ratio: 8.5 / 11; border-radius: 2px; padding: 0;
+  background-image: linear-gradient(rgba(251,249,242,.9), rgba(251,249,242,.9)), url("tex/paper001_tile-1024.webp"); background-size: auto, 420px; }
+.x-i.x-i .game.g-pitch > .cf, .x-i.x-i .g-card.g-pitch > .cf { border: 0; border-radius: 0; padding: 32px 32px 32px; display: block; height: auto; }
+.x-i.x-i .g-pitch h3 { font-size: var(--t26, 26px); margin: 0 0 16px; padding: 0 0 12px; border-bottom: 2.5px solid var(--ink); }
+.x-i.x-i .g-pitch .g-facts { border-top: 1px solid rgba(23,22,18,.25); border-bottom: 1px solid rgba(23,22,18,.25); padding: 12px 0; margin: 16px 0; }
+.x-i.x-i .job { background-image: linear-gradient(160deg, rgba(255,255,255,.55), rgba(255,255,255,0) 45%), linear-gradient(rgba(247,246,242,.93), rgba(247,246,242,.93)), url("tex/paper001_tile-1024.webp"); background-size: auto, auto, 360px; }
+/* Badges on a real CC0 PVC scan (ambientCG Plastic013A); the band is tinted by multiplying the same plastic */
+.x-i.x-i .job { background-image: linear-gradient(160deg, rgba(255,255,255,.35), rgba(255,255,255,0) 45%), url("tex/plastic013a_tile-1024.webp"); background-size: auto, 320px; background-color: #f4f3ef; }
+.x-i.x-i .job .c-org { background-image: url("tex/plastic013a_tile-1024.webp"); background-size: 320px; background-blend-mode: multiply; background-color: var(--band, var(--ink)); }
+/* Notes from Ian, 2026-11-05 17:00 */
+/* 1) one rule under a sell sheet's title, not two */
+.x-i.x-i .g-pitch .g-facts { border-top: 0; padding-top: 4px; }
+/* 3) the phone takes its own height in the case row, so About never runs into it */
+@media (min-width: 1001px) {
+  .x-i.x-i.x-i .i-cases > .floor-phone { margin-bottom: 0; }
+  .x-i.x-i .i-cases { align-items: start; }
+  .x-i.x-i .i-row.i-cases { margin-bottom: 96px; }
+}
+/* 4) hovering picks the card up: it straightens, grows a little and its shadow spreads and softens */
+.x-i.x-i.x-i .i-cases > .case { transition: transform .35s cubic-bezier(.2,.7,.3,1), box-shadow .35s cubic-bezier(.2,.7,.3,1), translate .35s cubic-bezier(.2,.7,.3,1); }
+.x-i.x-i.x-i .i-cases > .case.up, .x-i.x-i.x-i .i-cases > .case:focus-within { transform: rotate(0deg) scale(1.05); translate: 0 -10px; z-index: 6;
+  box-shadow: 0 2px 2px rgba(8,10,0,.3), 6px 14px 18px rgba(8,10,0,.28), 18px 36px 48px rgba(8,10,0,.3); }
+@media (prefers-reduced-motion: reduce) { .x-i.x-i.x-i .i-cases > .case { transition: none; } }
+/* 5) every sell sheet the same size: letter-shaped, rows share one height; the Daily Weather wallet lies over its title */
+.x-i.x-i .i-games, .x-i.x-i.games-i .g-grid { align-items: start; }
+.x-i.x-i .g-pitch .g-facts { gap: 12px 20px; }
+.x-i.x-i .g1.g-pitch h3 { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.x-i.x-i .g1.g-pitch .art-dw { margin-top: -6px; }
+/* Sell sheets: at least letter-shaped, and every sheet on a page the same height (rows share the tallest) */
+.x-i.x-i .i-games, .x-i.x-i.games-i .g-grid { container-type: inline-size; align-items: stretch; grid-auto-rows: 1fr; }
+.x-i.x-i .game.g-pitch, .x-i.x-i .g-card.g-pitch { aspect-ratio: auto; min-height: calc((100cqw - 40px) / 2 * 11 / 8.5); }
+@media (max-width: 700px) { .x-i.x-i .game.g-pitch, .x-i.x-i .g-card.g-pitch { min-height: calc(100cqw * 11 / 8.5); } }
+@media (min-width: 701px) { .x-i.x-i.games-i .g-card.g-pitch { min-height: 660px; } }
+.x-i.x-i.games-i .g-card.g-pitch { margin-top: 0; }
+/* Three decks: poker (EXACT), hanafuda (Japan study), tarot (BIRDS), all printed at poker size with the title in one place. */
+.x-i.x-i.x-i .i-cases > .case.d-hana { border-radius: 14px; background: #2a1712; background-image: none; }
+.x-i.x-i.x-i .i-cases > .case .c-art.c-deck { position: absolute; inset: 0; translate: none; height: auto; aspect-ratio: auto; margin: 0; background: none; display: block; z-index: 1; }
+.x-i.x-i.x-i .i-cases > .case.d-hana .c-art.c-deck { inset: 7px; border-radius: 8px; overflow: hidden; }
+.x-i.x-i.x-i .i-cases > .case.d-tarot .c-art.c-deck { inset: 4px; }
+.x-i .c-deck .deck { display: block; width: 100%; height: 100%; }
+.x-i.x-i.x-i .i-cases > .case.d-hana .c-index { z-index: 3; top: 15px; left: 16px; }
+.x-i.x-i.x-i .i-cases > .case.d-hana .c-index b { color: #fbf6e6; }
+.x-i.x-i.x-i .i-cases > .case.d-hana .c-index-b { top: 15px; bottom: auto; left: auto; right: 16px; transform: none; }
+.x-i.x-i.x-i .i-cases > .case.d-hana .c-index i { display: none; }
+/* Physical card stock: a linen-embossed grain over the print and the title band, a hairline of edge thickness, and a faint sheen. */
+.x-i.x-i.x-i .i-cases > .case::after { z-index: 9; background-image: linear-gradient(125deg, rgba(255,255,255,.16) 0%, rgba(255,255,255,0) 35%, rgba(255,255,255,0) 70%, rgba(255,255,255,.08) 100%), url("tex/stock-grain.webp?v=2"); background-size: auto, 340px; mix-blend-mode: overlay; box-shadow: inset 0 0 0 1px rgba(255,255,255,.45), inset 0 -1px 0 rgba(0,0,0,.18), inset 0 0 10px rgba(30,40,0,.14); }
+.x-i.x-i.x-i .i-cases > .case { --edge: 0 1px 0 #d9d5ca, 0 2px 0 #b9b4a8; }
+.x-i.x-i.x-i .i-cases > .case.d-hana { --edge: 0 1px 0 #3a231c, 0 2.5px 0 #1a0e0b; }
+/* Lifting a card: the grass lying over it slides off quickly instead of rising with it, and settles back once the card is down. */
+@media (hover: hover) {
+  .x-i.x-i.x-i .i-cases > .case > .blade-strip { transition: opacity .3s ease .32s; }
+  .x-i.x-i.x-i .i-cases > .case.up > .blade-strip, .x-i.x-i.x-i .i-cases > .case:focus-within > .blade-strip { opacity: 0; transition: opacity .12s ease 0s; }
+}
+.x-i.x-i.x-i .i-cases > .case { box-shadow: var(--edge), var(--sh); }
+.x-i.x-i.x-i .i-cases > .case.up, .x-i.x-i.x-i .i-cases > .case:focus-within { box-shadow: var(--edge), 0 2px 2px rgba(8,10,0,.3), 6px 14px 18px rgba(8,10,0,.28), 18px 36px 48px rgba(8,10,0,.3); }
+/* Real public-domain card art (2026-11-05): 1910 Murad basketball card, c.1900 February hanafuda, 1909 Three of Cups. Titles sit in one name plate at the foot of every card. */
+.x-i .c-deck img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.x-i.x-i.x-i .i-cases > .case.d-trade .c-art.c-deck { inset: 7.5% 7.5% 7.5%; border: 3px solid #3d2a6b; box-shadow: inset 0 0 0 2px #b8954a; outline: 2px solid #b8954a; outline-offset: 3px; }
+.x-i.x-i.x-i .i-cases > .case.d-trade .c-art.c-deck img { position: relative; z-index: -1; }
+.x-i.x-i.x-i .i-cases > .case.d-hana .c-art.c-deck img { object-position: 50% 30%; }
+.x-i.x-i.x-i .i-cases > .case.d-tarot .c-art.c-deck { inset: 3.5%; }
+.x-i.x-i.x-i .i-cases > .case.d-tarot .c-art.c-deck img { object-fit: contain; }
+.x-i.x-i.x-i .i-cases > .case h3, .x-i.x-i.x-i .i-cases > .case.d-hana h3, .x-i.x-i.x-i .i-cases > .case.d-tarot h3 { top: auto; bottom: 9%; translate: none; left: 11%; right: 11%; }
+.x-i.x-i.x-i .i-cases > .case.d-hana .c-index b { color: var(--ink); }
+/* The scan IS the card: full bleed, no inset frame or second border. */
+.x-i.x-i.x-i .i-cases > .case.d-trade .c-art.c-deck, .x-i.x-i.x-i .i-cases > .case.d-tarot .c-art.c-deck { inset: 0; border: 0; outline: 0; box-shadow: none; border-radius: inherit; overflow: hidden; }
+.x-i.x-i.x-i .i-cases > .case.d-trade .c-art.c-deck img, .x-i.x-i.x-i .i-cases > .case.d-tarot .c-art.c-deck img { object-fit: cover; position: static; z-index: auto; }
+.x-i.x-i.x-i .i-cases > .case h3 { box-shadow: none; }
+/* Scanned cards: the scan is the face, edge to edge (the base .card padding made a second border). */
+.x-i.x-i.x-i .i-cases > .case.d-trade, .x-i.x-i.x-i .i-cases > .case.d-hana, .x-i.x-i.x-i .i-cases > .case.d-tarot { padding: 0; }
+.x-i.x-i.x-i .i-cases > .case.d-trade::after, .x-i.x-i.x-i .i-cases > .case.d-tarot::after { background-image: linear-gradient(125deg, rgba(255,255,255,.14) 0%, rgba(255,255,255,0) 35%, rgba(255,255,255,0) 70%, rgba(255,255,255,.06) 100%); box-shadow: none; }
+/* EXACT: a real 1910 trading card (Frank Irons, broad jump) at its own squarer shape, same height as the others. */
+.x-i.x-i.x-i .i-cases > .case.d-trade { aspect-ratio: 2514 / 2898; width: 121.4%; justify-self: end; border-radius: 6px; background: none; }
+.x-i.x-i.x-i .i-cases > .case.d-trade .c-art.c-deck img { object-fit: fill; }
+@media (max-width: 1000px) { .x-i.x-i.x-i .i-cases > .case.d-trade { width: min(100%, 340px); justify-self: center; } }
+@media (min-width: 1001px) { .x-i.x-i .c-intro { grid-column: 1 / 8; } } /* 7 columns: hugs the tagline and buttons */
+/* Method tokens: punched chipboard tokens lying across each case card's foot, printed face up. */
+.x-i .c-tokens { position: absolute; left: 8%; right: 4%; bottom: -15px; z-index: 10; display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; pointer-events: none; }
+.x-i .c-tokens li { font-family: var(--f-ui); font-weight: 700; font-size: 14px; line-height: 1; color: var(--ink); padding: 7px 12px 8px; border-radius: 999px;
+  background-color: #f4efe2; background-image: linear-gradient(rgba(250,246,236,.82), rgba(250,246,236,.82)), url("tex/paper001_tile-1024.webp"); background-size: auto, 300px;
+  box-shadow: 0 1.5px 0 #b59a72, 0 3px 0 #8a6e48, 1px 4px 4px rgba(8,10,0,.35), 4px 9px 14px rgba(8,10,0,.25); }
+.x-i .c-tokens li:nth-child(1) { rotate: -3deg; } .x-i .c-tokens li:nth-child(2) { rotate: 2deg; translate: 0 3px; } .x-i .c-tokens li:nth-child(3) { rotate: -1deg; translate: 0 -1px; }
+.x-i .c-tokens { flex-wrap: nowrap; gap: 8px; } .x-i .c-tokens li { white-space: nowrap; }
+/* Tokens v2: thick round punchboard tokens. Printed face (ink colour, cream ring, icon over the word), grey board core showing at the edge. */
+.x-i .c-tokens { left: auto; right: -14px; bottom: -22px; gap: 4px; align-items: flex-end; }
+.x-i .c-tokens li { position: relative; width: 84px; height: 84px; padding: 0 6px; box-sizing: border-box; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; white-space: normal; text-align: center;
+  font-size: 12px; line-height: 1.1; letter-spacing: .01em; color: #fbf6e6;
+  background-color: #a8381f; background-image: radial-gradient(circle at 35% 28%, rgba(255,255,255,.16), rgba(255,255,255,0) 55%), url("tex/paper001_tile-1024.webp"); background-size: auto, 220px; background-blend-mode: normal, multiply;
+  box-shadow: inset 0 0 0 4px #a8381f, inset 0 0 0 5.5px #fbf6e6, inset 0 1px 1px rgba(255,255,255,.35), 0 1px 0 #6d6a62, 0 2px 0 #5c5952, 0 3px 0 #4b4843, 0 3.5px 0 #3c3a36, 1px 5px 5px rgba(8,10,0,.4), 5px 11px 16px rgba(8,10,0,.28); }
+.x-i .c-tokens li svg { width: 22px; height: 22px; flex: none; }
+.x-i .c-tokens li span { display: block; }
+.x-i .c-tokens li:nth-child(1) { rotate: -8deg; translate: 0 6px; } .x-i .c-tokens li:nth-child(2) { rotate: 5deg; translate: 0 -4px; }
+@media (max-width: 1000px) { .x-i .c-tokens { right: -10px; } }
+.x-i .c-tokens { left: 7%; right: auto; bottom: -54px; gap: 6px; }
+@media (max-width: 1000px) { .x-i .c-tokens { left: 7%; right: auto; } }
+/* BIRDS: the study's own figure (from the public preprint) printed onto the card stock: ink multiplies into the paper instead of sitting on it. */
+.x-i.x-i.x-i .i-cases > .case.d-fig .c-art.c-deck { inset: 7% 7% auto; height: auto; aspect-ratio: 558 / 519; }
+.x-i.x-i.x-i .i-cases > .case.d-fig .c-art.c-deck img { object-fit: contain; mix-blend-mode: multiply; filter: contrast(1.05) saturate(.9); }
+/* EXACT is the phone alone: k1 is an invisible frame over the phone's upper part that holds the title plate and tokens, lined up with the cards. */
+@media (min-width: 1001px) {
+  .x-i.x-i.x-i .i-cases > .k1.d-phone { grid-column: 1 / 4; grid-row: 1; width: calc(100% + 72px); aspect-ratio: auto; align-self: start; height: calc((100cqw - 11 * 24px) / 12 * 3 * 1.4 + 48px * 1.4); z-index: 2; }
+  .x-i.x-i .i-cases > .k2 { grid-column: 6 / 9; } .x-i.x-i .i-cases > .k3 { grid-column: 10 / 13; }
+}
+.x-i.x-i.x-i .i-cases > .k1.d-phone { background: none; box-shadow: none; padding: 0; transform: none; }
+.x-i.x-i.x-i .i-cases > .k1.d-phone::after { display: none; }
+.x-i.x-i.x-i .i-cases > .k1.d-phone.up, .x-i.x-i.x-i .i-cases > .k1.d-phone:focus-within { transform: none; translate: none; scale: none; box-shadow: none; }
+.x-i.x-i.x-i .i-cases > .k1.d-phone h3 { left: 14%; right: 14%; }
+/* Japan study: the real workshop table, photographed from above, printed edge to edge. */
+.x-i.x-i.x-i .i-cases > .case.d-photo { padding: 0; }
+.x-i.x-i.x-i .i-cases > .case.d-photo .c-art.c-deck { inset: 0; border-radius: inherit; overflow: hidden; }
+.x-i.x-i.x-i .i-cases > .case.d-photo::after { background-image: linear-gradient(125deg, rgba(255,255,255,.14) 0%, rgba(255,255,255,0) 35%, rgba(255,255,255,0) 70%, rgba(255,255,255,.06) 100%); }
+.x-i .c-tokens li { width: 80px; height: 80px; font-size: 12px; }
+.x-i .c-tokens { left: 2%; gap: 4px; } .x-i .c-tokens li:nth-child(3) { rotate: -3deg; translate: 0 8px; }
+@media (min-width: 1001px) { .x-i.x-i.x-i .i-cases > .k2 { margin-left: -40px; margin-right: 40px; } }
+.x-i.x-i.x-i .i-cases > .case.d-fig .c-art.c-deck { inset: 6% 5% auto; }
+.x-i.x-i.x-i .i-cases > .case.d-fig .c-art.c-deck img { filter: contrast(1.35) saturate(1.25); }
+/* Each case object keeps its real shape (Ian 18:27): phone, a landscape letter sheet, a printed figure.
+   Bottoms line up on the line a 3-column 5:7 card would end at, so the title plates and tokens share one baseline. */
+.x-i.x-i.x-i .i-cases > .case.d-sheet, .x-i.x-i.x-i .i-cases > .case.d-fig { padding: 0; border-radius: 2px; background-color: #fbfaf6;
+  background-image: linear-gradient(rgba(251,250,246,.86), rgba(251,250,246,.86)), url("tex/paper001_tile-1024.webp"); background-size: auto, 420px; }
+.x-i.x-i.x-i .i-cases > .case.d-sheet { aspect-ratio: 939 / 726; }
+.x-i.x-i.x-i .i-cases > .case.d-sheet .c-art.c-deck { inset: 0; border-radius: inherit; overflow: hidden; }
+.x-i.x-i.x-i .i-cases > .case.d-sheet .c-art.c-deck img { mix-blend-mode: multiply; }
+.x-i.x-i.x-i .i-cases > .case.d-fig { aspect-ratio: 1 / 1.16; }
+.x-i.x-i.x-i .i-cases > .case.d-fig .c-art.c-deck { inset: 6% 6% auto; }
+.x-i.x-i.x-i .i-cases > .case.d-sheet::after, .x-i.x-i.x-i .i-cases > .case.d-fig::after { border-radius: inherit; background-image: none; box-shadow: none; }
+.x-i.x-i.x-i .i-cases > .case h3 { bottom: 30px; }
+.x-i.x-i.x-i .i-cases > .case.d-sheet h3 { bottom: 22px; left: 18%; right: 18%; }
+@media (min-width: 1001px) {
+  .x-i.x-i .i-cases { --col: calc((100cqw - 11 * 24px) / 12); --H: calc((var(--col) * 3 + 48px) * 1.4); }
+  .x-i.x-i.x-i .i-cases > .k2 { grid-column: 5 / 9; margin: calc(var(--H) - (var(--col) * 4 + 72px) * 726 / 939) 0 0; }
+  .x-i.x-i.x-i .i-cases > .k3 { grid-column: 10 / 13; margin: calc(var(--H) - (var(--col) * 3 + 48px) * 1.16) 0 0; }
+}
+/* Phone at the row's scale (Ian: "way too big"): its bottom is the row's baseline, a little taller than a 3-column card. */
+@media (min-width: 1001px) {
+  .x-i.x-i .i-cases { --B: calc(var(--H) * 1.12); }
+  .x-i.x-i.x-i.x-i .i-cases > .floor-phone { --mm: calc(var(--B) / 147.6); width: calc(var(--mm) * 71.6); grid-column: 1 / 4; justify-self: center; margin: 0; }
+  .x-i.x-i.x-i.x-i .i-cases > .k1.d-phone { grid-column: 1 / 4; justify-self: center; width: calc(var(--B) / 147.6 * 71.6); height: var(--B); }
+  .x-i.x-i.x-i.x-i .i-cases > .k1.d-phone h3 { left: 6%; right: 6%; }
+  .x-i.x-i.x-i.x-i .i-cases > .k2 { margin-top: calc(var(--B) - (var(--col) * 4 + 72px) * 726 / 939); }
+  .x-i.x-i.x-i.x-i .i-cases > .k3 { margin-top: calc(var(--B) - (var(--col) * 3 + 48px) * 1.16); }
+}
+/* Tokens: an even, centred row under each object, alternating small tilts. */
+.x-i.x-i .c-tokens { left: -40px; right: -40px; justify-content: center; gap: 10px; bottom: -50px; }
+.x-i.x-i .c-tokens li:nth-child(1) { rotate: -6deg; translate: 0 0; } .x-i.x-i .c-tokens li:nth-child(2) { rotate: 4deg; translate: 0 0; } .x-i.x-i .c-tokens li:nth-child(3) { rotate: -2deg; translate: 0 0; }
+/* Embedded in the scene: the sheet is the photo itself (no added margin), paper tone matched to the other stock, soft curl shading at the edges, lit by the same canopy light. */
+.x-i.x-i.x-i.x-i .i-cases > .case.d-sheet { aspect-ratio: 939 / 574; background: #f1efe8; }
+@media (min-width: 1001px) { .x-i.x-i.x-i.x-i .i-cases > .k2 { margin-top: calc(var(--B) - (var(--col) * 4 + 72px) * 574 / 939); } }
+.x-i.x-i.x-i .i-cases > .case.d-sheet .c-art.c-deck img { filter: sepia(.08) brightness(.97); }
+.x-i.x-i.x-i .i-cases > .case.d-fig .c-art.c-deck img { filter: none; }
+.x-i.x-i.x-i .i-cases > .case.d-sheet::after, .x-i.x-i.x-i .i-cases > .case.d-fig::after { z-index: 3; box-shadow: inset 0 0 0 1px rgba(0,0,0,.05), inset 0 -10px 16px -10px rgba(40,44,20,.22), inset 10px 0 16px -12px rgba(40,44,20,.16); background-image: linear-gradient(125deg, rgba(255,255,255,.12), rgba(255,255,255,0) 40%), url("tex/stock-grain.webp?v=2"); background-size: auto, 340px; mix-blend-mode: overlay; }
+/* Title plates sit across each object's bottom edge (half on the object, half on the moss) so they never cover the artifact; tokens lie below. */
+.x-i.x-i.x-i.x-i .i-cases > .case h3 { top: auto; bottom: -24px; translate: none; }
+.x-i.x-i.x-i.x-i .i-cases > .case.d-sheet h3 { left: 14%; right: 14%; }
+.x-i.x-i .c-tokens { bottom: -118px; }
+@media (min-width: 1001px) { .x-i.x-i.x-i .i-row.i-cases { margin-bottom: 200px; } }
+/* BIRDS: the figure is the whole printed page, no inset. */
+.x-i.x-i.x-i.x-i .i-cases > .case.d-fig { aspect-ratio: 558 / 519; }
+.x-i.x-i.x-i.x-i .i-cases > .case.d-fig .c-art.c-deck { inset: 0; border-radius: inherit; overflow: hidden; }
+.x-i.x-i.x-i .i-cases > .case.d-fig .c-art.c-deck img { mix-blend-mode: multiply; filter: sepia(.06) brightness(.98); }
+@media (min-width: 1001px) { .x-i.x-i.x-i.x-i .i-cases > .k3 { margin-top: calc(var(--B) - (var(--col) * 3 + 48px) * 519 / 558); } }
+/* Case row system: three equal 4-column slots. Each object fits the same slot box (4 columns wide, --B tall), centred, all on one baseline; plates and tokens centre on the slot. */
+@media (min-width: 1001px) {
+  .x-i.x-i .i-cases { --w4: calc(var(--col) * 4 + 72px); }
+  .x-i.x-i.x-i.x-i .i-cases > .floor-phone, .x-i.x-i.x-i.x-i .i-cases > .k1.d-phone { grid-column: 1 / 5; justify-self: center; transform: none; rotate: -2deg; }
+  .x-i.x-i.x-i.x-i .i-cases > .k2 { grid-column: 5 / 9; width: 100%; justify-self: center; margin: calc(var(--B) - var(--w4) * 574 / 939) 0 0; }
+  .x-i.x-i.x-i.x-i .i-cases > .k3 { grid-column: 9 / 13; width: 100%; justify-self: center; margin: calc(var(--B) - var(--w4) * 519 / 558) 0 0; }
+  .x-i.x-i.x-i.x-i .i-cases > .k2 { transform: rotate(1deg); } .x-i.x-i.x-i.x-i .i-cases > .k3 { transform: rotate(-1deg); }
+}
+.x-i.x-i.x-i.x-i .i-cases > .case h3 { left: 50%; right: auto; width: max-content; max-width: 84%; translate: -50% 0; }
+.x-i.x-i .c-tokens { left: 50%; right: auto; translate: -50% 0; width: max-content; }
+.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3 { left: 50%; right: auto; width: max-content; max-width: 84%; translate: -50% 0; }
+/* Tokens take the same baked canopy light as every other piece (offset per token, set by blades.js relight()). */
+.x-i.x-i .c-tokens li { width: 88px; height: 88px; gap: 2px;
+  background-color: #a8381f; background-image: var(--L-img), radial-gradient(circle at 35% 28%, rgba(255,255,255,.14), rgba(255,255,255,0) 55%), url("tex/paper001_tile-1024.webp");
+  background-size: var(--L-size), auto, 220px; background-position: var(--L-pos), 0 0, 0 0; background-blend-mode: var(--L-blend), normal, multiply; background-repeat: repeat; }
+.x-i.x-i .c-tokens li svg { width: 19px; height: 19px; }
+.x-i.x-i .c-tokens li span { max-width: 62px; }
+.x-i.x-i .c-tokens li { width: 100px; height: 100px; line-height: 1.05; } .x-i.x-i .c-tokens li svg { width: 18px; height: 18px; } .x-i.x-i .c-tokens li span { max-width: 70px; }
+.x-i.x-i .c-tokens { gap: 8px; bottom: -128px; }
+/* Case studies, Ian's layout (18:37): phone tall on the left (columns 1-4, two rows), the Dialect sheet over the figure (columns 5-8), columns 9-12 left open for more work.
+   Each title plate sits across its object's top edge; its tokens sit across the bottom edge. */
+@media (min-width: 1001px) {
+  .x-i.x-i .i-cases { --w4: calc(var(--col) * 4 + 72px); --gapR: 96px; --hS: calc(var(--w4) * 574 / 939); --hG: calc(var(--w4) * 519 / 558); --P: calc(var(--hS) + var(--gapR) + var(--hG)); row-gap: var(--gapR); align-items: start; padding-top: 28px; }
+  .x-i.x-i.x-i.x-i.x-i .i-cases > .floor-phone { grid-column: 1 / 5; grid-row: 1 / 3; justify-self: start; --mm: calc(var(--P) / 147.6); width: calc(var(--mm) * 71.6); margin: 0; rotate: -1.5deg; }
+  .x-i.x-i.x-i.x-i.x-i .i-cases > .k1.d-phone { grid-column: 1 / 5; grid-row: 1 / 3; justify-self: start; width: calc(var(--P) / 147.6 * 71.6); height: var(--P); margin: 0; rotate: -1.5deg; }
+  .x-i.x-i.x-i.x-i.x-i .i-cases > .k2 { grid-column: 5 / 9; grid-row: 1; margin: 0; width: 100%; }
+  .x-i.x-i.x-i.x-i.x-i .i-cases > .k3 { grid-column: 5 / 9; grid-row: 2; margin: 0; width: 100%; }
+  .x-i.x-i.x-i .i-row.i-cases { margin-bottom: 160px; }
+}
+.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3 { top: -26px; bottom: auto; }
+.x-i.x-i.x-i .c-tokens { bottom: -50px; }
+.x-i.x-i .c-tokens li { width: 96px; height: 96px; }
+@media (min-width: 1001px) { .x-i.x-i .i-cases { --gapR: 128px; } .x-i.x-i.x-i .i-row.i-cases { margin-bottom: 176px; } }
+.x-i.x-i .c-tokens li { width: 90px; height: 90px; }
+.x-i.x-i.x-i .c-tokens { bottom: -80px; }
+.x-i.x-i .c-tokens li { letter-spacing: 0; }
+/* Tokens v3 placement: a vertical stack straddling each object's right edge, centred on its height. */
+.x-i.x-i.x-i.x-i .c-tokens { flex-direction: column; flex-wrap: nowrap; gap: 6px; left: auto; right: -45px; top: 50%; bottom: auto; width: auto; translate: 0 -50%; justify-content: center; }
+.x-i.x-i.x-i.x-i .c-tokens li:nth-child(1) { rotate: -6deg; translate: -2px 0; } .x-i.x-i.x-i.x-i .c-tokens li:nth-child(2) { rotate: 5deg; translate: 3px 0; } .x-i.x-i.x-i.x-i .c-tokens li:nth-child(3) { rotate: -3deg; translate: -1px 0; }
+@media (min-width: 1001px) { .x-i.x-i .i-cases { --gapR: 80px; } .x-i.x-i.x-i .i-row.i-cases { margin-bottom: 96px; } }
+/* Tape (Ian 18:43): titles on a strip of the section-label tape across each object's top edge; methods on a shorter strip across a lower corner. */
+.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3 { top: -18px; padding: 8px 22px 7px; border: 0; border-radius: 0; box-shadow: none; rotate: -1.5deg;
+  color: #2b2720; background: rgba(226,214,180,.9) url("tex/paper001_tile-1024.webp") center / 300px; background-blend-mode: multiply;
+  clip-path: polygon(0 8%, 3% 0, 5% 12%, 8% 2%, 10% 0, 90% 0, 92% 6%, 95% 0, 97% 10%, 100% 4%, 98% 30%, 100% 55%, 97% 78%, 100% 100%, 94% 92%, 91% 100%, 88% 95%, 10% 100%, 7% 92%, 4% 100%, 2% 90%, 0 100%, 2% 70%, 0 45%, 3% 24%);
+  filter: drop-shadow(1px 2px 1.5px rgba(10,14,4,.35)) brightness(.95); }
+.x-i.x-i.x-i.x-i.x-i .i-cases > .k2 h3 { rotate: 1.2deg; } .x-i.x-i.x-i.x-i.x-i .i-cases > .k3 h3 { rotate: -.8deg; }
+.x-i.x-i.x-i.x-i.x-i .c-tokens { flex-direction: column; gap: 2px; left: auto; right: -22px; top: auto; bottom: -14px; width: auto; translate: none; rotate: -4deg; align-items: flex-start;
+  padding: 9px 20px 8px; color: #2b2720; background: rgba(226,214,180,.9) url("tex/paper001_tile-1024.webp") center / 300px; background-blend-mode: multiply;
+  clip-path: polygon(0 6%, 4% 0, 8% 5%, 12% 0, 88% 0, 92% 4%, 96% 0, 100% 5%, 97% 30%, 100% 60%, 97% 85%, 100% 100%, 93% 95%, 88% 100%, 12% 100%, 7% 95%, 3% 100%, 0 94%, 3% 65%, 0 35%, 3% 15%);
+  filter: drop-shadow(1px 2px 1.5px rgba(10,14,4,.35)) brightness(.95); }
+.x-i.x-i.x-i.x-i.x-i .c-tokens li { width: auto; height: auto; padding: 0; display: block; border-radius: 0; background: none; box-shadow: none; rotate: none; translate: none; color: #2b2720; font-family: var(--f-ui); font-weight: 600; font-size: 14px; line-height: 1.45; letter-spacing: 0; text-align: left; white-space: nowrap; }
+.x-i.x-i.x-i.x-i.x-i .c-tokens li svg { display: none; } .x-i.x-i.x-i.x-i.x-i .c-tokens li span { max-width: none; }
+.x-i.x-i.x-i.x-i.x-i .i-cases > .k2 .c-tokens { rotate: 3deg; }
+/* Masking tape v2 (Ian: "doesn't really look like tape"): straight long edges, torn short ends, translucent so what's under shows through, fine crepe across the width, flat on the surface. */
+.x-i { --tape-clip: polygon(3px 0, calc(100% - 4px) 0, 100% 14%, calc(100% - 3px) 27%, 100% 41%, calc(100% - 5px) 56%, calc(100% - 1px) 70%, calc(100% - 4px) 85%, calc(100% - 2px) 100%, 4px 100%, 0 87%, 4px 73%, 1px 58%, 5px 44%, 0 30%, 3px 15%);
+  --tape-bg: repeating-linear-gradient(91deg, rgba(90,70,30,.06) 0 1px, rgba(255,255,255,0) 1px 3px), linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,0) 45%, rgba(0,0,0,.04)), linear-gradient(rgba(236,224,190,.78), rgba(236,224,190,.78)); }
+.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3, .x-i.x-i.x-i.x-i.x-i.x-i .c-tokens li, .x-i.x-i.x-i .i-label {
+  clip-path: var(--tape-clip); background: var(--tape-bg); mix-blend-mode: multiply; filter: none; opacity: 1; color: #2b2720; border: 0; border-radius: 0; box-shadow: none; }
+.x-i.x-i.x-i .i-label::after { display: none; }
+.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3 { padding: 7px 20px 7px; }
+.x-i.x-i.x-i.x-i.x-i.x-i .c-tokens { background: none; clip-path: none; filter: none; padding: 0; gap: 5px; align-items: flex-end; rotate: none; right: -26px; bottom: -10px; }
+.x-i.x-i.x-i.x-i.x-i.x-i .c-tokens li { padding: 5px 14px 5px; line-height: 1.2; }
+.x-i.x-i.x-i.x-i.x-i.x-i .c-tokens li:nth-child(1) { rotate: -3deg; translate: -10px 0; } .x-i.x-i.x-i.x-i.x-i.x-i .c-tokens li:nth-child(2) { rotate: 2deg; translate: 4px 0; } .x-i.x-i.x-i.x-i.x-i.x-i .c-tokens li:nth-child(3) { rotate: -1.5deg; translate: -4px 0; }
+/* Real tape (ambientCG Tape005 scans, CC0): each label is drawn with a real torn piece as a border-image, the torn ends kept and the middle stretched to the label's length. */
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3, .x-i.x-i.x-i.x-i.x-i.x-i.x-i .c-tokens li, .x-i.x-i.x-i.x-i .i-label {
+  clip-path: none; background: none; mix-blend-mode: multiply; filter: none; opacity: .96;
+  border-style: solid; border-width: 0 13px; border-image-source: url("tex/tape/t02.webp"); border-image-slice: 0 34 fill; border-image-width: 0 13px; border-image-repeat: stretch; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k1 h3 { border-image-source: url("tex/tape/t01.webp"); }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k3 h3 { border-image-source: url("tex/tape/t04.webp"); }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i .c-tokens li:nth-child(1) { border-image-source: url("tex/tape/t05.webp"); }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i .c-tokens li:nth-child(2) { border-image-source: url("tex/tape/t06.webp"); }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i .c-tokens li:nth-child(3) { border-image-source: url("tex/tape/t07.webp"); }
+.x-i.x-i.x-i.x-i .i-label { border-image-source: url("tex/tape/t04.webp"); padding: 8px 12px 7px; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3 { padding: 7px 10px; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i .c-tokens li { padding: 5px 6px; }
+/* Titles and method tape stay legible: opaque enough to cover grass tips at an edge. */
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3, .x-i.x-i.x-i.x-i.x-i.x-i.x-i .c-tokens li { mix-blend-mode: normal; opacity: 1; filter: drop-shadow(0 1px .6px rgba(10,14,4,.22)); }
+/* Capstone figure (Ian 18:50): the right-hand slot, columns 9-12, spanning both rows and centred between them. Placeholder title and methods until Ian gives the wording. */
+.x-i.x-i.x-i.x-i.x-i .i-cases > .k4 { transform: rotate(.8deg); }
+.x-i.x-i.x-i.x-i.x-i .i-cases > .d-cap { aspect-ratio: 656 / 468; }
+@media (min-width: 1001px) { .x-i.x-i.x-i.x-i.x-i .i-cases > .k4 { grid-column: 9 / 13; grid-row: 1 / 3; align-self: center; margin: 0; width: 100%; } }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k4 h3 { border-image-source: url("tex/tape/t02.webp"); rotate: .6deg; }
+.x-i.x-i.x-i.x-i.x-i .i-cases > .d-cap .c-art.c-deck { aspect-ratio: 656 / 468; }
+/* Tape hierarchy (Ian 18:56): section labels > case titles > methods.
+   Section labels: kraft tape, 22px (section-head size). Titles: cream tape, 20px. Methods: small cream pieces, 14px, lighter weight, muted ink. */
+.x-i.x-i.x-i.x-i.x-i .i-label { border-image-source: url("tex/tape/k04.webp"); font-size: 22px; font-weight: 700; line-height: 1.1; padding: 10px 14px 9px; color: #2b2720; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3 { font-size: 20px; line-height: 1.15; padding: 8px 12px; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .c-tokens li { font-size: 14px; font-weight: 500; color: var(--muted); padding: 3px 4px; line-height: 1.2; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .c-tokens { gap: 3px; }
+.x-i.x-i.x-i.x-i.x-i .i-label { mix-blend-mode: normal; opacity: 1; position: relative; z-index: 6; filter: drop-shadow(0 1px .6px rgba(10,14,4,.22)); }
+/* Bias plugin affinity diagram (Ian 19:33): a printout of the Figma board, under the capstone in columns 9-12; the capstone moves to the top slot. */
+.x-i.x-i.x-i.x-i.x-i .i-cases > .d-aff { aspect-ratio: 605 / 540; }
+.x-i.x-i.x-i.x-i.x-i .i-cases > .d-aff .c-art.c-deck { aspect-ratio: 605 / 540; }
+.x-i.x-i.x-i.x-i.x-i .i-cases > .k5 { transform: rotate(-.7deg); }
+@media (min-width: 1001px) {
+  .x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k4 { grid-row: 1; align-self: start; }
+  .x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k5 { grid-column: 9 / 13; grid-row: 2; margin: 0; width: 100%; }
+}
+/* Method strips sit inside their own object's edge, so a neighbour's grass can't grow over them (Ian 19:37). */
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .c-tokens { right: 10px; bottom: 10px; }
+.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k4 h3 { max-width: 98%; }
+/* Label mix (Ian 19:05-20:51): each level is its own material. Section labels: wooden signs (ambientCG Wood095, CC0). Case titles: manila specimen tags (Paper006, CC0) tied on with twine. Methods: real tape (above). */
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-label, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3 { border: 0; border-image: none; background: none; clip-path: none; filter: none; mix-blend-mode: normal; opacity: 1; isolation: isolate; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-label { position: relative; display: inline-block; padding: 10px 18px 9px; color: #3a2412; text-shadow: 0 1px 0 rgba(255,240,210,.45); }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-label::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: 3px;
+  background: linear-gradient(180deg, rgba(255,255,255,.18), rgba(0,0,0,0) 40%, rgba(0,0,0,.18)), url("tex/wood095_tile-1024.webp") 0 30% / 520px;
+  box-shadow: inset 0 0 0 1px rgba(70,45,20,.35), 1px 3px 3px rgba(10,14,4,.45); }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-label::after { display: none; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3 { padding: 8px 14px 8px 30px; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3::before { content: ""; position: absolute; inset: 0; z-index: -1;
+  background: radial-gradient(circle at 15px 50%, #34402a 0 3.5px, #c9b98e 3.5px 6.5px, rgba(0,0,0,0) 7px), linear-gradient(rgba(236,222,180,.55), rgba(236,222,180,.55)), url("tex/paper006_tile-1024.webp") center / 260px;
+  background-blend-mode: normal, multiply, normal;
+  clip-path: polygon(11px 0, 100% 0, 100% 100%, 11px 100%, 0 calc(100% - 11px), 0 11px); filter: drop-shadow(1px 2px 1.5px rgba(10,14,4,.4)); }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3::after { content: ""; display: block; position: absolute; left: -38px; top: 50%; width: 54px; height: 2px; z-index: -2;
+  background: repeating-linear-gradient(60deg, #b9a27a 0 2px, #8c7752 2px 3px); border-radius: 2px; rotate: -14deg; transform-origin: right center; box-shadow: 0 1px 1px rgba(0,0,0,.3); }
+/* One face for every label (Ian 20:54): titles were mixing Bricolage 20px (no link) and Plus Jakarta 17px (linked). All labels: Plus Jakarta Sans 700, one ink; sizes 22 / 20 / 14. */
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-label, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3 a { font-family: var(--f-ui); font-weight: 700; letter-spacing: 0; color: #2b2720; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3 a { font-size: inherit; line-height: inherit; }
+/* Printed sheets read as paper, not pasted images (Ian 20:54): the canopy light and shade fall on them like every other piece, real paper grain shows through the ink, ink sits slightly soft in the fibres, and one corner lifts with its own shadow and curl. */
+.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-sheet, .x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-fig {
+  background-color: #f3f0e6;
+  background-image: var(--L-img), linear-gradient(rgba(246,243,233,.62), rgba(246,243,233,.62)), url("tex/paper001_tile-1024.webp");
+  background-size: var(--L-size), auto, 360px; background-position: var(--L-pos), 0 0, 0 0; background-blend-mode: var(--L-blend), normal, normal; background-repeat: repeat;
+  box-shadow: 0 0 0 .5px rgba(60,55,40,.25), 0 1px 1px rgba(10,14,4,.3), 3px 7px 9px -3px rgba(10,14,4,.38), 18px 22px 22px -16px rgba(10,14,4,.5); }
+.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-sheet .c-art.c-deck img, .x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-fig .c-art.c-deck img { mix-blend-mode: multiply; opacity: .93; filter: blur(.25px) contrast(.94) sepia(.05); }
+.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-sheet::after, .x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-fig::after { z-index: 3; mix-blend-mode: overlay; opacity: 1;
+  background-image: linear-gradient(318deg, rgba(10,14,4,.16) 0, rgba(255,255,255,.34) 2.2%, rgba(255,255,255,.08) 7%, rgba(255,255,255,0) 14%), linear-gradient(112deg, rgba(0,0,0,.05), rgba(0,0,0,0) 12%), url("tex/stock-grain.webp?v=2");
+  background-size: auto, auto, 340px; background-blend-mode: normal, normal, normal;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.04), inset 0 -8px 14px -10px rgba(40,44,20,.25); }
+/* The art box must not form its own layer, or the multiply print blends with nothing and skips the canopy light and paper beneath (Ian 20:56: "not sensitive to the shadows"). */
+.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-sheet .c-art.c-deck, .x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-fig .c-art.c-deck { z-index: auto; }
+/* Labels take the canopy light too (offsets set per label by blades.js relight()). */
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-label::before { background-image: var(--L-img), linear-gradient(180deg, rgba(255,255,255,.18), rgba(0,0,0,0) 40%, rgba(0,0,0,.18)), url("tex/wood095_tile-1024.webp");
+  background-size: var(--L-size), auto, 520px; background-position: var(--L-pos), 0 0, 0 30%; background-blend-mode: var(--L-blend), normal, normal; background-repeat: repeat; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3::before { background-image: var(--L-img), radial-gradient(circle at 15px 50%, #34402a 0 3.5px, #c9b98e 3.5px 6.5px, rgba(0,0,0,0) 7px), linear-gradient(rgba(236,222,180,.55), rgba(236,222,180,.55)), url("tex/paper006_tile-1024.webp");
+  background-size: var(--L-size), auto, auto, 260px; background-position: var(--L-pos), 0 0, 0 0, center; background-blend-mode: var(--L-blend), normal, multiply, normal; background-repeat: repeat; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .c-tokens li { position: relative; isolation: isolate; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .c-tokens li::after { content: ""; position: absolute; inset: 1px 9px; z-index: -1; pointer-events: none; mix-blend-mode: multiply;
+  background-image: var(--L-img); background-size: var(--L-size); background-position: var(--L-pos); background-blend-mode: var(--L-blend); background-repeat: repeat; opacity: .9; }
+/* Hover (Ian 20:56): the sheets no longer lift, so the grass around them never vanishes; the sheet only straightens a touch and its shadow deepens. */
+
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k2.up, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k2:focus-within { transform: rotate(1deg) scale(1.05); }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k3.up, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k3:focus-within { transform: rotate(-1deg) scale(1.05); }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k4.up, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k4:focus-within { transform: rotate(.8deg) scale(1.05); }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k5.up, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k5:focus-within { transform: rotate(-.7deg) scale(1.05); }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.up > .blade-strip, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:focus-within > .blade-strip { opacity: 1; }
+
+/* Picking a sheet up, as it would really go (Ian 20:59): the paper lifts and grows a touch; the grass is rooted, so it stays exactly where it was
+   (each strip is moved back by the inverse of the lift), and the part of it now under the raised paper is hidden by the paper's footprint. */
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone) > .blade-strip { transform-origin: calc(var(--cx) + var(--cw) / 2) calc(var(--cy) + var(--ch) / 2); transition: transform .35s cubic-bezier(.2,.7,.3,1), clip-path .35s cubic-bezier(.2,.7,.3,1);
+  clip-path: polygon(evenodd, calc(var(--cx) - 300px) calc(var(--cy) - 300px), calc(var(--cx) + var(--cw) + 300px) calc(var(--cy) - 300px), calc(var(--cx) + var(--cw) + 300px) calc(var(--cy) + var(--ch) + 300px), calc(var(--cx) - 300px) calc(var(--cy) + var(--ch) + 300px), calc(var(--cx) - 300px) calc(var(--cy) - 300px), var(--cx) var(--cy), var(--cx) var(--cy), var(--cx) var(--cy), var(--cx) var(--cy)); }
+@media (hover: hover) {
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone).up > .blade-strip, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone):focus-within > .blade-strip { opacity: 1; transform: scale(calc(1 / 1.05)) translate(0, 10px);
+    clip-path: polygon(evenodd, calc(var(--cx) - 300px) calc(var(--cy) - 300px), calc(var(--cx) + var(--cw) + 300px) calc(var(--cy) - 300px), calc(var(--cx) + var(--cw) + 300px) calc(var(--cy) + var(--ch) + 300px), calc(var(--cx) - 300px) calc(var(--cy) + var(--ch) + 300px), calc(var(--cx) - 300px) calc(var(--cy) - 300px),
+      calc(var(--cx) - var(--cw) * .025) calc(var(--cy) - var(--ch) * .025 - 10px), calc(var(--cx) + var(--cw) * 1.025) calc(var(--cy) - var(--ch) * .025 - 10px),
+      calc(var(--cx) + var(--cw) * 1.025) calc(var(--cy) + var(--ch) * 1.025 - 10px), calc(var(--cx) - var(--cw) * .025) calc(var(--cy) + var(--ch) * 1.025 - 10px)); }
+}
+/* Rows match (Ian 21:00): the two top sheets share one shape (the prompt sheet's), the two lower sheets share one, and the phone spans both rows exactly.
+   A chart printed on a page of another shape keeps its proportions, centred with a paper margin. */
+@media (min-width: 1001px) {
+  .x-i.x-i .i-cases { --hS: calc(var(--w4) * 574 / 939); --hG: calc(var(--w4) / 1.1); }
+}
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k4.d-cap, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k4.d-cap .c-art.c-deck { aspect-ratio: 939 / 574; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k3.d-fig, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k5.d-aff, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k3.d-fig .c-art.c-deck, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k5.d-aff .c-art.c-deck { aspect-ratio: 1.1; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k4 .c-art.c-deck img, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k3 .c-art.c-deck img, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k5 .c-art.c-deck img { object-fit: contain; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k4 .c-art.c-deck { inset: 9% 0 3%; height: auto; aspect-ratio: auto; }
+/* Tags tied on behind (Ian 21:01): each tag sits under the object's top edge, so the object hides its lower part. */
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3 { top: auto; bottom: calc(100% - 9px); clip-path: inset(-30px -30px 9px -70px); }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3 { padding-bottom: 17px; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k4 .c-art.c-deck { top: 9%; bottom: auto; left: 0; right: 0; height: 88%; aspect-ratio: auto; }
+@media (min-width: 1001px) { .x-i.x-i.x-i.x-i.x-i.x-i .i-cases { padding-top: 64px; } }
+/* Tags, take 2 (Ian 21:21): the tag lies in front, on the object; its string runs from the punched hole up to the top edge and wraps over it, tied on behind. */
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3 { top: 16px; bottom: auto; clip-path: none; padding: 8px 14px 8px 30px; rotate: -1.5deg; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k2 h3 { rotate: 1.2deg; } .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k3 h3 { rotate: -.8deg; } .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k4 h3 { rotate: .6deg; } .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k5 h3 { rotate: -1deg; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3::after { left: 9px; top: -19px; bottom: calc(50% - 4px); width: 12px; height: auto; rotate: -6deg; transform-origin: 50% 100%;
+  background: none; border: 2px solid #a48c62; border-top: 0; border-radius: 0 0 7px 7px; box-shadow: 1px 1px 1px rgba(10,14,4,.25); z-index: -2; }
+/* where the string bends over the edge it catches a little light */
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3 > :first-child { position: relative; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3 { z-index: 7; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3::after { z-index: 1; border-color: #9c845a; }
+/* Tags, take 3 (Ian 21:24): the string loops out to the LEFT, round the object's left edge. Tags sit near the left edge so the string is short. */
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3 { left: 30px; right: auto; translate: none; max-width: calc(100% - 52px); }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3::after { left: -36px; right: auto; top: calc(50% - 6px); bottom: auto; width: 53px; height: 12px; rotate: 0deg; transform-origin: 100% 50%;
+  border: 2px solid #9c845a; border-left: 0; border-radius: 0 7px 7px 0; background: none; }
+
+/* Hover, take 4 (Ian 21:25: keep the lift, fix the grass). Lifting a sheet, as grass really behaves: the blades lying over its edge ride up with it
+   for a moment, then slip off the rising edge (they are rooted, so they end where they grew), spring outward a few px and sway to rest beside it.
+   The part now under the raised paper is hidden by its footprint. Putting it down reverses the slide, and the blades fall back over the edge. */
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone) > .blade-strip { --sx: 0px; --sy: 0px; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone) > .blade-strip[data-edge="top"] { --sy: -1px; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone) > .blade-strip[data-edge="bottom"] { --sy: 1px; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone) > .blade-strip[data-edge="left"] { --sx: -1px; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone) > .blade-strip[data-edge="right"] { --sx: 1px; }
+@keyframes blade-slip { 0%, 18% { translate: 0 0; } 38% { translate: calc(var(--sx) * 7) calc(var(--sy) * 7); } 58% { translate: calc(var(--sx) * -2.5) calc(var(--sy) * -2.5); }
+  76% { translate: calc(var(--sx) * 1.2) calc(var(--sy) * 1.2); } 100% { translate: 0 0; } }
+@media (hover: hover) {
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone) > .blade-strip { transition: transform .3s cubic-bezier(.3,.6,.3,1) 0s, clip-path .3s cubic-bezier(.3,.6,.3,1) 0s; }
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone).up > .blade-strip, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone):focus-within > .blade-strip { opacity: 1;
+    transition: transform .22s cubic-bezier(.4,0,.2,1) .07s, clip-path .14s linear .1s; animation: blade-slip .9s cubic-bezier(.3,.5,.4,1) both; }
+}
+@media (prefers-reduced-motion: reduce) { .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case > .blade-strip { animation: none !important; } }
+/* No spring (Ian 21:29): the blades just slide off the rising edge and settle, with no outward bounce or sway. */
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case > .blade-strip { animation: none; }
+/* Still bounced (Ian 21:33): the sway rule lost on specificity, and the brief ride-up then drop also read as a bounce. Now the grass never moves:
+   its counter-move runs on exactly the sheet's timing, so the two cancel, and the paper simply rises over it. */
+@media (hover: hover) {
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone) > .blade-strip, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone).up > .blade-strip, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone):focus-within > .blade-strip {
+    animation: none; translate: none; transition: transform .35s cubic-bezier(.2,.7,.3,1) 0s, clip-path .35s cubic-bezier(.2,.7,.3,1) 0s; }
+}
+/* Critique pass (Ian 21:39). 1) Each tag lies on the grass just above its object's top-left corner, its string running down from the hole and over the edge to tie on behind,
+   so the artifact itself stays uncovered. 2) Method tape hangs off the lower corner, clear of chart labels and the app's button; earlier objects sit above
+   later neighbours so no neighbour's grass grows over that tape. 3) The space above the row only makes room for the tags. */
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3 { top: auto; bottom: calc(100% + 6px); left: 4px; max-width: calc(100% - 8px); }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3::after { left: 10px; right: auto; top: 50%; bottom: -20px; width: 10px; height: auto; rotate: 4deg; transform-origin: 50% 0;
+  border: 2px solid #9c845a; border-bottom: 0; border-radius: 6px 6px 0 0; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case .c-tokens { right: -14px; bottom: -20px; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k1 { z-index: 5; } .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k2, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k3 { z-index: 4; } .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k4, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k5 { z-index: 3; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.up, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:focus-within { z-index: 8; }
+@media (min-width: 1001px) { .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases { padding-top: 76px; --gapR: 96px; } }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k1 .c-tokens { right: -64px; bottom: 6px; }
+/* The paper covers its grass all at once (Ian 21:41: blades were vanishing one by one as the hidden area swept across). The footprint now appears
+   the instant the sheet rises and goes the instant it lands; only the strips' counter-move is animated. */
+@media (hover: hover) {
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone) > .blade-strip { transition: transform .35s cubic-bezier(.2,.7,.3,1) 0s, clip-path .35s step-end 0s; }
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone).up > .blade-strip, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone):focus-within > .blade-strip { transition: transform .35s cubic-bezier(.2,.7,.3,1) 0s, clip-path 0s; }
+}
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:has(h3 a[href]) { cursor: pointer; }
+/* The tag overlaps its object's top edge a little (Ian 21:47); the string runs from the hole to that edge and over it. */
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3 { bottom: calc(100% - 14px); }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3::after { bottom: 6px; }
+/* Setting a sheet down (Ian 21:48: the grass flickered back in). At rest the hidden area is a rectangle well inside the sheet, clear of every blade;
+   lifting snaps it out to the sheet's footprint, and after the sheet lands it shrinks back evenly from all four edges, so the blades ease back over the edge together. */
+@media (hover: hover) {
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone) > .blade-strip {
+    clip-path: polygon(evenodd, calc(var(--cx) - 300px) calc(var(--cy) - 300px), calc(var(--cx) + var(--cw) + 300px) calc(var(--cy) - 300px), calc(var(--cx) + var(--cw) + 300px) calc(var(--cy) + var(--ch) + 300px), calc(var(--cx) - 300px) calc(var(--cy) + var(--ch) + 300px), calc(var(--cx) - 300px) calc(var(--cy) - 300px),
+      calc(var(--cx) + 90px) calc(var(--cy) + 90px), calc(var(--cx) + var(--cw) - 90px) calc(var(--cy) + 90px),
+      calc(var(--cx) + var(--cw) - 90px) calc(var(--cy) + var(--ch) - 90px), calc(var(--cx) + 90px) calc(var(--cy) + var(--ch) - 90px));
+    transition: transform .35s cubic-bezier(.2,.7,.3,1) 0s, clip-path .7s cubic-bezier(.3,0,.2,1) .3s; }
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone).up > .blade-strip, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone):focus-within > .blade-strip { transition: transform .35s cubic-bezier(.2,.7,.3,1) 0s, clip-path 0s; }
+}
+/* A lifted sheet's shadow stays the size of the sheet (Ian 21:51): the same shadow as at rest, pulled in by the 5% the sheet grows, so on the ground it covers the same area. */
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-sheet.up, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-fig.up, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-sheet:focus-within, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-fig:focus-within {
+  box-shadow: 0 0 0 .5px rgba(60,55,40,.25), 0 1px 1px -1px rgba(10,14,4,.3), 3px 7px 9px -12px rgba(10,14,4,.38), 18px 22px 22px -25px rgba(10,14,4,.5); }
+/* (fix) the lifted footprint rule was outranked by the resting one, so the grass was never hidden or let back out; restated here at full strength. */
+@media (hover: hover) {
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone).up > .blade-strip, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone):focus-within > .blade-strip {
+    clip-path: polygon(evenodd, calc(var(--cx) - 300px) calc(var(--cy) - 300px), calc(var(--cx) + var(--cw) + 300px) calc(var(--cy) - 300px), calc(var(--cx) + var(--cw) + 300px) calc(var(--cy) + var(--ch) + 300px), calc(var(--cx) - 300px) calc(var(--cy) + var(--ch) + 300px), calc(var(--cx) - 300px) calc(var(--cy) - 300px),
+      calc(var(--cx) - var(--cw) * .025) calc(var(--cy) - var(--ch) * .025 - 10px), calc(var(--cx) + var(--cw) * 1.025) calc(var(--cy) - var(--ch) * .025 - 10px),
+      calc(var(--cx) + var(--cw) * 1.025) calc(var(--cy) + var(--ch) * 1.025 - 10px), calc(var(--cx) - var(--cw) * .025) calc(var(--cy) + var(--ch) * 1.025 - 10px)); }
+}
+/* The canopy shade falling on a lifted sheet stays the size and place it is on the ground (Ian 21:58): the light is fixed in the world, so while the sheet
+   grows 5% and rises 10px its light layers are drawn 5% smaller and shifted back by the same amount. */
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-sheet, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-fig {
+  --L-size-h: calc(1600px / 1.05), calc(1600px / 1.05), calc(var(--pw, 100%) / 1.05) calc(var(--ph, 100%) / 1.05), calc(var(--pw, 100%) / 1.05) calc(var(--ph, 100%) / 1.05);
+  --L-pos-h: calc((-180px - var(--ox) - var(--wx, 0px) + var(--kw, 0px) * .025) / 1.05) calc((-120px - var(--oy) - var(--wy, 0px) + var(--kh, 0px) * .025 + 10px) / 1.05),
+    calc((-180px - var(--ox) - var(--wx, 0px) + var(--kw, 0px) * .025) / 1.05) calc((-120px - var(--oy) - var(--wy, 0px) + var(--kh, 0px) * .025 + 10px) / 1.05),
+    calc((0px - var(--ox) + var(--kw, 0px) * .025) / 1.05) calc((0px - var(--oy) + var(--kh, 0px) * .025 + 10px) / 1.05),
+    calc((0px - var(--ox) + var(--kw, 0px) * .025) / 1.05) calc((0px - var(--oy) + var(--kh, 0px) * .025 + 10px) / 1.05);
+  transition: transform .35s cubic-bezier(.2,.7,.3,1), box-shadow .35s cubic-bezier(.2,.7,.3,1), translate .35s cubic-bezier(.2,.7,.3,1), background-size .35s cubic-bezier(.2,.7,.3,1), background-position .35s cubic-bezier(.2,.7,.3,1); }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-sheet.up, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-fig.up, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-sheet:focus-within, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-fig:focus-within {
+  background-size: var(--L-size-h), auto, 360px; background-position: var(--L-pos-h), 0 0, 0 0; }
+/* (Ian 22:03) grass beside a lifted sheet rose with it: the side strips carry their own inline transform (the scroll gust leans them), which replaced the
+   counter-move. The counter-move now uses the separate scale and translate properties, which add to any transform instead of replacing it. */
+@media (hover: hover) {
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone) > .blade-strip { scale: 1; translate: 0 0; transition: scale .35s cubic-bezier(.2,.7,.3,1) 0s, translate .35s cubic-bezier(.2,.7,.3,1) 0s, clip-path .7s cubic-bezier(.3,0,.2,1) .3s; }
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone).up > .blade-strip, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone):focus-within > .blade-strip { scale: calc(1 / 1.05); translate: 0 calc(10px / 1.05);
+    transition: scale .35s cubic-bezier(.2,.7,.3,1) 0s, translate .35s cubic-bezier(.2,.7,.3,1) 0s, clip-path 0s; }
+}
+/* String round the left edge (Ian 22:10): from the punched hole it runs left, curves down just outside the object's left edge and passes behind it a little below the corner. */
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3::after { left: -7px; right: auto; top: calc(50% - 1px); bottom: -16px; width: 24px; height: auto; rotate: none;
+  border: 2px solid #9c845a; border-right: 0; border-bottom: 0; border-radius: 12px 0 0 0; background: none; box-shadow: -1px 1px 1px rgba(10,14,4,.25);
+  -webkit-mask: linear-gradient(180deg, #000 0, #000 calc(100% - 6px), transparent 100%); mask: linear-gradient(180deg, #000 0, #000 calc(100% - 6px), transparent 100%); }
+/* Flicker (Ian 22:38, trace): the sheets' canopy light was transitioned on background-size/position, so every time the page re-measured itself (loading,
+   images arriving, zoom, tab switch) the light slid across the sheets. The light now lives on its own layer above the paper and below the print, held still in
+   the world by the same counter-move as the grass (a transform, which nothing else touches); background properties no longer animate. */
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-sheet, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-fig { background-image: linear-gradient(rgba(246,243,233,.62), rgba(246,243,233,.62)), url("tex/paper001_tile-1024.webp");
+  background-size: auto, 360px; background-position: 0 0, 0 0; background-blend-mode: normal; transition: transform .35s cubic-bezier(.2,.7,.3,1), box-shadow .35s cubic-bezier(.2,.7,.3,1), translate .35s cubic-bezier(.2,.7,.3,1); }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-sheet.up, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-fig.up, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-sheet:focus-within, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-fig:focus-within { background-size: auto, 360px; background-position: 0 0, 0 0; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-sheet::before, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-fig::before { content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none; border-radius: inherit; mix-blend-mode: multiply;
+  background-image: var(--L-img); background-size: var(--L-size); background-position: var(--L-pos); background-blend-mode: var(--L-blend); background-repeat: repeat;
+  transition: scale .35s cubic-bezier(.2,.7,.3,1), translate .35s cubic-bezier(.2,.7,.3,1); }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-sheet.up::before, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-fig.up::before, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-sheet:focus-within::before, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-fig:focus-within::before { scale: calc(1 / 1.05); translate: 0 calc(10px / 1.05); inset: -3%; }
+/* (the light layer reaches 14px past the sheet, clipped by it, so the shrunk layer still covers the whole sheet while lifted; its pattern is shifted to match) */
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-sheet, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-fig { overflow: visible; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-sheet::before, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-fig::before, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-sheet.up::before, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-fig.up::before,
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-sheet:focus-within::before, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-fig:focus-within::before { inset: -14px; clip-path: none;
+  background-position: calc(-166px - var(--ox) - var(--wx, 0px)) calc(-106px - var(--oy) - var(--wy, 0px)), calc(-166px - var(--ox) - var(--wx, 0px)) calc(-106px - var(--oy) - var(--wy, 0px)),
+    calc(14px - var(--ox)) calc(14px - var(--oy)), calc(14px - var(--ox)) calc(14px - var(--oy)); }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-sheet > .cf, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-fig > .cf { position: absolute; inset: 0; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-sheet::before, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-fig::before { clip-path: inset(14px round 2px);
+  transition: scale .35s cubic-bezier(.2,.7,.3,1), translate .35s cubic-bezier(.2,.7,.3,1), clip-path .35s cubic-bezier(.2,.7,.3,1); }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-sheet.up::before, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-fig.up::before, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-sheet:focus-within::before, .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-fig:focus-within::before {
+  clip-path: inset(calc(4px - (100% - 28px) * .025) calc(14px - (100% - 28px) * .025) calc(24px - (100% - 28px) * .025) calc(14px - (100% - 28px) * .025) round 2px); }
+/* Pieces vanishing while scrolling (Ian's recording 22:57): every grass strip around the sheets carried a clip-path at rest, and on a composited strip
+   that costs the graphics card a second full-size picture (a mask) per strip; with hundreds of strips Chrome ran out of room and dropped whole pieces
+   (the phone, a sheet) for a few frames. Strips carry no clip and no counter-move at rest; only while a sheet is lifted, or settling back (.settle,
+   set for a second by site-r.js), do its own strips get them. */
+@media (hover: hover) {
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone):not(.up):not(:focus-within):not(.settle) > .blade-strip { clip-path: none; scale: none; translate: none; transition: none; }
+}
+/* Lifting a sheet (Ian 23:09): site-r.js lays a grass-free copy of the sheet over it and lifts the copy (.up takes the old
+   hover look). The real sheet and its grass never move and carry no cut-outs; the real sheet is hidden while the copy is up
+   (its grass stays), and once the copy has landed it fades out over the real sheet, so the blades come back softly. */
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.lift-copy { position: absolute; margin: 0; grid-area: auto; z-index: 8; pointer-events: none; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.lift-copy.up { pointer-events: auto; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.lift-copy.fade { animation: lift-fade .45s linear both; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.lift-copy.gone { visibility: hidden; animation: none; opacity: 0; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.lifted { visibility: hidden; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.lifted > .blade-strip { visibility: visible; }
+@keyframes lift-fade { from { opacity: 1; } to { opacity: 0; } }
+/* Drawn-once pieces (blades.js bakePieces, Ian 23:05): once a piece's picture is ready (.bk, --bk) it replaces the live light stack,
+   cut-out and drop shadow. Until then (and right after a pan) the live CSS above draws the same thing. (A tape's picture spans its
+   border box, so its layer reaches past the 13px ends of the padding box.) */
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.bk::before { background: var(--bk) 0 0 / 100% 100% no-repeat; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-label.bk::before { background: var(--bk) 0 0 / 100% 100% no-repeat; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case h3.bk::before { inset: -6px; background: var(--bk) 0 0 / 100% 100% no-repeat; clip-path: none; filter: none; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .c-tokens li.bk { border-image: none; border-color: transparent; filter: none; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .c-tokens li.bk::after { content: ""; display: block; position: absolute; inset: -4px -17px; z-index: -1; mix-blend-mode: normal; opacity: 1;
+  background: var(--bk) 0 0 / 100% 100% no-repeat; }
+/* Case row below desktop width (2026-11-07). Tablet: the phone stands in the left column across two rows, the language and
+   allyship sheets beside it, the capstone and bias sheets side by side under it. Phone width: one column, phone first.
+   The phone (.floor-phone) and its invisible frame (.k1, which holds its tag and tape) always share one box. */
+@media (max-width: 1000px) {
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases { container-type: inline-size; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 24px; row-gap: 72px;
+    align-items: start; padding-top: 56px; margin-bottom: 96px; translate: none; --phw: calc((100cqw - 24px) / 2 * .8); }
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .floor-phone,
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k1.d-phone { grid-column: 1; grid-row: 1 / 3; justify-self: center; align-self: start; position: relative; left: auto; top: auto;
+    width: var(--phw); height: calc(var(--phw) * 147.6 / 71.6); aspect-ratio: auto; margin: 0; transform: none; rotate: -1.5deg; --mm: calc(var(--phw) / 71.6); }
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case:not(.d-phone) { width: 100%; justify-self: stretch; margin: 0; }
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k2 { grid-column: 2; grid-row: 1; }
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k3 { grid-column: 2; grid-row: 2; }
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k4 { grid-column: 1; grid-row: 3; }
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k5 { grid-column: 2; grid-row: 3; }
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case .c-tokens { right: -6px; }
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k1 .c-tokens { right: -14px; bottom: 8%; }
+}
+@media (max-width: 700px) {
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases { grid-template-columns: minmax(0, 1fr); row-gap: 96px; --phw: min(62cqw, 240px); }
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .floor-phone,
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k1.d-phone { grid-row: 1; }
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k2 { grid-column: 1; grid-row: 2; }
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k3 { grid-column: 1; grid-row: 3; }
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k4 { grid-column: 1; grid-row: 4; }
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k5 { grid-column: 1; grid-row: 5; }
+  .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .k1 .c-tokens { right: -30%; bottom: 10%; }
+}
+/* Experience badges as real PVC (Ian 2026-11-07: "doesn't totally look like plastic"). Once baked (blades.js, .bk-pl) the picture
+   carries the white plastic, the printed band, the canopy light, a gloss with glints where the sun lands, and the lanyard slot
+   punched clean through to the moss. Plastic has no paper vignette: a crisp polished rim instead, and a thin card edge under it. */
+.x-i.x-i .job { --edge: 0 1px 0 #d6d3cb, 0 1.6px 0 #aaa597; box-shadow: var(--edge), var(--sh); border-radius: 10px; }
+.x-i.x-i .job::after { box-shadow: inset 1px 1px 0 rgba(255,255,255,.85), inset -1px -1px 0 rgba(60,55,40,.18); }
+.x-i.x-i .job.bk-pl { background-color: transparent; }
+.x-i.x-i .job.bk-pl .c-org { background: none; }
+.x-i.x-i .job.bk-pl .c-org::before { display: none; }
+.x-i.x-i .job .c-org { border-radius: 10px 10px 0 0; }
+/* Claude's best-guess draft lines on the new case pages: read as normal text, with a dotted underline so Ian can find them to check */
+.ph.draft { color: inherit; font-style: inherit; text-decoration: underline dotted #b07a3c 1.5px; text-underline-offset: 4px; text-decoration-skip-ink: none; }
+/* More breathing room between homepage sections (Ian 2026-11-08: "a little tight"): 144px desktop, 96px phone, still on the
+   8/16/24/48/96 scale's rhythm (96 x 1.5). The hero gets the same gap: Ian no longer needs the case row on the first screen. */
+.x-i .i-scene > :is(.i-hero, .i-cases, .i-about, .i-jobs, .i-skills, .i-more) { margin-bottom: 144px !important; }
+@media (max-width: 700px) { .x-i .i-scene > :is(.i-hero, .i-cases, .i-about, .i-jobs, .i-skills, .i-more) { margin-bottom: 96px !important; } }
+/* (the first label's own 48px top margin adds to the hero's here, so the hero's share is smaller to land on the same 144px) */
+@media (min-width: 701px) { .x-i .i-scene > .i-hero { margin-bottom: 96px !important; } }
+/* the case row's first tags sat ~45-65px under the "Case studies" sign while every other section's content starts ~16-20px
+   under its sign (Ian 2026-11-08); the row's top padding (room for the tags) comes down to match */
+@media (min-width: 1001px) { .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases { padding-top: 52px; } }
+/* The EXACT phone lifts with its tag like the other case objects (Ian 2026-11-08): its grass-free copy rises over it */
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .floor-phone.lift-copy { position: absolute; margin: 0; grid-area: auto; z-index: 7; pointer-events: none; justify-self: auto;
+  transition: transform .35s cubic-bezier(.2,.7,.3,1), box-shadow .35s cubic-bezier(.2,.7,.3,1), translate .35s cubic-bezier(.2,.7,.3,1); }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .floor-phone.lift-copy.up { pointer-events: auto; transform: scale(1.05); translate: 0 -10px;
+  box-shadow: 0 2px 2px rgba(8,10,0,.3), 6px 14px 18px rgba(8,10,0,.28), 18px 36px 48px rgba(8,10,0,.3); }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .floor-phone.lift-copy.fade { animation: lift-fade .45s linear both; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .floor-phone.lift-copy.gone { visibility: hidden; animation: none; opacity: 0; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .floor-phone.lifted { visibility: hidden; }
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .floor-phone.lifted > .blade-strip { visibility: visible; }
+@media (prefers-reduced-motion: reduce) { .x-i .i-cases > .floor-phone.lift-copy { transition: none; } }
+/* TL;DR box: its padding was being zeroed by .s-inner, so the text ran into the box's edges (Ian 2026-11-08) */
+.x-i.x-i.x-i .s-inner.s-tldr { padding: 24px 28px 26px; border-radius: 4px; box-sizing: border-box; }
+@media (max-width: 700px) { .x-i.x-i.x-i .s-inner.s-tldr { padding: 18px 18px 20px; } }
+/* A middle ground for the first screen (Ian 2026-11-08: missed how clean the live one is, but projects should show a bit
+   earlier): the live hero's scale and calm back (big name, roomy intro card, a larger photo card, moss above), and the
+   Case studies sign with the tops of the first tags peeking in at the bottom of a laptop screen as the hint to scroll. */
+@media (min-width: 1001px) {
+  .x-i.x-i.x-i .i-hero { margin-top: 64px; row-gap: 32px; }
+  .x-i.x-i.x-i .i-hero h1 { font-size: 120px; }
+  .x-i.x-i.x-i .c-intro { grid-column: 1 / 8; }
+  .x-i.x-i.x-i .c-intro > .cf { padding: 32px; }
+  .x-i.x-i.x-i .c-me { grid-column: 10 / 13; }
+  .x-i .i-scene > .i-hero { margin-bottom: max(48px, 100vh - 770px) !important; }
+}

@@ -1119,3 +1119,50 @@
     } finally { btn.disabled = false; }
   });
 })();
+// The whole case object opens its case study (its title stays the keyboard link); text selection and other links are left alone.
+document.addEventListener("click", e => {
+  const c = e.target.closest(".i-cases > .case"); if (!c || e.target.closest("a, button") || String(getSelection())) return;
+  const a = c.querySelector("h3 a[href]"); if (!a) return;
+  if (e.metaKey || e.ctrlKey || e.button === 1) open(a.href, "_blank"); else a.click();
+});
+// Lifting a sheet (Ian 23:09): a copy of the sheet, with no grass of its own, is laid over it and rises, so the grass around
+// the real sheet never moves or gets cut out; the copy simply lies on top of it. Once the copy has landed it fades away
+// over the real sheet, so the blades come back over the edge softly. (Hover devices only; keyboard focus keeps the old lift.)
+(() => {
+  if (!matchMedia("(hover: hover)").matches) return;
+  const lift = c => {
+    let k = c._copy;
+    // (a copy that has fully landed is made afresh, so it carries the sheet's current pictures of its light, tag and tape)
+    if (k && (k.classList.contains("gone") || !k.isConnected)) { k.remove(); k = c._copy = null; }
+    if (!k) {
+      k = c.cloneNode(true); c._copy = k;
+      k.querySelectorAll(".blade-strip, .grow-fx").forEach(n => n.remove());
+      k.classList.remove("lay"); k.classList.add("lift-copy"); k.setAttribute("aria-hidden", "true");
+      k.querySelectorAll("a, button").forEach(n => n.setAttribute("tabindex", "-1"));
+      k.addEventListener("pointerleave", e => { const g = group(c); if (!inside(g, e.relatedTarget)) g.forEach(drop); });
+      k.addEventListener("transitionend", e => { if (e.target === k && e.propertyName === "transform" && !k.classList.contains("up")) land(c); });
+    }
+    for (const v of ["--ox", "--oy", "--kw", "--kh"]) k.style.setProperty(v, c.style.getPropertyValue(v));
+    Object.assign(k.style, { left: c.offsetLeft + "px", top: c.offsetTop + "px", width: c.offsetWidth + "px", height: c.offsetHeight + "px" });
+    if (!k.isConnected) c.after(k);
+    k.classList.remove("fade", "gone"); c.classList.add("lifted");
+    k.getBoundingClientRect(); k.classList.add("up");
+  };
+  const land = c => { const k = c._copy; if (k.classList.contains("up")) return; c.classList.remove("lifted"); k.classList.add("fade"); };
+  const drop = c => { const k = c._copy; if (!k || !k.classList.contains("up")) return; k.classList.remove("up");
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) { land(c); k.classList.add("gone"); }
+    // (in case its transform has no transition to end, e.g. the phone's frame, it still lands once the others have)
+    else setTimeout(() => { if (!k.classList.contains("up") && c.classList.contains("lifted")) land(c); }, 420); };
+  // (the EXACT phone and its invisible frame, which holds its tag and tape, share one box and lift together: Ian 2026-11-08)
+  const SEL = ".i-cases > .case:is(.d-sheet, .d-fig, .d-phone):not(.lift-copy), .i-cases > .floor-phone:not(.lift-copy)";
+  const group = c => c.matches(".floor-phone, .d-phone") ? [...c.parentNode.querySelectorAll(":scope > .floor-phone:not(.lift-copy), :scope > .case.d-phone:not(.lift-copy)")] : [c];
+  const inside = (g, t) => !!t && g.some(c => c.contains(t) || (c._copy && c._copy.contains(t)));
+  document.addEventListener("pointerover", e => {
+    const c = e.target.closest && e.target.closest(SEL); if (c) group(c).forEach(lift);
+  });
+  document.addEventListener("pointerout", e => {
+    const c = e.target.closest && e.target.closest(SEL); if (!c || !c._copy) return;
+    const g = group(c); if (inside(g, e.relatedTarget)) return; g.forEach(drop);
+  });
+  document.addEventListener("animationend", e => { if (e.target.classList && e.target.classList.contains("lift-copy") && e.target.classList.contains("fade")) e.target.classList.add("gone"); });
+})();

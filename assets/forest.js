@@ -16,14 +16,26 @@
     img.src = url; img.style.filter = "none";
     Object.assign(img.style, { width: w + 2 * P + "px", height: h + 2 * P + "px", left: left - P + "px", top: top - P + "px" });
   }
+  let worker = null; const asked = new Map(); let jobN = 0;
+  try { if (window.Worker && window.OffscreenCanvas && "filter" in new OffscreenCanvas(1, 1).getContext("2d")) {
+    worker = new Worker(ROOT + "assets/bake-worker.js?v=20261107a");
+    worker.onmessage = e => { const r = asked.get(e.data.id); asked.delete(e.data.id); if (r) r(e.data.blobs); };
+    worker.onerror = () => { worker = null; for (const r of asked.values()) r(null); asked.clear(); }; } } catch (e) { worker = null; }
   async function bake(img, src, cls, w, h, left, top) {
     const k = bakeKey(src, cls, w, h); if (baked.has(k)) return;
     baked.set(k, null);
     if (!filt[cls]) filt[cls] = getComputedStyle(img).filter;
-    const o = new Image(); o.crossOrigin = "anonymous"; o.src = src; try { await o.decode(); } catch (e) { baked.delete(k); return; }
-    const c = document.createElement("canvas"); c.width = Math.ceil((w + 2 * P) * DPR); c.height = Math.ceil((h + 2 * P) * DPR);
-    const x = c.getContext("2d"); x.scale(DPR, DPR); x.filter = filt[cls]; x.drawImage(o, P, P, w, h);
-    const url = await new Promise(r => c.toBlob(b => r(b && URL.createObjectURL(b)), "image/png")); if (!url) return;
+    let url;
+    // drawn in the shared worker (assets/bake-worker.js) where it can be, off the page's main thread: a page of these drawn
+    // here held up the first seconds after loading, when a fast scroll outran the page (Ian 2026-11-06)
+    const wb = worker && await new Promise(r => { const id = ++jobN; asked.set(id, r);
+      worker.postMessage({ id, job: { kind: "litter", src: new URL(src, location.href).href, filter: filt[cls], w, h, P, dpr: DPR } }); });
+    if (wb && wb[0]) url = URL.createObjectURL(wb[0]);
+    else { const o = new Image(); o.crossOrigin = "anonymous"; o.src = src; try { await o.decode(); } catch (e) { baked.delete(k); return; }
+      const c = document.createElement("canvas"); c.width = Math.ceil((w + 2 * P) * DPR); c.height = Math.ceil((h + 2 * P) * DPR);
+      const x = c.getContext("2d"); x.scale(DPR, DPR); x.filter = filt[cls]; x.drawImage(o, P, P, w, h);
+      url = await new Promise(r => c.toBlob(b => r(b && URL.createObjectURL(b)), "image/png")); }
+    if (!url) return;
     baked.set(k, url);
     // swapped in only once the new picture is decoded, in one go, so the piece never blinks
     const n = new Image(); n.src = url; try { await n.decode(); } catch (e) { return; }

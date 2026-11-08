@@ -273,6 +273,7 @@
     const sh = document.createElement("div"), fx = document.createElement("div");
     sh.className = fx.className = "blade-strip grow-fx"; sh.setAttribute("aria-hidden", "true"); fx.setAttribute("aria-hidden", "true");
     Object.assign(sh.style, { left: 0, top: 0, width: w + "px", height: h + "px", overflow: "hidden", borderRadius: rad + "px" }); Object.assign(fx.style, { left: 0, top: 0, width: 0, height: 0 });
+    for (const n of [sh, fx]) { n.dataset.edge = st.edge; n.style.setProperty("--cx", "0px"); n.style.setProperty("--cy", "0px"); n.style.setProperty("--cw", w + "px"); n.style.setProperty("--ch", h + "px"); } // (lifted-sheet rules, dir-i.css)
     const first = pair(st)[0]; first.img.before(sh); first.img.before(fx);
     for (const s of pair(st)) s.cv.style.visibility = "hidden";
     let left = 0; const an = st.fxAn = [], done = () => { if (--left <= 0) st.fxDone = true; };
@@ -430,7 +431,9 @@
         return [c, m]; };
       const [tcv, timg] = cut ? mk() : [null, null];
       for (const n of [cv, img, tcv, timg]) { if (!n) continue; n.className = cut ? "blade-strip side" : "blade-strip"; n.setAttribute("aria-hidden", "true"); n.alt = "";
-        Object.assign(n.style, { left: x0 + "px", top: y0 + "px", width: cv.width / DPR + "px", height: cv.height / DPR + "px" }); }
+        Object.assign(n.style, { left: x0 + "px", top: y0 + "px", width: cv.width / DPR + "px", height: cv.height / DPR + "px" });
+        // where the piece lies, in the strip's own box: a lifted piece hides the grass under its footprint (dir-i.css)
+        n.dataset.edge = edge; n.style.setProperty("--cx", -x0 + "px"); n.style.setProperty("--cy", -y0 + "px"); n.style.setProperty("--cw", el.offsetWidth + "px"); n.style.setProperty("--ch", el.offsetHeight + "px"); }
       if (cut) { // the edge's shadow layers go in front of its first sprig layer, in order
         const first = shadowsFirst.get(edge); if (first) el.insertBefore(timg, first); else el.appendChild(timg); }
       el.appendChild(img); if (cut && !shadowsFirst.has(edge)) shadowsFirst.set(edge, img);
@@ -462,50 +465,69 @@
   // Each lit piece gets its scene offset, so the shared light (baked into backgrounds in CSS) lines up across pieces.
   function relight() {
     const sc = scene(); PW = sc.offsetWidth; PH = sc.offsetHeight; sc.style.setProperty("--pw", PW + "px"); sc.style.setProperty("--ph", PH + "px");
-    document.querySelectorAll(".card, .hand a").forEach(el => { const o = offset(el); el.style.setProperty("--ox", o.x + "px"); el.style.setProperty("--oy", o.y + "px"); });
+    document.querySelectorAll(".card, .hand a, .c-tokens li, .i-label, .case h3").forEach(el => { const o = offset(el); el.style.setProperty("--ox", o.x + "px"); el.style.setProperty("--oy", o.y + "px");
+      if (el.matches(".case")) { el.style.setProperty("--kw", el.offsetWidth + "px"); el.style.setProperty("--kh", el.offsetHeight + "px"); } });
   }
   // ---------- The pieces' lighting, drawn once ----------
   // Each card and menu card is lit by a stack of see-through layers (sun flecks, canopy shade, the page-wide falloff) blended
   // over its paper (dir-i.css). The browser redid that blending for every bit of every card it drew, which on a fast
   // scroll couldn't keep up (bare green showed until the cards came in). So once the layout settles, each piece's stack is
-  // blended here, with the same blend steps, into one picture that then stands in for it. Redone when the layout changes.
-  const texs = new Map(), tex = src => texs.get(src) || (texs.set(src, load(src)), texs.get(src));
-  const BAKE = { card: ["tex/canopy-shade-card.webp", "tex/linen-n.webp", 512, "normal", [246, 246, 243], true], hand: ["tex/canopy-shade-L.webp", "tex/linen-n.webp", 512, "normal", [243, 243, 239], false],
-    handR: ["tex/canopy-shade-L.webp", "tex/paper006_tile-1024.webp", 220, "multiply", [34, 33, 29], false] };
+  // blended once, with the same blend steps, into one picture that then stands in for it. Redone when the layout changes.
+  // The drawing itself runs in a worker (assets/bake-worker.js), off the page's main thread: drawn here, the ground's map
+  // alone took about half a second in one go right after loading, and a fast scroll outran the page and showed bare olive
+  // (Ian, 2026-11-06). Where a browser can't draw in a worker the pieces keep their live CSS light, which looks the same.
+  let baker = null; const asked = new Map(); let jobN = 0;
+  try { if (window.Worker && window.OffscreenCanvas && new OffscreenCanvas(1, 1).getContext("2d")) {
+    baker = new Worker(ROOT + "assets/bake-worker.js?v=20261107c");
+    baker.onmessage = e => { const r = asked.get(e.data.id); asked.delete(e.data.id); if (r) r(e.data.blobs); };
+    baker.onerror = () => { baker = null; for (const r of asked.values()) r(null); asked.clear(); }; } } catch (e) { baker = null; }
+  const bakeJob = job => baker ? new Promise(r => { const id = ++jobN; asked.set(id, r); baker.postMessage({ id, job: { root: ROOT, PW, PH, fx: FX(), fy: FY(), ...job } }); }) : Promise.resolve(null);
+  // swap a finished picture in only once it's decoded, so nothing blinks
+  const ready = async blob => { const url = URL.createObjectURL(blob), im = new Image(); im.src = url; await im.decode().catch(() => {}); return url; };
+  const BAKE = { card: ["card", "tex/linen-n.webp", 512, "normal", [246, 246, 243], true], hand: ["L", "tex/linen-n.webp", 512, "normal", [243, 243, 239], false],
+    handR: ["L", "tex/paper006_tile-1024.webp", 220, "multiply", [34, 33, 29], false],
+    badge: ["card", "tex/plastic013a_tile-1024.webp", 320, "multiply", [255, 255, 255], false] }; // (Experience badges: white PVC, with the extras below)
   let bakeGen = 0;
   async function bakeLight() {
     const gen = ++bakeGen, dpr = Math.min(2, devicePixelRatio || 1);
+    if (!baker) return;
     await bakeGround(gen);
-    const els = [...document.querySelectorAll(".x-i .card, .x-i .hand a")];
+    // Each card and menu card is lit by a stack of see-through layers (sun flecks, canopy shade, the page-wide falloff)
+    // blended over its paper (dir-i.css); the browser redid that blending for every bit of every card it drew. So each
+    // piece's stack is blended once, with the same steps, into one picture that then stands in for it.
+    const els = [...document.querySelectorAll(".x-i .card:not(.d-sheet):not(.d-fig), .x-i .hand a")]; // (printed sheets get only their light layer, below)
     for (const el of els) {
       if (gen !== bakeGen) return;
-      const kind = el.matches(".hand a") ? (el.classList.contains("r") ? "handR" : "hand") : "card", [shadeSrc, paperSrc, paperW, paperBlend, bg, sheen] = BAKE[kind];
-      const W = el.offsetWidth, H = el.offsetHeight, o = { x: parseFloat(el.style.getPropertyValue("--ox")) || 0, y: parseFloat(el.style.getPropertyValue("--oy")) || 0 }, key = [W, H, o.x, o.y, PW, PH, dpr, FX(), FY()].join();
+      const kind = el.matches(".hand a") ? (el.classList.contains("r") ? "handR" : "hand") : el.matches(".job") ? "badge" : "card", [shade, paper, paperW, paperBlend, bg, sheen] = BAKE[kind];
+      // an ID badge's colour band and lanyard slot go into its picture, so the light and the gloss lie over them too and the slot is a real hole
+      let extra = {};
+      if (kind === "badge") { const org = el.querySelector(".c-org"), sl = org && getComputedStyle(org, "::before"), sw = sl ? parseFloat(sl.width) || 46 : 46, sh = sl ? parseFloat(sl.height) || 8 : 8;
+        if (org) extra = { band: { h: org.offsetHeight, color: getComputedStyle(org).getPropertyValue("--band").trim() || "#171612" },
+          slot: { x: (el.offsetWidth - sw) / 2, y: (parseFloat(sl.top) || 9) + org.offsetTop, w: sw, h: sh }, gloss: { glint: 1 } }; }
+      const W = el.offsetWidth, H = el.offsetHeight, ox = parseFloat(el.style.getPropertyValue("--ox")) || 0, oy = parseFloat(el.style.getPropertyValue("--oy")) || 0, key = [W, H, ox, oy, PW, PH, dpr, FX(), FY(), JSON.stringify(extra)].join();
       if (!W || !H || el._bakeKey === key) continue;
-      const [sun, shade, paper] = await Promise.all([tex(ROOT + "assets/tex/canopy-sun-2.webp"), tex(ROOT + "assets/" + shadeSrc), tex(ROOT + "assets/" + paperSrc)]);
-      if (!sun || !shade || !paper || gen !== bakeGen) return;
-      const cv = document.createElement("canvas"); cv.width = Math.ceil(W * dpr); cv.height = Math.ceil(H * dpr);
-      const x = cv.getContext("2d", RW); x.scale(dpr, dpr);
-      const tile = (img, size, px, py, mode) => { img = copy(img, size); const pt = x.createPattern(img, "repeat"); pt.setTransform(new DOMMatrix().translate(px, py).scale(size / img.width));
-        x.globalCompositeOperation = mode; x.fillStyle = pt; x.fillRect(0, 0, W, H); };
-      const fill = (st, mode) => { x.globalCompositeOperation = mode; x.fillStyle = st; x.fillRect(0, 0, W, H); };
-      // bottom up, as CSS stacks them: the colour, the paper, (cards: a pale wash and a sheen), then the light
-      fill(`rgb(${bg})`, "source-over"); tile(paper, paperW, 0, 0, paperBlend);
-      if (sheen) { fill("rgba(248,248,246,.78)", "source-over");
-        const g = lin(x, 125, W, H, 0, 0); g.addColorStop(0, "rgba(255,255,255,.35)"); g.addColorStop(.4, "rgba(255,255,255,0)"); g.addColorStop(.65, "rgba(255,255,255,0)"); g.addColorStop(1, "rgba(255,255,255,.12)"); fill(g, "source-over"); }
-      { const g = lin(x, 150, PW, PH, -o.x, -o.y); g.addColorStop(0, "rgb(255,253,249)"); g.addColorStop(.55, "rgb(246,246,239)"); g.addColorStop(1, "rgb(232,234,223)"); fill(g, "multiply"); }
-      // (CSS blends gradient colours premultiplied: fading from clear white to the shade is fading the shade's own colour in)
-      { x.save(); x.translate(-o.x + PW * .25, -o.y + PH * .15); x.scale(PW * 1.4, PH); const g = x.createRadialGradient(0, 0, 0, 0, 0, 1);
-        g.addColorStop(.55, "rgba(40,48,30,0)"); g.addColorStop(1, "rgba(40,48,30,.27)"); x.globalCompositeOperation = "multiply"; x.fillStyle = g;
-        x.fillRect((o.x - PW * .25) / (PW * 1.4), (o.y - PH * .15) / PH, W / (PW * 1.4), H / PH); x.restore(); }
-      tile(shade, 1600, -180 - o.x - FX(), -120 - o.y - FY(), "multiply"); tile(sun, 1600, -180 - o.x - FX(), -120 - o.y - FY(), "soft-light");
-      const blob = await new Promise(r => cv.toBlob(r)); cv.width = 0; if (!blob || gen !== bakeGen) return;
-      const url = URL.createObjectURL(blob), im = new Image(); im.src = url; await im.decode().catch(() => {});
-      if (gen !== bakeGen) { URL.revokeObjectURL(url); return; }
+      const blobs = await bakeJob({ kind: "card", W, H, dpr, ox, oy, shade, paper, paperW, paperBlend, bg, sheen, ...extra }); if (!blobs || gen !== bakeGen) return;
+      const url = await ready(blobs[0]); if (gen !== bakeGen) { URL.revokeObjectURL(url); return; }
       const old = el._bakeUrl; el._bakeUrl = url; el._bakeKey = key;
       Object.assign(el.style, { backgroundImage: `url("${url}")`, backgroundSize: "100% 100%", backgroundPosition: "0 0", backgroundRepeat: "no-repeat", backgroundBlendMode: "normal", backgroundOrigin: "border-box" });
+      if (kind === "badge") el.classList.add("bk-pl");
       if (old) URL.revokeObjectURL(old);
-      await new Promise(r => (!document.prerendering && window.requestIdleCallback || setTimeout)(r));
+    }
+    // The case sheets' light layer, the title tags, the method tape and the wooden section signs: each drew the canopy light
+    // live from a stack of blended page-sized layers, plus a cut-out and a drop shadow, on every repaint (pieces dropped out
+    // while scrolling, Ian 2026-11-05). Each is drawn once into one picture (shape and shadow included) shown as a plain image.
+    const pieces = [...document.querySelectorAll(".x-i .i-cases > .case:is(.d-sheet, .d-fig):not(.lift-copy), .x-i .i-cases > .case:not(.lift-copy) h3, .x-i .i-cases > .case:not(.lift-copy) .c-tokens li, .x-i .i-label")];
+    for (const el of pieces) {
+      if (gen !== bakeGen) return;
+      const W = el.offsetWidth, H = el.offsetHeight, ox = parseFloat(el.style.getPropertyValue("--ox")) || 0, oy = parseFloat(el.style.getPropertyValue("--oy")) || 0;
+      const kind = el.matches(".case") ? "sheet" : el.matches("h3") ? "tag" : el.matches("li") ? "tape" : "sign";
+      const tape = kind === "tape" ? getComputedStyle(el).borderImageSource.replace(/^url\("?|"?\)$/g, "") : "";
+      const key = [kind, W, H, ox, oy, PW, PH, dpr, FX(), FY(), tape].join();
+      if (!W || !H || el._pieceKey === key) continue;
+      const blobs = await bakeJob({ kind, W, H, dpr, ox, oy, tape }); if (!blobs || gen !== bakeGen) return;
+      const url = await ready(blobs[0]); if (gen !== bakeGen) { URL.revokeObjectURL(url); return; }
+      const old = el._pieceUrl; el._pieceUrl = url; el._pieceKey = key; el.style.setProperty("--bk", `url("${url}")`); el.classList.add("bk");
+      if (old) setTimeout(() => URL.revokeObjectURL(old), 3000);
     }
   }
   // The ground: the canopy shade and the page-wide falloff only darken (multiply), so they are folded into one soft map
@@ -513,28 +535,12 @@
   // ground is then the moss, that map and the sun flecks: three layers to draw instead of seven.
   async function bakeGround(gen) {
     const sc = scene(), fx = FX(), fy = FY(), key = [PW, PH, fx, fy].join(); if (!PW || !PH || sc._bakeKey === key) return;
-    const [shade, moss] = await Promise.all([tex(ROOT + "assets/tex/canopy-shade-L.webp"), tex(ROOT + "assets/tex/moss-quiet-2k.webp")]); if (!shade || !moss || gen !== bakeGen) return;
-    const k = .5, cv = document.createElement("canvas"); cv.width = Math.ceil(PW * k); cv.height = Math.ceil(PH * k); const x = cv.getContext("2d", RW); x.scale(k, k);
-    const fill = (st, mode) => { x.globalCompositeOperation = mode; x.fillStyle = st; x.fillRect(0, 0, PW, PH); };
-    fill("#fff", "source-over");
-    { const g = lin(x, 150, PW, PH, 0, 0); g.addColorStop(0, "rgb(255,253,249)"); g.addColorStop(.55, "rgb(246,246,239)"); g.addColorStop(1, "rgb(232,234,223)"); fill(g, "multiply"); }
-    { x.save(); x.translate(PW * .25, PH * .15); x.scale(PW * 1.4, PH); const g = x.createRadialGradient(0, 0, 0, 0, 0, 1);
-      g.addColorStop(.55, "rgba(40,48,30,0)"); g.addColorStop(1, "rgba(40,48,30,.27)"); x.globalCompositeOperation = "multiply"; x.fillStyle = g; x.fillRect(-.25 / 1.4, -.15, 1 / 1.4, 1); x.restore(); }
-    { const pt = x.createPattern(shade, "repeat"); pt.setTransform(new DOMMatrix().translate(-180 - fx, -120 - fy).scale(1600 / shade.width)); fill(pt, "multiply"); }
-    const m = document.createElement("canvas"); m.width = moss.width; m.height = moss.height; const mx = m.getContext("2d", RW); mx.drawImage(moss, 0, 0); mx.fillStyle = "rgba(22,28,12,.2)"; mx.fillRect(0, 0, m.width, m.height);
-    const [b1, b2] = await Promise.all([new Promise(r => cv.toBlob(r)), sc._mossUrl ? null : new Promise(r => m.toBlob(r, "image/webp", 1))]); cv.width = m.width = 0;
-    if (!b1 || gen !== bakeGen) return;
-    const u1 = URL.createObjectURL(b1), u2 = sc._mossUrl || URL.createObjectURL(b2);
-    await Promise.all([u1, u2].map(u => { const im = new Image(); im.src = u; return im.decode().catch(() => {}); })); if (gen !== bakeGen) return;
+    const blobs = await bakeJob({ kind: "ground", moss: !sc._mossUrl }); if (!blobs || gen !== bakeGen) return;
+    const [u1, u2] = await Promise.all([ready(blobs[0]), sc._mossUrl || ready(blobs[1])]); if (gen !== bakeGen) return;
     const old = sc._lightUrl; sc._lightUrl = u1; sc._mossUrl = u2; sc._bakeKey = key;
     Object.assign(sc.style, { backgroundImage: `url("${ROOT}assets/tex/canopy-sun-2.webp"), url("${u1}"), url("${u2}")`, backgroundSize: `1600px, ${PW}px ${PH}px, 900px`,
       backgroundPosition: `${-180 - fx}px ${-120 - fy}px, 0 0, ${-fx}px ${-fy}px`, backgroundRepeat: "repeat, no-repeat, repeat", backgroundBlendMode: "soft-light, multiply, normal" });
     if (old) URL.revokeObjectURL(old);
-  }
-  // a CSS linear-gradient at angle a over a w x h box whose top-left is at (bx, by)
-  function lin(x, a, w, h, bx, by) {
-    const r = a * Math.PI / 180, dx = Math.sin(r), dy = -Math.cos(r), L = Math.abs(w * dx) + Math.abs(h * dy), cx = bx + w / 2, cy = by + h / 2;
-    return x.createLinearGradient(cx - dx * L / 2, cy - dy * L / 2, cx + dx * L / 2, cy + dy * L / 2);
   }
   // (baked while the grass is still coming in: the baked ground is a level or two off the CSS one, and once the page had
   // settled that swap showed as the moss flicking, Ian's "flips to the image")
@@ -551,6 +557,7 @@
   // the baked pictures of the light are dropped at once (the CSS underneath draws the same light from the new numbers,
   // so the pan shows it right away) and baked again later
   addEventListener("floor-moved", () => { bakeGen++;
+    for (const el of document.querySelectorAll(".x-i .bk")) { el._pieceKey = null; el.classList.remove("bk"); }
     for (const el of [scene(), ...document.querySelectorAll(".x-i .card, .x-i .hand a")]) { if (!el._bakeKey && !el._lightUrl) continue; el._bakeKey = null;
       for (const k of ["backgroundImage", "backgroundSize", "backgroundPosition", "backgroundRepeat", "backgroundBlendMode", "backgroundOrigin"]) el.style[k] = ""; }
     // (the grass is redone once the pan has landed: redoing it mid-slide made the slide stutter)
@@ -915,8 +922,10 @@
     for (const [i, st] of sides.entries()) {
       const on = !calm && seen[i];
       if (on) { if (!windSt.has(st)) { windSt.add(st); const ox = (st.edge === "left" ? 0 : wd[i]) - st.x0;
-          for (const q of pair(st)) for (const n of [q.img, q.cv]) n.style.transformOrigin = `${ox}px 50%`; }
-        const r = rs[i], ex = r.left + (st.edge === "left" ? 0 : r.width), ey = r.top + st.y0 + st.H / DPR / 2, k = (st.edge === "left" ? 1 : -1) * envAt(ex, ey) * (12 + 8 * wind.amp) * gust(r.left + (st.edge === "left" ? 0 : r.width) + scrollX - sr.x, r.top + st.y0 + st.H / DPR / 2 + scrollY - sr.y), tf = `skewY(${k.toFixed(2)}deg)`; st.skew = [+k.toFixed(2), (st.edge === "left" ? 0 : wd[i]) || st.skew && st.skew[1] || 0]; for (const q of pair(st)) q.img.style.transform = q.cv.style.transform = tf; }
+          // (the lean is about the root line, written into the transform itself: the strip's transform-origin stays free for the stylesheet,
+          // which scales case-study grass about the sheet's centre while the sheet is lifted)
+          st.wo = ox - (parseFloat(getComputedStyle(st.img).transformOrigin) || 0); }
+        const r = rs[i], ex = r.left + (st.edge === "left" ? 0 : r.width), ey = r.top + st.y0 + st.H / DPR / 2, k = (st.edge === "left" ? 1 : -1) * envAt(ex, ey) * (12 + 8 * wind.amp) * gust(r.left + (st.edge === "left" ? 0 : r.width) + scrollX - sr.x, r.top + st.y0 + st.H / DPR / 2 + scrollY - sr.y), tf = `translateX(${st.wo}px) skewY(${k.toFixed(2)}deg) translateX(${-st.wo}px)`; st.skew = [+k.toFixed(2), (st.edge === "left" ? 0 : wd[i]) || st.skew && st.skew[1] || 0]; for (const q of pair(st)) q.img.style.transform = q.cv.style.transform = tf; }
       else if (windSt.has(st)) { windSt.delete(st); st.skew = null; for (const q of pair(st)) q.img.style.transform = q.cv.style.transform = ""; } }
     if (SW && !swayFrame.raf) swayFrame.raf = requestAnimationFrame(swayFrame);
     wind.raf = calm ? 0 : requestAnimationFrame(windFrame);
