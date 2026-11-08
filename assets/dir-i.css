@@ -1303,3 +1303,5 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
    8/16/24/48/96 scale's rhythm (96 x 1.5). The hero gets the same gap: Ian no longer needs the case row on the first screen. */
 .x-i .i-scene > :is(.i-hero, .i-cases, .i-about, .i-jobs, .i-skills, .i-more) { margin-bottom: 144px !important; }
 @media (max-width: 700px) { .x-i .i-scene > :is(.i-hero, .i-cases, .i-about, .i-jobs, .i-skills, .i-more) { margin-bottom: 96px !important; } }
+/* (the first label's own 48px top margin adds to the hero's here, so the hero's share is smaller to land on the same 144px) */
+@media (min-width: 701px) { .x-i .i-scene > .i-hero { margin-bottom: 96px !important; } }
