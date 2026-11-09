@@ -18,7 +18,7 @@
 .case-i .s-section:first-of-type .s-inner { border-top: 0; }
 .case-i .s-label { color: var(--ink); font-size: 21px; }
 .case-i .s-body, .case-i .s-body p { color: var(--ink); }
-.case-i .s-body a, .case-i .s-case-head a:not(.c-back) { color: #b5371f; }
+.case-i .s-body a, .case-i .s-case-head a:not(.c-back) { color: #9a2d19; }
 .case-i .s-case-stats { border-color: rgba(23,22,18,.8); }
 /* screenshots are phones lying on the sheet, their shadows on the paper */
 .case-i .s-shot-row img { box-sizing: border-box; border: 5px solid #121315; border-radius: 22px; background: #121315;
@@ -48,7 +48,7 @@
 .games-i .g-card .s-card-img { width: 100%; height: auto; display: block; border-radius: 2px; margin-bottom: 4px; box-shadow: .5px 1px 1px rgba(10,14,4,.4), 3px 5px 6px rgba(10,14,4,.22); }
 .games-i .g-card .s-quote { margin: 4px 0 0; padding-left: 12px; border-left: 2px solid #b5371f; }
 .games-i .g-card .s-quote p { font-style: italic; } .games-i .g-card cite { font-style: normal; font-size: 14px; }
-.games-i .g-card a, .games-i .g-note a { color: #b5371f; }
+.games-i .g-card a, .games-i .g-note a { color: #9a2d19; }
 .games-i .g-note { max-width: 640px; margin: 0 0 30px; transform: rotate(.3deg); }
 .games-i .g-grid + .g-note { margin-top: -40px; margin-bottom: 80px; }
 .games-i .s-proj-list { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; }
