@@ -72,7 +72,8 @@ async function draw(j) {
     let mb = null;
     if (mossImg) { const m = new OffscreenCanvas(mossImg.width, mossImg.height), mx = m.getContext("2d"); mx.drawImage(mossImg, 0, 0); mx.fillStyle = "rgba(22,28,12,.2)"; mx.fillRect(0, 0, m.width, m.height);
       mb = await m.convertToBlob({ type: "image/webp", quality: 1 }); }
-    return [await png(c), mb];
+    // (the map is opaque and soft, so a JPEG carries it: a PNG of it was ~3 MB, slow to encode here and slow to decode on the page)
+    return [await c.convertToBlob({ type: "image/jpeg", quality: .95 }), mb];
   }
   const [sun, shadeC, shadeL] = await Promise.all([T("tex/canopy-sun-2.webp", 1600), T("tex/canopy-shade-card.webp", 1600), T("tex/canopy-shade-L.webp", 1600)]);
   if (!sun || !shadeC || !shadeL) return null;

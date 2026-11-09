@@ -478,7 +478,7 @@
   // (Ian, 2026-11-06). Where a browser can't draw in a worker the pieces keep their live CSS light, which looks the same.
   let baker = null; const asked = new Map(); let jobN = 0;
   try { if (window.Worker && window.OffscreenCanvas && new OffscreenCanvas(1, 1).getContext("2d")) {
-    baker = new Worker(ROOT + "assets/bake-worker.js?v=20261107c");
+    baker = new Worker(ROOT + "assets/bake-worker.js?v=20261109a");
     baker.onmessage = e => { const r = asked.get(e.data.id); asked.delete(e.data.id); if (r) r(e.data.blobs); };
     baker.onerror = () => { baker = null; for (const r of asked.values()) r(null); asked.clear(); }; } } catch (e) { baker = null; }
   const bakeJob = job => baker ? new Promise(r => { const id = ++jobN; asked.set(id, r); baker.postMessage({ id, job: { root: ROOT, PW, PH, fx: FX(), fy: FY(), ...job } }); }) : Promise.resolve(null);
@@ -535,11 +535,13 @@
   // ground is then the moss, that map and the sun flecks: three layers to draw instead of seven.
   async function bakeGround(gen) {
     const sc = scene(), fx = FX(), fy = FY(), key = [PW, PH, fx, fy].join(); if (!PW || !PH || sc._bakeKey === key) return;
-    const blobs = await bakeJob({ kind: "ground", moss: !sc._mossUrl }); if (!blobs || gen !== bakeGen) return;
-    const [u1, u2] = await Promise.all([ready(blobs[0]), sc._mossUrl || ready(blobs[1])]); if (gen !== bakeGen) return;
-    const old = sc._lightUrl; sc._lightUrl = u1; sc._mossUrl = u2; sc._bakeKey = key;
-    Object.assign(sc.style, { backgroundImage: `url("${ROOT}assets/tex/canopy-sun-2.webp"), url("${u1}"), url("${u2}")`, backgroundSize: `1600px, ${PW}px ${PH}px, 900px`,
-      backgroundPosition: `${-180 - fx}px ${-120 - fy}px, 0 0, ${-fx}px ${-fy}px`, backgroundRepeat: "repeat, no-repeat, repeat", backgroundBlendMode: "soft-light, multiply, normal" });
+    // (the moss's 20% shade is a flat layer over the plain moss, not a re-encoded copy of the moss: encoding that 2048px copy
+    // took the worker over a second, so the baked ground arrived late and a fast scroll right after load outran the page)
+    const blobs = await bakeJob({ kind: "ground", moss: false }); if (!blobs || gen !== bakeGen) return;
+    const u1 = await ready(blobs[0]); if (gen !== bakeGen) return;
+    const old = sc._lightUrl; sc._lightUrl = u1; sc._bakeKey = key;
+    Object.assign(sc.style, { backgroundImage: `url("${ROOT}assets/tex/canopy-sun-2.webp"), url("${u1}"), linear-gradient(rgba(22,28,12,.2), rgba(22,28,12,.2)), url("${ROOT}assets/tex/moss-quiet-2k.webp")`, backgroundSize: `1600px, ${PW}px ${PH}px, auto, 900px`,
+      backgroundPosition: `${-180 - fx}px ${-120 - fy}px, 0 0, 0 0, ${-fx}px ${-fy}px`, backgroundRepeat: "repeat, no-repeat, no-repeat, repeat", backgroundBlendMode: "soft-light, multiply, normal, normal" });
     if (old) URL.revokeObjectURL(old);
   }
   // (baked while the grass is still coming in: the baked ground is a level or two off the CSS one, and once the page had
