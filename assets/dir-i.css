@@ -1344,3 +1344,6 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 /* While a landed copy fades out over the real piece, the real piece already casts its own shadow; the copy's shadow on top doubled
    it, so the edge darkened and then lightened again (Ian 2026-11-09). The fading copy casts none. */
 .x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .lift-copy.fade { box-shadow: none !important; transition: none !important; }
+/* Phones: the 58px case titles' longest words ("Reimagining", "Unorthodox") were wider than the paper, which pushed the title,
+   lede and facts past its right edge (site review 2026-11-09). Titles scale with the screen there, still the largest text. */
+@media (max-width: 700px) { .x-i.x-i.x-i .s-case-title { font-size: clamp(34px, 10.5vw, 58px); overflow-wrap: break-word; } }
