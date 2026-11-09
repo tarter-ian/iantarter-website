@@ -475,7 +475,7 @@ body > p[role="status"] { top: 0; left: 0; }
     linear-gradient(150deg, rgb(255,253,249) 0%, rgb(246,246,239) 55%, rgb(232,234,223) 100%); }
 .x-i { --muted: #47443b; }
 /* links: the same orange a shade deeper, at 19px bold, so they pass WCAG AA (3:1 for large text) on cards in shade and on tape */
-.x-i { --link: #b5371f; }
+.x-i { --link: #9a2d19; } /* (darker than the old #b5371f, which was 4.1-4.4:1 on the paper: site review 2026-11-09) */
 .x-i .card a:not(.s-btn), .x-i .i-more a { color: var(--link); font-size: 19px; font-weight: 700; }
 .x-i .i-more a { background-color: rgba(240,233,210,.95); filter: none; }
 /* visible keyboard focus on the menu cards and on the name (a tab stop for typing hidden words) */
