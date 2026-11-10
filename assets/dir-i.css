@@ -1357,24 +1357,29 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 @media (max-width: 700px) { .x-i .g-pitch .c-art.art-ma { width: 112px; right: -10px; top: -18px; } }
 
 /* Rainbow River: the box lies ON the sheet in place of the title, like the Daily Weather wallet: a rigid square box seen from
-   above, bigger than its slot, hanging over the sheet's top and right edges, with a tall object's long shadow. Three tiles lie
-   loose on the sheet's lower right corner, and more are scattered in the open moss beside it. */
+   above, bigger than its slot, hanging over the sheet's top and right edges, with a tall object's long shadow. Its tiles lie
+   scattered in the open moss beside the sheet (below it on a phone), each a .lay piece so grass grows round it. */
 .x-i .g-rr.g-pitch { position: relative; } .x-i .g-rr.g-pitch .cf { position: static; }
 .x-i.x-i .g-rr.g-pitch h3 { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .x-i .g-rr.g-pitch .c-art.art-rr { aspect-ratio: 3 / 2; height: auto; margin: -6px 0 26px; background: none; overflow: visible; display: block; position: relative; z-index: 6; pointer-events: none; }
 .art-rr img.box { position: absolute; left: 50%; top: 50%; width: 82%; height: auto; max-width: none; transform: translate(-44%, -58%) rotate(5deg);
   filter: drop-shadow(1px 1.4px 0 #1b2440) drop-shadow(1px 1.4px 0 #182038) drop-shadow(1px 1.4px 0 #141b30) drop-shadow(1px 1.4px 0 #111728) drop-shadow(1px 1.4px 0 #0e1320) drop-shadow(5px 8px 5px rgba(6,8,2,.55)) drop-shadow(20px 30px 24px rgba(6,8,2,.42)); }
-.rr-tiles { position: absolute; right: -20px; bottom: -16px; width: 236px; height: 100px; z-index: 6; pointer-events: none; }
-.rr-tiles img, .rr-scatter img { position: absolute; width: 84px; height: 84px; border-radius: 5px;
-  filter: drop-shadow(.5px .8px 0 #b9ab94) drop-shadow(.5px .8px 0 #a3957f) drop-shadow(2px 4px 3px rgba(6,8,2,.5)) drop-shadow(8px 12px 12px rgba(6,8,2,.32)); }
-.rr-tiles img { bottom: 0; }
-.rr-tiles img:nth-child(1) { right: 148px; bottom: 4px; transform: rotate(-7deg); }
-.rr-tiles img:nth-child(2) { right: 72px; bottom: 12px; transform: rotate(4deg); }
-.rr-tiles img:nth-child(3) { right: 0; bottom: 0; transform: rotate(11deg); }
 .rr-scatter { position: relative; pointer-events: none; }
-.rr-scatter img:nth-child(1) { left: 6%; top: 60%; transform: rotate(-14deg); }
-.rr-scatter img:nth-child(2) { left: 30%; top: 74%; transform: rotate(9deg); }
-.rr-scatter img:nth-child(3) { left: 24%; top: 34%; transform: rotate(23deg); }
-.rr-scatter img:nth-child(4) { left: 58%; top: 52%; transform: rotate(-5deg); }
-.rr-scatter img:nth-child(5) { left: 66%; top: 14%; transform: rotate(-31deg); }
-@media (max-width: 700px) { .rr-tiles { right: -8px; bottom: -12px; } .rr-scatter { display: none; } .x-i.x-i.games-i .g-card.g-pitch.g-rr { padding-bottom: 104px !important; } }
+.x-i .rr-scatter .rr-tile.lay { position: absolute; width: 84px; height: 84px; }
+.rr-scatter .rr-tile img { display: block; width: 100%; height: 100%; border-radius: 5px;
+  filter: drop-shadow(.5px .8px 0 #b9ab94) drop-shadow(.5px .8px 0 #a3957f) drop-shadow(2px 4px 3px rgba(6,8,2,.5)) drop-shadow(8px 12px 12px rgba(6,8,2,.32)); }
+.rr-scatter .rr-tile:nth-child(1) { left: 4%; top: 57%; rotate: -17deg; }
+.rr-scatter .rr-tile:nth-child(2) { left: 19%; top: 66%; rotate: 31deg; }
+.rr-scatter .rr-tile:nth-child(3) { left: 36%; top: 85%; rotate: -8deg; }
+.rr-scatter .rr-tile:nth-child(4) { left: 50%; top: 50%; rotate: 74deg; }
+.rr-scatter .rr-tile:nth-child(5) { left: 60%; top: 36%; rotate: 12deg; }
+.rr-scatter .rr-tile:nth-child(6) { left: 79%; top: 71%; rotate: -38deg; }
+.rr-scatter .rr-tile:nth-child(7) { left: 27%; top: 22%; rotate: 22deg; }
+.rr-scatter .rr-tile:nth-child(8) { left: 73%; top: 7%; rotate: 58deg; }
+@media (max-width: 700px) { .rr-scatter { height: 190px; } .rr-scatter .rr-tile:nth-child(n+6) { display: none; }
+  .rr-scatter .rr-tile:nth-child(1) { left: 4%; top: 40%; }
+  .rr-scatter .rr-tile:nth-child(2) { left: 22%; top: 8%; }
+  .rr-scatter .rr-tile:nth-child(3) { left: 40%; top: 48%; }
+  .rr-scatter .rr-tile:nth-child(4) { left: 62%; top: 14%; }
+  .rr-scatter .rr-tile:nth-child(5) { left: 72%; top: 50%; }
+}
