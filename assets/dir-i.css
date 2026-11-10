@@ -1351,9 +1351,9 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 /* Magical Athlete: the Nemesis racer card is a loose object lying on its credit sheet's top right corner, hanging over the
    top and right edges onto the moss, clear of the title and facts. It takes no room in the layout */
 .x-i .g-pitch:has(.art-ma) { position: relative; } .x-i .g-pitch:has(.art-ma) .cf { position: static; }
-.x-i .g-pitch .c-art.art-ma { position: absolute; right: -30px; top: -22px; width: 132px; aspect-ratio: 560 / 781; height: auto; margin: 0; background: none; overflow: visible; display: block; z-index: 6; pointer-events: none; }
+.x-i .g-pitch .c-art.art-ma { position: absolute; right: -30px; top: -22px; width: 132px; aspect-ratio: 552 / 772; height: auto; margin: 0; background: none; overflow: visible; display: block; z-index: 6; pointer-events: none; }
 .art-ma img.racer { display: block; width: 100%; height: auto; transform: rotate(6deg);
-  filter: drop-shadow(.4px .6px 0 #3a1a28) drop-shadow(.6px .9px 0 #2a121d) drop-shadow(3px 5px 3px rgba(6,8,2,.5)) drop-shadow(12px 18px 16px rgba(6,8,2,.35)); }
+  filter: drop-shadow(.4px .6px 0 #121210) drop-shadow(.6px .9px 0 #0a0a09) drop-shadow(3px 5px 3px rgba(6,8,2,.5)) drop-shadow(12px 18px 16px rgba(6,8,2,.35)); }
 @media (max-width: 700px) { .x-i .g-pitch .c-art.art-ma { width: 112px; right: -10px; top: -18px; } }
 /* wide screens: the card is bigger and leans the other way, so its top corner pokes up over the sheet's top edge and its lower
    half swings off the right edge, clear of the title and the facts (Ian: bigger, different angle, no text covered) */
