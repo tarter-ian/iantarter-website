@@ -1358,7 +1358,7 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 
 /* Rainbow River: the box lies ON the sheet in place of the title, like the Daily Weather wallet: a rigid square box seen from
    above, bigger than its slot, hanging over the sheet's top and right edges, with a tall object's long shadow. Its tiles lie
-   scattered in the open moss beside the sheet (below it on a phone), each a .lay piece so grass grows round it. */
+   scattered in the open moss beside the sheet (none on a phone), each a .lay piece so grass grows round it. */
 .x-i .g-rr.g-pitch { position: relative; } .x-i .g-rr.g-pitch .cf { position: static; }
 .x-i.x-i .g-rr.g-pitch h3 { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .x-i .g-rr.g-pitch .c-art.art-rr { aspect-ratio: 3 / 2; height: auto; margin: -6px 0 26px; background: none; overflow: visible; display: block; position: relative; z-index: 6; pointer-events: none; }
@@ -1376,10 +1376,4 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 .rr-scatter .rr-tile:nth-child(6) { left: 48.1%; top: 58.8%; rotate: -38deg; }
 .rr-scatter .rr-tile:nth-child(7) { left: 18.9%; top: 78.5%; rotate: 22deg; }
 .rr-scatter .rr-tile:nth-child(8) { left: 68.9%; top: 82.3%; rotate: 58deg; }
-@media (max-width: 700px) { .rr-scatter { height: 250px; } .rr-scatter .rr-tile:nth-child(n+6) { display: none; }
-  .rr-scatter .rr-tile:nth-child(1) { left: 3.7%; top: 13px; }
-  .rr-scatter .rr-tile:nth-child(2) { left: 39.0%; top: 43px; }
-  .rr-scatter .rr-tile:nth-child(3) { left: 72.9%; top: 8px; }
-  .rr-scatter .rr-tile:nth-child(4) { left: 17.8%; top: 153px; }
-  .rr-scatter .rr-tile:nth-child(5) { left: 57.3%; top: 148px; }
-}
+@media (max-width: 700px) { .rr-scatter { display: none; } }
