@@ -1356,9 +1356,16 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
   filter: drop-shadow(.4px .6px 0 #3a1a28) drop-shadow(.6px .9px 0 #2a121d) drop-shadow(3px 5px 3px rgba(6,8,2,.5)) drop-shadow(12px 18px 16px rgba(6,8,2,.35)); }
 @media (max-width: 700px) { .x-i .g-pitch .c-art.art-ma { width: 112px; right: -10px; top: -18px; } }
 
-/* Rainbow River: its box lies on the sheet over the title, like the Daily Weather wallet: a square rigid box seen from above,
-   turned a little, with its depth drawn as stacked edge shadows */
-.x-i.x-i .g-rr.g-pitch h3 { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-.x-i .g-rr.g-pitch .c-art.art-rr { aspect-ratio: 3 / 2; height: auto; margin: -6px 0 26px; background: none; overflow: visible; display: flex; align-items: center; justify-content: center; position: relative; z-index: 6; }
-.art-rr img.box { height: 106%; width: auto; max-width: none; transform: rotate(4deg);
-  filter: drop-shadow(1px 1.4px 0 #1b2440) drop-shadow(1px 1.4px 0 #182038) drop-shadow(1px 1.4px 0 #141b30) drop-shadow(1px 1.4px 0 #111728) drop-shadow(4px 7px 4px rgba(6,8,2,.55)) drop-shadow(16px 24px 20px rgba(6,8,2,.4)); }
+/* Rainbow River: its box and three river tiles are loose pieces lying on the sheet, like the Nemesis card: the box on the
+   top right corner, the tiles along the bottom, all hanging a little over the edge. They take no room in the layout */
+.x-i .g-rr.g-pitch { position: relative; } .x-i .g-rr.g-pitch .cf { position: static; }
+.x-i .g-rr.g-pitch .c-art.art-rr { position: absolute; right: -28px; top: -22px; width: 124px; aspect-ratio: 640 / 623; height: auto; margin: 0; background: none; overflow: visible; display: block; z-index: 6; pointer-events: none; }
+.art-rr img.box { display: block; width: 100%; height: auto; transform: rotate(5deg);
+  filter: drop-shadow(1px 1.4px 0 #1b2440) drop-shadow(1px 1.4px 0 #182038) drop-shadow(1px 1.4px 0 #141b30) drop-shadow(4px 7px 4px rgba(6,8,2,.55)) drop-shadow(14px 20px 18px rgba(6,8,2,.4)); }
+.rr-tiles { position: absolute; right: -20px; bottom: -16px; width: 236px; height: 100px; z-index: 6; pointer-events: none; }
+.rr-tiles img { position: absolute; bottom: 0; width: 84px; height: 84px; border-radius: 5px;
+  filter: drop-shadow(.5px .8px 0 #b9ab94) drop-shadow(.5px .8px 0 #a3957f) drop-shadow(2px 4px 3px rgba(6,8,2,.5)) drop-shadow(8px 12px 12px rgba(6,8,2,.32)); }
+.rr-tiles img:nth-child(1) { right: 148px; bottom: 4px; transform: rotate(-7deg); }
+.rr-tiles img:nth-child(2) { right: 72px; bottom: 12px; transform: rotate(4deg); }
+.rr-tiles img:nth-child(3) { right: 0; bottom: 0; transform: rotate(11deg); }
+@media (max-width: 700px) { .x-i .g-rr.g-pitch .c-art.art-rr { width: 108px; right: -10px; top: -18px; } .rr-tiles { right: -8px; bottom: -12px; } }
