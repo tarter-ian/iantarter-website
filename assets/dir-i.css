@@ -1368,18 +1368,18 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 .x-i .rr-scatter .rr-tile.lay { position: absolute; width: 84px; height: 84px; }
 .rr-scatter .rr-tile img { display: block; width: 100%; height: 100%; border-radius: 5px;
   filter: drop-shadow(.5px .8px 0 #b9ab94) drop-shadow(.5px .8px 0 #a3957f) drop-shadow(2px 4px 3px rgba(6,8,2,.5)) drop-shadow(8px 12px 12px rgba(6,8,2,.32)); }
-.rr-scatter .rr-tile:nth-child(1) { left: 4%; top: 57%; rotate: -17deg; }
-.rr-scatter .rr-tile:nth-child(2) { left: 19%; top: 66%; rotate: 31deg; }
-.rr-scatter .rr-tile:nth-child(3) { left: 36%; top: 85%; rotate: -8deg; }
-.rr-scatter .rr-tile:nth-child(4) { left: 50%; top: 50%; rotate: 74deg; }
-.rr-scatter .rr-tile:nth-child(5) { left: 60%; top: 36%; rotate: 12deg; }
-.rr-scatter .rr-tile:nth-child(6) { left: 79%; top: 71%; rotate: -38deg; }
-.rr-scatter .rr-tile:nth-child(7) { left: 27%; top: 22%; rotate: 22deg; }
-.rr-scatter .rr-tile:nth-child(8) { left: 73%; top: 7%; rotate: 58deg; }
-@media (max-width: 700px) { .rr-scatter { height: 190px; } .rr-scatter .rr-tile:nth-child(n+6) { display: none; }
-  .rr-scatter .rr-tile:nth-child(1) { left: 4%; top: 40%; }
-  .rr-scatter .rr-tile:nth-child(2) { left: 22%; top: 8%; }
-  .rr-scatter .rr-tile:nth-child(3) { left: 40%; top: 48%; }
-  .rr-scatter .rr-tile:nth-child(4) { left: 62%; top: 14%; }
-  .rr-scatter .rr-tile:nth-child(5) { left: 72%; top: 50%; }
+.rr-scatter .rr-tile:nth-child(1) { left: 7.8%; top: 5.0%; rotate: -17deg; }
+.rr-scatter .rr-tile:nth-child(2) { left: 59.2%; top: 11.8%; rotate: 31deg; }
+.rr-scatter .rr-tile:nth-child(3) { left: 30.0%; top: 29.2%; rotate: -8deg; }
+.rr-scatter .rr-tile:nth-child(4) { left: 71.7%; top: 39.1%; rotate: 74deg; }
+.rr-scatter .rr-tile:nth-child(5) { left: 5.0%; top: 51.2%; rotate: 12deg; }
+.rr-scatter .rr-tile:nth-child(6) { left: 48.1%; top: 58.8%; rotate: -38deg; }
+.rr-scatter .rr-tile:nth-child(7) { left: 18.9%; top: 78.5%; rotate: 22deg; }
+.rr-scatter .rr-tile:nth-child(8) { left: 68.9%; top: 82.3%; rotate: 58deg; }
+@media (max-width: 700px) { .rr-scatter { height: 250px; } .rr-scatter .rr-tile:nth-child(n+6) { display: none; }
+  .rr-scatter .rr-tile:nth-child(1) { left: 3.7%; top: 13px; }
+  .rr-scatter .rr-tile:nth-child(2) { left: 39.0%; top: 43px; }
+  .rr-scatter .rr-tile:nth-child(3) { left: 72.9%; top: 8px; }
+  .rr-scatter .rr-tile:nth-child(4) { left: 17.8%; top: 153px; }
+  .rr-scatter .rr-tile:nth-child(5) { left: 57.3%; top: 148px; }
 }
