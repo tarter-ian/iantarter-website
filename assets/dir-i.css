@@ -1430,8 +1430,10 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 .x-i.games-i .box-lay > .blade-strip[data-edge="r2"], .x-i.games-i .box-lay > .blade-strip[data-edge="r3"] { -webkit-mask-image: linear-gradient(to bottom, #000 calc(var(--cy) + 12px), transparent calc(var(--cy) + 26px)); mask-image: linear-gradient(to bottom, #000 calc(var(--cy) + 12px), transparent calc(var(--cy) + 26px)); }
 /* The box at a size nearer the real thing (Ian): standing on the slot's floor and hanging a little
    over the sheet's top edge. The row gap above it grows so it never covers the sheets in the row before. */
-/* box = 2.5 tiles wide, as in the real game (Ian): 250px against 100px tiles */
-.x-i.x-i.x-i.games-i .art-rr .box-lay { top: auto; bottom: 0; width: 250px; translate: -47% 0; }
-.x-i.x-i .rr-scatter .rr-tile.lay { width: 100px; height: 100px; }
-@media (min-width: 701px) { .x-i.x-i.x-i.games-i .g-grid:has(.g-rr) { row-gap: 84px; } }
-@media (max-width: 700px) { .x-i.x-i.x-i.games-i .g-grid:has(.g-rr) { grid-auto-rows: auto; } .x-i.x-i.games-i .g-grid > .g-rr { margin-top: 44px; } }
+/* box = 3 tiles wide and a little wider than the wallet (Ian): 318px against 106px tiles. Its slot is taller than the
+   wallet's so most of the box rests on the sheet. */
+.x-i.x-i.x-i.games-i .art-rr .box-lay { top: auto; bottom: 0; width: 318px; translate: -48% 0; }
+.x-i.x-i.x-i.games-i .g-rr.g-pitch .c-art.art-rr { aspect-ratio: auto; height: 236px; }
+.x-i.x-i .rr-scatter .rr-tile.lay { width: 106px; height: 106px; }
+@media (min-width: 701px) { .x-i.x-i.x-i.games-i .g-grid:has(.g-rr) { row-gap: 104px; } }
+@media (max-width: 700px) { .x-i.x-i.x-i.games-i .g-grid:has(.g-rr) { grid-auto-rows: auto; } .x-i.x-i.games-i .g-grid > .g-rr { margin-top: 64px; } }
