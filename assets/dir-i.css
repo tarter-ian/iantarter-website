@@ -1380,3 +1380,10 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 .rr-scatter .rr-tile:nth-child(7) { left: 18.9%; top: 78.5%; rotate: 22deg; }
 .rr-scatter .rr-tile:nth-child(8) { left: 68.9%; top: 82.3%; rotate: 58deg; }
 @media (max-width: 700px) { .rr-scatter { display: none; } }
+
+/* Projects, Published: neighbouring objects lean opposite ways (Ian). Two columns: wallet right, Nemesis left, box left.
+   One column (phone): wallet right, Nemesis left, box right. */
+.x-i.games-i .g1.g-pitch .art-dw img.wallet { transform: rotate(6deg); }
+.x-i.games-i .art-ma img.racer { transform: rotate(-6deg); }
+@media (min-width: 1000px) { .x-i.games-i .art-ma img.racer { transform: rotate(-10deg); } }
+@media (min-width: 701px) { .x-i.games-i .art-rr img.box { transform: translate(-44%, -58%) rotate(-5deg); } }
