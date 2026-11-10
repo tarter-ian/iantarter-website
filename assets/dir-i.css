@@ -1408,3 +1408,5 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 .x-i.games-i .art-ma .racer-lay > .blade-strip[data-edge="bottom"] { -webkit-mask-image: linear-gradient(to right, transparent calc(var(--cx) + var(--cw) * var(--on, .72)), #000 calc(var(--cx) + var(--cw) * var(--on, .72) + 10px)); mask-image: linear-gradient(to right, transparent calc(var(--cx) + var(--cw) * var(--on, .72)), #000 calc(var(--cx) + var(--cw) * var(--on, .72) + 10px)); }
 @media (min-width: 1000px) { .x-i.games-i .art-ma .racer-lay { rotate: -10deg; --on: .44; } .x-i.games-i .art-ma .racer-lay > .blade-strip { --on: .44; } }
 @media (max-width: 700px) { .x-i.games-i .art-ma .racer-lay > .blade-strip[data-edge="bottom"] { display: none; } }
+/* the quotes use the description's text size, so the sheet has one body size (Ian) */
+.x-i.x-i.games-i .g1.g-pitch .s-quote p, .x-i.x-i.x-i.games-i .g1.g-pitch .s-quote cite a { font-size: 15px; line-height: 1.5; }
