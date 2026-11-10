@@ -1428,3 +1428,8 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 .x-i.x-i.x-i.games-i .art-rr .box-lay img.box { position: static; display: block; width: 100%; transform: none; }
 .x-i.games-i .box-lay > .blade-strip[data-edge="r1"] { display: none; }
 .x-i.games-i .box-lay > .blade-strip[data-edge="r2"], .x-i.games-i .box-lay > .blade-strip[data-edge="r3"] { -webkit-mask-image: linear-gradient(to bottom, #000 calc(var(--cy) + 12px), transparent calc(var(--cy) + 26px)); mask-image: linear-gradient(to bottom, #000 calc(var(--cy) + 12px), transparent calc(var(--cy) + 26px)); }
+/* The box at a size nearer the real thing (Ian): about as wide as the sheet, standing on the slot's floor and hanging
+   over the sheet's top edge. The row gap above it grows so it never covers the sheets in the row before. */
+.x-i.x-i.x-i.games-i .art-rr .box-lay { top: auto; bottom: 0; width: 112%; translate: -47% 0; }
+@media (min-width: 701px) { .x-i.x-i.x-i.games-i .g-grid:has(.g-rr) { row-gap: 150px; } }
+@media (max-width: 700px) { .x-i.x-i.x-i.games-i .g-grid:has(.g-rr) { grid-auto-rows: auto; } .x-i.x-i.games-i .g-grid > .g-rr { margin-top: 112px; } }
