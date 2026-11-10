@@ -1143,8 +1143,15 @@ document.addEventListener("click", e => {
       k.addEventListener("transitionend", e => { if (e.target === k && e.propertyName === "transform" && !k.classList.contains("up")) land(c); });
     }
     for (const v of ["--ox", "--oy", "--kw", "--kh"]) k.style.setProperty(v, c.style.getPropertyValue(v));
-    Object.assign(k.style, { left: c.offsetLeft + "px", top: c.offsetTop + "px", width: c.offsetWidth + "px", height: c.offsetHeight + "px" });
-    if (!k.isConnected) c.after(k);
+    // (exact fractional size and place: offsetLeft/offsetWidth round to whole pixels, and a copy even a third of a pixel off
+    // resamples its picture, which shimmers as the copy fades over the real sheet: Ian 2026-11-10)
+    if (!k.isConnected) {
+      const cs = getComputedStyle(c);
+      Object.assign(k.style, { left: c.offsetLeft + "px", top: c.offsetTop + "px", width: cs.width, height: cs.height });
+      c.after(k);
+      const a = c.getBoundingClientRect(), b = k.getBoundingClientRect();
+      k.style.left = c.offsetLeft + (a.left - b.left) + "px"; k.style.top = c.offsetTop + (a.top - b.top) + "px";
+    }
     k.classList.remove("fade", "gone"); c.classList.add("lifted");
     k.getBoundingClientRect(); k.classList.add("up");
   };
