@@ -1355,3 +1355,10 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 .art-ma img.racer { display: block; width: 100%; height: auto; transform: rotate(6deg);
   filter: drop-shadow(.4px .6px 0 #3a1a28) drop-shadow(.6px .9px 0 #2a121d) drop-shadow(3px 5px 3px rgba(6,8,2,.5)) drop-shadow(12px 18px 16px rgba(6,8,2,.35)); }
 @media (max-width: 700px) { .x-i .g-pitch .c-art.art-ma { width: 112px; right: -10px; top: -18px; } }
+
+/* Rainbow River: its box lies on the sheet over the title, like the Daily Weather wallet: a square rigid box seen from above,
+   turned a little, with its depth drawn as stacked edge shadows */
+.x-i.x-i .g-rr.g-pitch h3 { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.x-i .g-rr.g-pitch .c-art.art-rr { aspect-ratio: 3 / 2; height: auto; margin: -6px 0 26px; background: none; overflow: visible; display: flex; align-items: center; justify-content: center; position: relative; z-index: 6; }
+.art-rr img.box { height: 106%; width: auto; max-width: none; transform: rotate(4deg);
+  filter: drop-shadow(1px 1.4px 0 #1b2440) drop-shadow(1px 1.4px 0 #182038) drop-shadow(1px 1.4px 0 #141b30) drop-shadow(1px 1.4px 0 #111728) drop-shadow(4px 7px 4px rgba(6,8,2,.55)) drop-shadow(16px 24px 20px rgba(6,8,2,.4)); }
