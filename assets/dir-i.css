@@ -1387,3 +1387,13 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 .x-i.games-i .art-ma img.racer { transform: rotate(-6deg); }
 @media (min-width: 1000px) { .x-i.games-i .art-ma img.racer { transform: rotate(-10deg); } }
 @media (min-width: 701px) { .x-i.games-i .art-rr img.box { transform: translate(-44%, -58%) rotate(-5deg); } }
+
+/* The Daily Weather's press quotes: on a phone they sit inside its sheet, under the description (Ian), and the separate
+   quotes card is hidden. On wider screens the sheet keeps its shared height and the quotes stay on their own card. */
+.x-i.games-i .g1.g-pitch .s-quote.q-in { display: none; }
+@media (max-width: 700px) {
+  .x-i.games-i .g1.g-pitch .s-quote.q-in { display: block; margin: 14px 0 0; }
+  .x-i.games-i .g1.g-pitch .c-text + .s-quote.q-in { margin-top: 18px; }
+  .x-i.games-i .g-grid + .g-quotes { display: none; }
+  .x-i.x-i.games-i .g-grid:has(.q-in) { grid-template-rows: auto; }
+}
