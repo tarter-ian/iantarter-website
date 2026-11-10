@@ -1420,10 +1420,11 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 .x-i.games-i .wallet-lay > .blade-strip[data-edge="left"], .x-i.games-i .wallet-lay > .blade-strip[data-edge="right"] { -webkit-mask-image: linear-gradient(to bottom, #000 calc(var(--cy) + 44px), transparent calc(var(--cy) + 60px)); mask-image: linear-gradient(to bottom, #000 calc(var(--cy) + 44px), transparent calc(var(--cy) + 60px)); }
 @media (max-width: 700px) { .x-i.games-i .wallet-lay > .blade-strip { display: none; } }
 
-/* The Rainbow River box hangs over the sheet's top edge, so grass grows along its top (Ian): same .lay wrapper as the
-   wallet and the Nemesis card; the wrapper carries the box's place and turn. */
+/* The Rainbow River box: the wrapper carries the box's place and turn. Grass only surrounds its base (Ian): the box stands taller
+   than the moss, so it is dressed like the sitting rock (lay-rock + data-outline): sprigs root at its foot and their tips
+   just reach the edge, never over the lid. Only the top edge and the top of each side lie on moss, so only those show. */
 .x-i.x-i.games-i .art-rr .box-lay { position: absolute; left: 50%; top: 50%; width: 82%; translate: -44% -58%; rotate: 5deg; }
 @media (min-width: 701px) { .x-i.x-i.games-i .art-rr .box-lay { rotate: -5deg; } }
 .x-i.x-i.x-i.games-i .art-rr .box-lay img.box { position: static; display: block; width: 100%; transform: none; }
-.x-i.games-i .box-lay > .blade-strip[data-edge="bottom"] { display: none; }
-.x-i.games-i .box-lay > .blade-strip[data-edge="left"], .x-i.games-i .box-lay > .blade-strip[data-edge="right"] { -webkit-mask-image: linear-gradient(to bottom, #000 calc(var(--cy) + var(--over, 14px)), transparent calc(var(--cy) + var(--over, 14px) + 14px)); mask-image: linear-gradient(to bottom, #000 calc(var(--cy) + var(--over, 14px)), transparent calc(var(--cy) + var(--over, 14px) + 14px)); }
+.x-i.games-i .box-lay > .blade-strip[data-edge="r1"] { display: none; }
+.x-i.games-i .box-lay > .blade-strip[data-edge="r2"], .x-i.games-i .box-lay > .blade-strip[data-edge="r3"] { -webkit-mask-image: linear-gradient(to bottom, #000 calc(var(--cy) + 12px), transparent calc(var(--cy) + 26px)); mask-image: linear-gradient(to bottom, #000 calc(var(--cy) + 12px), transparent calc(var(--cy) + 26px)); }
