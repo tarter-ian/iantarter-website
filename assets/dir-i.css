@@ -1360,13 +1360,13 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 @media (min-width: 1000px) { .x-i .g-pitch .c-art.art-ma { width: 176px; right: -80px; top: -40px; } .art-ma img.racer { transform: rotate(-10deg); } }
 
 /* Rainbow River: the box lies ON the sheet in place of the title, like the Daily Weather wallet: a rigid square box seen from
-   above, bigger than its slot, hanging over the sheet's top and right edges, with a tall object's long shadow. Its tiles lie
+   above, bigger than its slot, hanging over the sheet's top and right edges, with a tall object's long shadow. Its right and bottom sides are the real side panels from the box template, drawn into the image. Its tiles lie
    scattered in the open moss beside the sheet (none on a phone), each a .lay piece so grass grows round it. */
 .x-i .g-rr.g-pitch { position: relative; } .x-i .g-rr.g-pitch .cf { position: static; }
 .x-i.x-i .g-rr.g-pitch h3 { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .x-i .g-rr.g-pitch .c-art.art-rr { aspect-ratio: 3 / 2; height: auto; margin: -6px 0 26px; background: none; overflow: visible; display: block; position: relative; z-index: 6; pointer-events: none; }
 .art-rr img.box { position: absolute; left: 50%; top: 50%; width: 82%; height: auto; max-width: none; transform: translate(-44%, -58%) rotate(5deg);
-  filter: drop-shadow(1px 1.4px 0 #1b2440) drop-shadow(1px 1.4px 0 #182038) drop-shadow(1px 1.4px 0 #141b30) drop-shadow(1px 1.4px 0 #111728) drop-shadow(1px 1.4px 0 #0e1320) drop-shadow(5px 8px 5px rgba(6,8,2,.55)) drop-shadow(20px 30px 24px rgba(6,8,2,.42)); }
+  filter: drop-shadow(5px 8px 5px rgba(6,8,2,.55)) drop-shadow(20px 30px 24px rgba(6,8,2,.42)); }
 .rr-scatter { position: relative; pointer-events: none; }
 .x-i .rr-scatter .rr-tile.lay { position: absolute; width: 84px; height: 84px; }
 .rr-scatter .rr-tile img { display: block; width: 100%; height: 100%; border-radius: 5px;
@@ -1388,12 +1388,23 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 @media (min-width: 1000px) { .x-i.games-i .art-ma img.racer { transform: rotate(-10deg); } }
 @media (min-width: 701px) { .x-i.games-i .art-rr img.box { transform: translate(-44%, -58%) rotate(-5deg); } }
 
-/* The Daily Weather's press quotes: on a phone they sit inside its sheet, under the description (Ian), and the separate
-   quotes card is hidden. On wider screens the sheet keeps its shared height and the quotes stay on their own card. */
-.x-i.games-i .g1.g-pitch .s-quote.q-in { display: none; }
-@media (max-width: 700px) {
-  .x-i.games-i .g1.g-pitch .s-quote.q-in { display: block; margin: 14px 0 0; }
-  .x-i.games-i .g1.g-pitch .c-text + .s-quote.q-in { margin-top: 18px; }
-  .x-i.games-i .g-grid + .g-quotes { display: none; }
-  .x-i.x-i.games-i .g-grid:has(.q-in) { grid-template-rows: auto; }
+/* The Daily Weather's two press quotes sit inside its sheet, under the description (Ian). So the sheet stays the shared
+   660px on wide screens, the wallet is not in a slot there: it hangs over the sheet's top edge, and the Published row
+   starts lower to give it room. On a phone the wallet keeps its slot and the sheet just grows. */
+.x-i.games-i .g1.g-pitch .s-quote { margin: 12px 0 0; }
+.x-i.games-i .g1.g-pitch .c-text + .s-quote { margin-top: 16px; }
+@media (max-width: 700px) { .x-i.x-i.games-i .g-grid:has(.g1) { grid-template-rows: auto; } }
+@media (min-width: 701px) {
+  .x-i.x-i.games-i .g-grid:has(.g1) { margin-top: 140px; }
+  .x-i.x-i.games-i .g1.g-pitch .art-dw { aspect-ratio: auto; height: 62px; margin: 0 0 22px; align-items: flex-end; }
 }
+
+/* The Nemesis card lies half on the sheet and half on the moss, so grass grows along the edges that are on the moss (Ian):
+   the turn is on a .lay wrapper so blades.js roots sprigs round the turned card; the left edge (on the sheet) gets none
+   and the bottom edge only gets them past the sheet's right edge. */
+.x-i.games-i .art-ma img.racer { transform: none; }
+.x-i.games-i .art-ma .racer-lay { rotate: -6deg; }
+.x-i.games-i .art-ma .racer-lay > .blade-strip[data-edge="left"] { display: none; }
+.x-i.games-i .art-ma .racer-lay > .blade-strip[data-edge="bottom"] { -webkit-mask-image: linear-gradient(to right, transparent calc(var(--cx) + var(--cw) * var(--on, .72)), #000 calc(var(--cx) + var(--cw) * var(--on, .72) + 10px)); mask-image: linear-gradient(to right, transparent calc(var(--cx) + var(--cw) * var(--on, .72)), #000 calc(var(--cx) + var(--cw) * var(--on, .72) + 10px)); }
+@media (min-width: 1000px) { .x-i.games-i .art-ma .racer-lay { rotate: -10deg; --on: .44; } .x-i.games-i .art-ma .racer-lay > .blade-strip { --on: .44; } }
+@media (max-width: 700px) { .x-i.games-i .art-ma .racer-lay > .blade-strip[data-edge="bottom"] { display: none; } }
