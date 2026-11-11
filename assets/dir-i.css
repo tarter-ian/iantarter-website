@@ -1437,3 +1437,11 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 .x-i.x-i .rr-scatter .rr-tile.lay { width: 106px; height: 106px; }
 @media (min-width: 701px) { .x-i.x-i.x-i.games-i .g-grid:has(.g-rr) { row-gap: 104px; } }
 @media (max-width: 700px) { .x-i.x-i.x-i.games-i .g-grid:has(.g-rr) { grid-auto-rows: auto; } .x-i.x-i.games-i .g-grid > .g-rr { margin-top: 64px; } }
+/* Phone ID badges (2026-11-11): same CR80 shape, tighter insides so the full line fits on narrow screens */
+@media (max-width: 460px) {
+  .x-i.x-i .job > .cf { padding: 0 16px 12px; gap: 2px; }
+  .x-i.x-i .job .c-org { margin: 0 -16px 6px; padding: 21px 16px 7px; }
+  .x-i.x-i .job .c-org::before { top: 7px; }
+  .x-i.x-i .job .c-text { margin-top: 4px; line-height: 1.4; }
+}
+@media (max-width: 380px) { .x-i.x-i .job .c-org { padding-top: 18px; margin-bottom: 4px; } .x-i.x-i .job .c-org::before { top: 6px; } }
