@@ -1445,3 +1445,6 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
   .x-i.x-i .job .c-text { margin-top: 4px; line-height: 1.4; }
 }
 @media (max-width: 380px) { .x-i.x-i .job .c-org { padding-top: 18px; margin-bottom: 4px; } .x-i.x-i .job .c-org::before { top: 6px; } }
+/* Skills index card (2026-11-11): one font size in the list so every text line is exactly one rule tall and sits on its line */
+.x-i.x-i .index dl { font-size: var(--t17, 17px); position: relative; top: calc(var(--rule) / 2 - 14px); } /* baseline sits about 4px above each rule at any card scale */
+.x-i.x-i .index dt, .x-i.x-i .index dd { font-size: inherit; line-height: 0; } /* the bold face has different metrics; zero line-height keeps every line exactly one rule */
