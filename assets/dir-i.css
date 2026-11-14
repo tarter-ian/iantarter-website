@@ -1066,7 +1066,9 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
   background-image: var(--L-img), linear-gradient(rgba(246,243,233,.62), rgba(246,243,233,.62)), url("tex/paper001_tile-1024.webp");
   background-size: var(--L-size), auto, 360px; background-position: var(--L-pos), 0 0, 0 0; background-blend-mode: var(--L-blend), normal, normal; background-repeat: repeat;
   box-shadow: 0 0 0 .5px rgba(60,55,40,.25), 0 1px 1px rgba(10,14,4,.3), 3px 7px 9px -3px rgba(10,14,4,.38), 18px 22px 22px -16px rgba(10,14,4,.5); }
-.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-sheet .c-art.c-deck img, .x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-fig .c-art.c-deck img { mix-blend-mode: multiply; opacity: .93; filter: blur(.25px) contrast(.94) sepia(.05); }
+.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-sheet .c-art.c-deck img, .x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-fig .c-art.c-deck img { mix-blend-mode: multiply; opacity: .93; filter: none; }
+/* (Ian 2026-11-14: the print look, contrast .94 and sepia .05, is baked into the *-print.webp files instead of a CSS filter, and the .25px blur
+   is gone: Safari on iPhone rasterised the filtered pictures far too soft) */
 .x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-sheet::after, .x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .case.d-fig::after { z-index: 3; mix-blend-mode: overlay; opacity: 1;
   background-image: linear-gradient(318deg, rgba(10,14,4,.16) 0, rgba(255,255,255,.34) 2.2%, rgba(255,255,255,.08) 7%, rgba(255,255,255,0) 14%), linear-gradient(112deg, rgba(0,0,0,.05), rgba(0,0,0,0) 12%), url("tex/stock-grain.webp?v=2");
   background-size: auto, auto, 340px; background-blend-mode: normal, normal, normal;
