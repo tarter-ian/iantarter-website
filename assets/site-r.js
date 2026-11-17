@@ -1139,6 +1139,9 @@ document.addEventListener("click", e => {
       k.querySelectorAll(".blade-strip, .grow-fx").forEach(n => n.remove());
       k.classList.remove("lay"); k.classList.add("lift-copy"); k.setAttribute("aria-hidden", "true");
       k.querySelectorAll("a, button").forEach(n => n.setAttribute("tabindex", "-1"));
+      // (the copy's pictures are painted with the frame, never a frame late: decoding="async" let the first lift of each sheet
+      // show its paper blank for a moment, Ian 2026-11-17)
+      k.querySelectorAll("img").forEach(n => { n.decoding = "sync"; n.loading = "eager"; });
       k.addEventListener("pointerleave", e => { const g = group(c); if (!inside(g, e.relatedTarget)) g.forEach(drop); });
       k.addEventListener("transitionend", e => { if (e.target === k && e.propertyName === "transform" && !k.classList.contains("up")) land(c); });
     }
@@ -1152,9 +1155,29 @@ document.addEventListener("click", e => {
       const a = c.getBoundingClientRect(), b = k.getBoundingClientRect();
       k.style.left = c.offsetLeft + (a.left - b.left) + "px"; k.style.top = c.offsetTop + (a.top - b.top) + "px";
     }
-    k.classList.remove("fade", "gone"); c.classList.add("lifted");
+    k.classList.remove("fade", "gone");
     k.getBoundingClientRect(); k.classList.add("up");
+    // (the real sheet is hidden only once the copy has been drawn on screen: hiding both in one frame let a brand-new copy,
+    // not yet painted, show bare moss for a moment on the first lift of each sheet, Ian 2026-11-17)
+    requestAnimationFrame(() => requestAnimationFrame(() => { if (k.classList.contains("up")) c.classList.add("lifted"); }));
   };
+  // Warm-up (Ian 2026-11-17): just before the case row comes into view, each sheet's lifted copy is drawn once, all but
+  // invisible, so its pictures and light are already decoded at the lifted size when the first hover comes.
+  const warm = () => document.querySelectorAll(SEL).forEach(c => {
+    const k = c.cloneNode(true); k.querySelectorAll(".blade-strip, .grow-fx").forEach(n => n.remove());
+    k.classList.remove("lay"); k.classList.add("lift-copy", "up", "warm"); k.setAttribute("aria-hidden", "true"); k.inert = true;
+    for (const v of ["--ox", "--oy", "--kw", "--kh"]) k.style.setProperty(v, c.style.getPropertyValue(v));
+    const cs = getComputedStyle(c);
+    Object.assign(k.style, { left: c.offsetLeft + "px", top: c.offsetTop + "px", width: cs.width, height: cs.height });
+    c.after(k); setTimeout(() => k.remove(), 1500);
+  });
+  const row = document.querySelector(".i-cases");
+  if (row && "IntersectionObserver" in window) {
+    const io = new IntersectionObserver(es => { if (!es.some(e => e.isIntersecting)) return; io.disconnect();
+      (window.requestIdleCallback || setTimeout)(warm, { timeout: 600 }); }, { rootMargin: "300px 0px" });
+    // (after the pieces' pictures are baked, so the warm copies carry the same pictures a real lift will)
+    setTimeout(() => io.observe(row), 2500);
+  }
   const land = c => { const k = c._copy; if (k.classList.contains("up")) return; c.classList.remove("lifted"); k.classList.add("fade"); };
   const drop = c => { const k = c._copy; if (!k || !k.classList.contains("up")) return; k.classList.remove("up");
     if (matchMedia("(prefers-reduced-motion: reduce)").matches) { land(c); k.classList.add("gone"); }
