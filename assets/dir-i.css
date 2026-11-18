@@ -1450,3 +1450,6 @@ li.mock::before, label.mock::before, .c-pdf.mock::before, .c-now.mock::before { 
 /* Skills index card (2026-11-11): one font size in the list so every text line is exactly one rule tall and sits on its line */
 .x-i.x-i .index dl { font-size: var(--t17, 17px); position: relative; top: calc(var(--rule) / 2 - 14px); } /* baseline sits about 4px above each rule at any card scale */
 .x-i.x-i .index dt, .x-i.x-i .index dd { font-size: inherit; line-height: 0; } /* the bold face has different metrics; zero line-height keeps every line exactly one rule */
+
+/* Warm-up copies (site-r.js, Ian 2026-11-17): drawn once at their lifted size, all but invisible, then removed. */
+.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i.x-i .i-cases > .lift-copy.warm { opacity: .004 !important; transition: none !important; animation: none !important; pointer-events: none !important; box-shadow: none !important; }
